@@ -42,29 +42,26 @@ export function FastApiOverviewView() {
       <Panel>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <PanelTitle eyebrow="FastAPI · Supabase · Read-only" title="Ringkasan platform" />
-            <p className="max-w-3xl text-sm leading-6 text-muted">Angka dihitung di server memakai token admin yang sedang login. RLS Supabase tetap berlaku; hasil berarti baris yang dapat dilihat akun ini, bukan klaim jumlah global jika policy membatasi akses.</p>
+            <PanelTitle eyebrow="Platform" title="Ringkasan & Metrik Utama" />
+            <p className="max-w-3xl text-sm leading-6 text-muted">Metrik platform dihitung secara real-time berdasarkan data terkini di database platform CariKostKita.</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2"><Badge status="JWT + RLS" tone="brand" /><PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton></div>
+          <div className="flex flex-wrap items-center gap-2"><PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton></div>
         </div>
       </Panel>
 
       {error ? <ErrorState message={error} onRetry={load} /> : loading && !data ? (
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><SkeletonCard count={8} /></div>
       ) : data ? (
-        <>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-live="polite" aria-atomic="false">
-            {CARDS.map(([group, key, label, Icon, hint]) => (
-              <Panel key={`${group}-${key}`} className="min-w-0">
-                <div className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-maroon/10 text-maroon"><Icon size={19} aria-hidden="true" /></span>
-                  <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wide text-muted">{label}</p><p className="mt-1 text-3xl font-black leading-tight text-ink">{data[group]?.[key] ?? "—"}</p><p className="mt-2 text-xs leading-5 text-muted">{hint}</p></div>
-                </div>
-              </Panel>
-            ))}
-          </div>
-          <p role="status" aria-atomic="true" className="text-xs text-muted">Ringkasan berhasil dimuat dari endpoint FastAPI dan memakai akses database akun admin aktif.</p>
-        </>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-live="polite" aria-atomic="false">
+          {CARDS.map(([group, key, label, Icon, hint]) => (
+            <Panel key={`${group}-${key}`} className="min-w-0">
+              <div className="flex items-start gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-maroon/10 text-maroon"><Icon size={19} aria-hidden="true" /></span>
+                <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wide text-muted">{label}</p><p className="mt-1 text-3xl font-black leading-tight text-ink">{data[group]?.[key] ?? "—"}</p><p className="mt-2 text-xs leading-5 text-muted">{hint}</p></div>
+              </div>
+            </Panel>
+          ))}
+        </div>
       ) : null}
     </div>
   );

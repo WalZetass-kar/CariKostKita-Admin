@@ -13,86 +13,73 @@ import {
   NotificationCenterDropdown, SkeletonDashboard, SkeletonTable, ToastProvider, useToast
 } from "./ui";
 import { ROLE_LABELS, ROLE_MENUS } from "@/lib/constants";
-import { DashboardView } from "./views/DashboardView";
-import { KostFormModal, KostView } from "./views/KostView";
-import { OwnersView } from "./views/OwnersView";
-import { OwnerVerificationQueueView } from "./views/OwnerVerificationQueueView";
-import { FastApiReportQueueView } from "./views/FastApiReportQueueView";
-import { FastApiUsersView } from "./views/FastApiUsersView";
 import { FastApiOverviewView } from "./views/FastApiOverviewView";
-import { FastApiOwnersView } from "./views/FastApiOwnersView";
 import { FastApiKostsView } from "./views/FastApiKostsView";
+import { FastApiOwnersView } from "./views/FastApiOwnersView";
+import { OwnerVerificationQueueView } from "./views/OwnerVerificationQueueView";
+import { FastApiUsersView } from "./views/FastApiUsersView";
+import { FastApiReportQueueView } from "./views/FastApiReportQueueView";
 import { FastApiAdsView } from "./views/FastApiAdsView";
 import { FastApiAnalyticsView } from "./views/FastApiAnalyticsView";
 import { FastApiActivityLogsView } from "./views/FastApiActivityLogsView";
-import { UsersView } from "./views/UsersView";
-import { ReportsView } from "./views/ReportsView";
-import { AdsView } from "./views/AdsView";
-import { AnalyticsView } from "./views/AnalyticsView";
-import { AuditView } from "./views/AuditView";
 import { SettingsView } from "./views/SettingsView";
+import { KostFormModal } from "./views/KostView";
 
 const navItems = [
-  ["fastapi_overview", "Ringkasan · FastAPI", ChartNoAxesCombined],
-  ["kost", "Manajemen Kost", Building2],
-  ["fastapi_kosts", "Kost · FastAPI", Building2],
-  ["owners", "Pemilik Kost", BriefcaseBusiness],
-  ["fastapi_owners", "Pemilik · FastAPI", BriefcaseBusiness],
+  ["fastapi_overview", "Ringkasan", LayoutDashboard],
+  ["fastapi_kosts", "Manajemen Kost", Building2],
+  ["fastapi_owners", "Pemilik Kost", BriefcaseBusiness],
   ["verification", "Antrean Verifikasi", BadgeCheck],
-  ["users", "Pengguna", Users],
-  ["fastapi_users", "Pengguna · FastAPI", Users],
-  ["reports", "Laporan Kost", Flag],
-  ["fastapi_reports", "Laporan · FastAPI", Flag],
-  ["ads", "Manajemen Iklan", Megaphone],
-  ["fastapi_ads", "Iklan · FastAPI", Megaphone],
-  ["analytics", "Statistik", ChartNoAxesCombined],
-  ["fastapi_analytics", "Analitik Â· FastAPI", ChartNoAxesCombined],
-  ["audit", "Audit Log", History],
-  ["fastapi_activity_logs", "Audit Log · FastAPI", History],
+  ["fastapi_users", "Pengguna", Users],
+  ["fastapi_reports", "Laporan Kost", Flag],
+  ["fastapi_ads", "Manajemen Iklan", Megaphone],
+  ["fastapi_analytics", "Analitik & Telemetri", ChartNoAxesCombined],
+  ["fastapi_activity_logs", "Audit Log", History],
   ["settings", "Pengaturan", Settings],
-  ["dashboard", "Dashboard lama", LayoutDashboard],
 ];
 
 const viewMeta = {
-  dashboard: ["Dashboard legacy", "Snapshot dan statistik lama"],
-  fastapi_overview: ["Ringkasan Platform", "Agregat dari FastAPI · Supabase RLS"],
-  kost: ["Manajemen Kost", "Kelola Data Kost"],
-  fastapi_kosts: ["Direktori Kost", "Data yang terlihat melalui FastAPI · RLS"],
-  owners: ["Pemilik Kost", "Verifikasi & Kelola Pemilik"],
-  fastapi_owners: ["Direktori Pemilik", "Profil pemilik dari FastAPI · RLS"],
-  verification: ["Verifikasi", "Antrean Pengajuan Pemilik"],
-  users: ["Pengguna", "Kelola Pengguna"],
-  fastapi_users: ["Direktori Pengguna", "Data Supabase melalui FastAPI"],
-  reports: ["Laporan Kost", "Tindak Lanjut Laporan"],
-  fastapi_reports: ["Laporan FastAPI", "Moderasi melalui API baru"],
-  ads: ["Manajemen Iklan", "Promosi dan Performa"],
-  fastapi_ads: ["Inventaris Iklan", "Data schema terverifikasi · read-only"],
-  analytics: ["Statistik", "Analitik Platform"],
-  fastapi_analytics: ["Analitik Produk", "Agregat event dan crash dari FastAPI Â· RLS"],
-  audit: ["Audit Log", "Riwayat Aktivitas"],
-  fastapi_activity_logs: ["Audit Log FastAPI", "Log server yang terlihat melalui RLS"],
-  settings: ["Pengaturan", "Profil, Keamanan & Sistem"],
+  fastapi_overview: ["Platform", "Ringkasan & Statistik"],
+  fastapi_kosts: ["Properti", "Manajemen Kost"],
+  fastapi_owners: ["Mitra", "Pemilik Kost"],
+  verification: ["Moderasi", "Antrean Verifikasi Pemilik"],
+  fastapi_users: ["Pengguna", "Manajemen Pengguna"],
+  fastapi_reports: ["Moderasi", "Laporan Pelanggaran Kost"],
+  fastapi_ads: ["Pemasaran", "Manajemen Iklan"],
+  fastapi_analytics: ["Performa", "Analitik & Telemetri"],
+  fastapi_activity_logs: ["Keamanan", "Audit Log Aktivitas"],
+  settings: ["Sistem", "Pengaturan Profil & Sistem"],
+  // Alias backward compatibility
+  dashboard: ["Platform", "Ringkasan & Statistik"],
+  kost: ["Properti", "Manajemen Kost"],
+  owners: ["Mitra", "Pemilik Kost"],
+  users: ["Pengguna", "Manajemen Pengguna"],
+  reports: ["Moderasi", "Laporan Pelanggaran Kost"],
+  ads: ["Pemasaran", "Manajemen Iklan"],
+  analytics: ["Performa", "Analitik & Telemetri"],
+  audit: ["Keamanan", "Audit Log Aktivitas"],
 };
 
 const views = {
-  dashboard: DashboardView,
   fastapi_overview: FastApiOverviewView,
-  kost: KostView,
   fastapi_kosts: FastApiKostsView,
-  owners: OwnersView,
   fastapi_owners: FastApiOwnersView,
   verification: OwnerVerificationQueueView,
-  users: UsersView,
   fastapi_users: FastApiUsersView,
-  reports: ReportsView,
   fastapi_reports: FastApiReportQueueView,
-  ads: AdsView,
   fastapi_ads: FastApiAdsView,
-  analytics: AnalyticsView,
   fastapi_analytics: FastApiAnalyticsView,
-  audit: AuditView,
   fastapi_activity_logs: FastApiActivityLogsView,
   settings: SettingsView,
+  // Alias fallbacks for bookmarks / global search
+  dashboard: FastApiOverviewView,
+  kost: FastApiKostsView,
+  owners: FastApiOwnersView,
+  users: FastApiUsersView,
+  reports: FastApiReportQueueView,
+  ads: FastApiAdsView,
+  analytics: FastApiAnalyticsView,
+  audit: FastApiActivityLogsView,
 };
 
 export default function AdminApp(props) {
@@ -116,7 +103,7 @@ function Shell({ initialAdmin }) {
   const [activeView, setActiveViewState] = useState(
     initialAdmin?.role === "moderator"
       ? "fastapi_reports"
-      : ["super_admin", "admin"].includes(initialAdmin?.role) ? "fastapi_overview" : "dashboard"
+      : "fastapi_overview"
   );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -187,8 +174,8 @@ function Shell({ initialAdmin }) {
     }
   }, []);
   useEffect(() => {
-    if (!isApiFirstView && !data) load();
-  }, [isApiFirstView, data, load]);
+    if (activeView === "settings" && !data) load();
+  }, [activeView, data, load]);
 
   /* proteksi navigasi kembali setelah logout */
   useEffect(() => {
@@ -256,7 +243,7 @@ function Shell({ initialAdmin }) {
 
   useEffect(() => {
     if (admin?.role && !allowedMenus.includes(activeView)) {
-      setActiveViewState("dashboard");
+      setActiveViewState(admin?.role === "moderator" ? "fastapi_reports" : "fastapi_overview");
     }
   }, [admin?.role, allowedMenus, activeView]);
 

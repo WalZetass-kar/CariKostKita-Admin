@@ -42,12 +42,11 @@ export function FastApiAnalyticsView() {
       <Panel>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <PanelTitle eyebrow="FastAPI Â· Supabase Â· Read-only" title="Analitik produk" />
-            <p className="max-w-3xl text-sm leading-6 text-muted">Hitungan event dan laporan crash yang terlihat oleh akun staf aktif melalui RLS. Angka event adalah jumlah kejadian, bukan pengguna unik atau rasio konversi.</p>
+            <PanelTitle eyebrow="Performa" title="Analitik & Telemetri" />
+            <p className="max-w-3xl text-sm leading-6 text-muted">Statistik aktivitas pengguna, interaksi fitur, dan metrik stabilitas sistem CariKostKita.</p>
           </div>
           <div className="flex flex-wrap items-end gap-2">
             <SelectField label="Rentang waktu" value={days} onChange={(event) => setDays(Number(event.target.value))} options={PERIODS} />
-            <Badge status="JWT + RLS" tone="brand" />
             <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
           </div>
         </div>

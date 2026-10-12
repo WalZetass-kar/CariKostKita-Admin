@@ -93,8 +93,8 @@ export function FastApiUsersView() {
       <Panel>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <PanelTitle eyebrow="FastAPI · Supabase · Ter-audit" title="Direktori pengguna" />
-            <p className="max-w-3xl text-sm leading-6 text-muted">Halaman ini mengambil data langsung dari endpoint admin FastAPI. Ubah status akun atau role melalui RPC server yang memeriksa kewenangan dan mencatat riwayat; snapshot lama tetap ada di menu Pengguna.</p>
+            <PanelTitle eyebrow="Pengguna" title="Manajemen Pengguna" />
+            <p className="max-w-3xl text-sm leading-6 text-muted">Kelola data akun pengguna, hak akses role, serta status keaktifan akun di platform CariKostKita.</p>
           </div>
           <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>
@@ -117,12 +117,11 @@ export function FastApiUsersView() {
       </div>
 
       {error ? <ErrorState message={error} onRetry={load} /> : loading ? <SkeletonTable rows={6} cols={6} /> : users.length === 0 ? (
-        <EmptyState title="Pengguna tidak ditemukan" message="Coba ubah kata kunci atau filter. Data di sini hanya berasal dari FastAPI." />
+        <EmptyState title="Pengguna tidak ditemukan" message="Coba ubah kata kunci atau filter pencarian." />
       ) : (
         <Panel className="p-0">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
-            <div><h3 className="font-extrabold text-ink">Akun terdaftar</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p></div>
-            <Badge status="FastAPI" tone="brand" />
+            <div><h3 className="font-extrabold text-ink">Akun Terdaftar</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p></div>
           </div>
           <DataTable headers={["Pengguna", "Kontak", "Role", "Verifikasi", "Status", "Terdaftar", "Aksi"]} minWidth={960}>
             {users.map((user) => {

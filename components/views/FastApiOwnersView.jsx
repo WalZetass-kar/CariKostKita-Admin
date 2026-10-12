@@ -47,7 +47,7 @@ export function FastApiOwnersView() {
     <div className="grid gap-5">
       <Panel>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div><PanelTitle eyebrow="FastAPI · Supabase · Read-only" title="Direktori pemilik kost" /><p className="max-w-3xl text-sm leading-6 text-muted">Daftar ini hanya berisi profil role owner yang dapat dibaca staf lewat JWT dan RLS. Antrean serta keputusan verifikasi ada di menu Antrean Verifikasi · FastAPI; halaman Pemilik Kost legacy tetap dipertahankan.</p></div>
+          <div><PanelTitle eyebrow="Mitra" title="Direktori Pemilik Kost" /><p className="max-w-3xl text-sm leading-6 text-muted">Kelola dan pantau seluruh akun pemilik kost yang terdaftar di platform CariKostKita.</p></div>
           <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>
         <form onSubmit={search} className="mt-4 grid gap-3 sm:grid-cols-[minmax(210px,1fr)_220px_170px_auto]">
@@ -62,7 +62,7 @@ export function FastApiOwnersView() {
         <EmptyState title="Pemilik tidak ditemukan" message="Tidak ada profil pemilik pada filter ini yang terlihat oleh token admin saat ini." />
       ) : (
         <Panel className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-extrabold text-ink">Profil pemilik</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p></div><Badge status="JWT + RLS" tone="brand" /></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-extrabold text-ink">Profil Pemilik</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p></div></div>
           <DataTable headers={["Pemilik", "Kontak", "Verifikasi", "Status akun", "Terdaftar"]} minWidth={760}>
             {owners.map((owner) => <tr key={owner.id} className="hover:bg-track/60">
               <Td><div className="flex min-w-48 items-center gap-3"><Avatar name={owner.name || owner.email} src={owner.avatar_url} size={38} /><div className="min-w-0"><p className="truncate font-bold text-ink">{owner.name || "Tanpa nama"}</p><p className="truncate text-xs text-muted">ID {owner.id}</p></div></div></Td>

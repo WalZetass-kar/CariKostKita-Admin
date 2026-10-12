@@ -44,8 +44,8 @@ export function FastApiAdsView() {
     <div className="grid gap-5">
       <Panel>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div><PanelTitle eyebrow="FastAPI · Supabase · Read-only" title="Inventaris iklan" /><p className="max-w-3xl text-sm leading-6 text-muted">Halaman ini membaca kolom iklan yang terverifikasi melalui JWT admin dan RLS. Pengelolaan iklan lama masih tersedia; mutasi FastAPI menunggu verifikasi role marketing, platform/posisi, dan policy tabel.</p></div>
-          <div className="flex flex-wrap items-center gap-2"><Badge status="JWT + RLS" tone="brand" /><PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton></div>
+          <div><PanelTitle eyebrow="Pemasaran" title="Manajemen Iklan" /><p className="max-w-3xl text-sm leading-6 text-muted">Kelola dan pantau seluruh inventaris kampanye iklan yang tayang di aplikasi dan website CariKostKita.</p></div>
+          <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>
         <form onSubmit={search} className="mt-4 grid gap-3 sm:grid-cols-[minmax(220px,1fr)_210px_auto]">
           <label className="relative block"><span className="sr-only">Cari judul iklan</span><Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" /><input value={queryInput} maxLength={100} onChange={(event) => setQueryInput(event.target.value)} placeholder="Cari judul iklan…" className="h-10 w-full rounded-lg border border-line bg-field pl-9 pr-3 text-sm text-ink" /></label>
@@ -58,7 +58,7 @@ export function FastApiAdsView() {
         <EmptyState title="Iklan tidak ditemukan" message="Tidak ada iklan pada filter ini yang terlihat oleh token admin saat ini." />
       ) : (
         <Panel className="p-0">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-extrabold text-ink">Iklan yang terlihat</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} item per permintaan</p></div><Badge status="Read-only" tone="neutral" /></div>
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4"><div><h3 className="font-extrabold text-ink">Daftar Kampanye Iklan</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} item per permintaan</p></div></div>
           <DataTable headers={["Iklan", "Periode", "Status", "Impresi", "Klik", "Target"]} minWidth={820}>
             {ads.map((ad) => <tr key={ad.id} className="hover:bg-track/60">
               <Td><div className="flex min-w-52 items-center gap-3">{ad.image_url ? <img src={ad.image_url} alt="" className="h-10 w-14 shrink-0 rounded-md border border-line object-cover" /> : <span className="grid h-10 w-14 shrink-0 place-items-center rounded-md border border-line bg-track text-muted"><ImageIcon size={17} aria-hidden="true" /></span>}<div className="min-w-0"><p className="truncate font-bold text-ink">{ad.title || "Tanpa judul"}</p><p className="truncate text-xs text-muted">ID {ad.id}</p></div></div></Td>

@@ -51,9 +51,9 @@ export function FastApiActivityLogsView() {
       <Panel>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <PanelTitle eyebrow="Keamanan · FastAPI · RLS" title="Audit log aktivitas" />
+            <PanelTitle eyebrow="Keamanan" title="Audit Log Aktivitas" />
             <p className="mt-2 max-w-2xl text-sm text-muted">
-              Identitas aktor memakai ID profil terverifikasi. Log ditampilkan sesuai akses RLS akun ini; data legacy tetap terpisah.
+              Riwayat seluruh aktivitas administratif dan perubahan data penting yang tercatat secara terverifikasi.
             </p>
           </div>
           <PrimaryButton onClick={load} disabled={loading}>

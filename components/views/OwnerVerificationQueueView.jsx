@@ -69,8 +69,8 @@ export function OwnerVerificationQueueView() {
       <Panel>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <PanelTitle eyebrow="FastAPI · Supabase" title="Antrean verifikasi pemilik" />
-            <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau pengajuan pemilik secara terpisah dari data pemilik legacy. Keputusan tersimpan melalui endpoint moderasi FastAPI.</p>
+            <PanelTitle eyebrow="Moderasi" title="Antrean Verifikasi Pemilik" />
+            <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan proses permohonan verifikasi identitas pemilik kost secara real-time.</p>
           </div>
           <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>

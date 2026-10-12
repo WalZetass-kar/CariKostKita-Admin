@@ -77,8 +77,8 @@ export function FastApiReportQueueView() {
       <Panel>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <PanelTitle eyebrow="FastAPI · Supabase" title="Antrean laporan kost" />
-            <p className="mt-2 max-w-2xl text-sm text-muted">Layar ini membaca dan memoderasi laporan melalui FastAPI. Data snapshot legacy tetap tersedia pada menu Laporan Kost selama fase validasi.</p>
+            <PanelTitle eyebrow="Moderasi" title="Laporan Pelanggaran Kost" />
+            <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan tindak lanjuti laporan keluhan atau indikasi pelanggaran listing kost.</p>
           </div>
           <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>

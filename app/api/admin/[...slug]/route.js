@@ -74,6 +74,18 @@ const routes = [
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memuat direktori kost FastAPI."));
     return payload;
   }, ["super_admin", "admin", "moderator"]],
+  ["PATCH", "fastapi-kosts/:id/status", async ({ session }, { body, params }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/${encodeURIComponent(params.id)}/status`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal mengubah status ketersediaan kost."));
+    return payload;
+  }, ["super_admin", "admin"]],
   ["GET", "fastapi-owners", async ({ session }, { url }) => {
     const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
     const query = new URLSearchParams({ role: "owner" });
