@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Clock, Clock3, Download, ExternalLink, FileSpreadsheet, FileText, Inbox, Loader2, RefreshCw, RotateCcw, Search, SlidersHorizontal, X, XCircle, Image as ImageIcon, Upload, Building2, BriefcaseBusiness, Users, Flag, Megaphone, Bell, MapPin } from "lucide-react";
 import { exportRows } from "@/lib/exporter";
-import { readImage } from "@/lib/api";
+import { api, readImage } from "@/lib/api";
 import { formatDateTime, initials, timeAgo } from "@/lib/format";
 
 /* ---------- Badge ---------- */
@@ -840,6 +840,9 @@ export function BulkActionBar({ selectedCount, onClear, children }) {
 /* ---------- Global Search Modal ---------- */
 export function GlobalSearchModal({ open, onClose, onSelect, data }) {
   const [query, setQuery] = useState("");
+  const [remoteResults, setRemoteResults] = useState(null);
+  const [remoteLoading, setRemoteLoading] = useState(false);
+  const [remoteError, setRemoteError] = useState("");
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -849,9 +852,47 @@ export function GlobalSearchModal({ open, onClose, onSelect, data }) {
     }
   }, [open]);
 
+  useEffect(() => {
+    const keyword = query.trim();
+    let cancelled = false;
+    if (!open || !keyword) {
+      setRemoteResults(null);
+      setRemoteLoading(false);
+      setRemoteError("");
+      return () => { cancelled = true; };
+    }
+    setRemoteResults(null);
+    setRemoteLoading(true);
+    setRemoteError("");
+    const timer = setTimeout(async () => {
+      try {
+        const result = await api(`global-search?q=${encodeURIComponent(keyword.slice(0, 100))}`);
+        if (!cancelled) setRemoteResults(result.results || []);
+      } catch (error) {
+        if (!cancelled) {
+          const fallback = data
+            ? "Hasil lokal legacy ditampilkan."
+            : "Data legacy belum dimuat; buka halaman Dashboard lama untuk memuatnya.";
+          setRemoteError(`${error.message || "Pencarian FastAPI tidak tersedia."} ${fallback}`);
+        }
+      } finally {
+        if (!cancelled) setRemoteLoading(false);
+      }
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [open, query, data]);
+
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q || !data) return [];
+    if (!q) return [];
+    if (remoteResults !== null) {
+      const icons = { Kost: Building2, Pemilik: BriefcaseBusiness, Pengguna: Users, Laporan: Flag };
+      return remoteResults.map((result) => ({ ...result, icon: icons[result.category] || Search }));
+    }
+    if (!data) return [];
     const list = [];
     (data.kosts || []).forEach((k) => {
       if (k.name.toLowerCase().includes(q) || k.area.toLowerCase().includes(q) || k.address.toLowerCase().includes(q)) {
@@ -874,7 +915,7 @@ export function GlobalSearchModal({ open, onClose, onSelect, data }) {
       }
     });
     return list.slice(0, 15);
-  }, [query, data]);
+  }, [query, data, remoteResults]);
 
   if (!open) return null;
 
@@ -901,6 +942,8 @@ export function GlobalSearchModal({ open, onClose, onSelect, data }) {
             <div className="p-6 text-center text-xs text-muted">
               Ketik kata kunci untuk mencari di seluruh platform CariKostKita.
             </div>
+          ) : remoteLoading ? (
+            <div className="p-6 text-center text-xs text-muted">Mencari pada data yang terlihat oleh akun Anda…</div>
           ) : results.length === 0 ? (
             <div className="p-6 text-center text-xs text-muted">
               Tidak ditemukan data yang cocok dengan "{query}".
@@ -933,6 +976,7 @@ export function GlobalSearchModal({ open, onClose, onSelect, data }) {
               })}
             </div>
           )}
+          {remoteError && <p role="status" className="border-t border-line px-3 py-2 text-xs text-warn-fg">{remoteError}</p>}
         </div>
       </div>
     </div>

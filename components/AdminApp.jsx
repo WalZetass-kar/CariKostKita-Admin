@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bell, BriefcaseBusiness, Building2, ChartNoAxesCombined, ChevronDown,
   Flag, History, LayoutDashboard, LogOut, Megaphone, Menu, Search, Settings,
-  Users, X, Shield, Sparkles
+  Users, X, Shield, Sparkles, BadgeCheck
 } from "lucide-react";
 import { ApiError, api } from "@/lib/api";
 import { AppProvider } from "./AppContext";
@@ -16,6 +16,15 @@ import { ROLE_LABELS, ROLE_MENUS } from "@/lib/constants";
 import { DashboardView } from "./views/DashboardView";
 import { KostFormModal, KostView } from "./views/KostView";
 import { OwnersView } from "./views/OwnersView";
+import { OwnerVerificationQueueView } from "./views/OwnerVerificationQueueView";
+import { FastApiReportQueueView } from "./views/FastApiReportQueueView";
+import { FastApiUsersView } from "./views/FastApiUsersView";
+import { FastApiOverviewView } from "./views/FastApiOverviewView";
+import { FastApiOwnersView } from "./views/FastApiOwnersView";
+import { FastApiKostsView } from "./views/FastApiKostsView";
+import { FastApiAdsView } from "./views/FastApiAdsView";
+import { FastApiAnalyticsView } from "./views/FastApiAnalyticsView";
+import { FastApiActivityLogsView } from "./views/FastApiActivityLogsView";
 import { UsersView } from "./views/UsersView";
 import { ReportsView } from "./views/ReportsView";
 import { AdsView } from "./views/AdsView";
@@ -24,38 +33,65 @@ import { AuditView } from "./views/AuditView";
 import { SettingsView } from "./views/SettingsView";
 
 const navItems = [
-  ["dashboard", "Dashboard", LayoutDashboard],
+  ["fastapi_overview", "Ringkasan · FastAPI", ChartNoAxesCombined],
   ["kost", "Manajemen Kost", Building2],
+  ["fastapi_kosts", "Kost · FastAPI", Building2],
   ["owners", "Pemilik Kost", BriefcaseBusiness],
+  ["fastapi_owners", "Pemilik · FastAPI", BriefcaseBusiness],
+  ["verification", "Antrean Verifikasi", BadgeCheck],
   ["users", "Pengguna", Users],
+  ["fastapi_users", "Pengguna · FastAPI", Users],
   ["reports", "Laporan Kost", Flag],
+  ["fastapi_reports", "Laporan · FastAPI", Flag],
   ["ads", "Manajemen Iklan", Megaphone],
+  ["fastapi_ads", "Iklan · FastAPI", Megaphone],
   ["analytics", "Statistik", ChartNoAxesCombined],
+  ["fastapi_analytics", "Analitik Â· FastAPI", ChartNoAxesCombined],
   ["audit", "Audit Log", History],
+  ["fastapi_activity_logs", "Audit Log · FastAPI", History],
   ["settings", "Pengaturan", Settings],
+  ["dashboard", "Dashboard lama", LayoutDashboard],
 ];
 
 const viewMeta = {
-  dashboard: ["Dashboard", "Ringkasan Platform"],
+  dashboard: ["Dashboard legacy", "Snapshot dan statistik lama"],
+  fastapi_overview: ["Ringkasan Platform", "Agregat dari FastAPI · Supabase RLS"],
   kost: ["Manajemen Kost", "Kelola Data Kost"],
+  fastapi_kosts: ["Direktori Kost", "Data yang terlihat melalui FastAPI · RLS"],
   owners: ["Pemilik Kost", "Verifikasi & Kelola Pemilik"],
+  fastapi_owners: ["Direktori Pemilik", "Profil pemilik dari FastAPI · RLS"],
+  verification: ["Verifikasi", "Antrean Pengajuan Pemilik"],
   users: ["Pengguna", "Kelola Pengguna"],
+  fastapi_users: ["Direktori Pengguna", "Data Supabase melalui FastAPI"],
   reports: ["Laporan Kost", "Tindak Lanjut Laporan"],
+  fastapi_reports: ["Laporan FastAPI", "Moderasi melalui API baru"],
   ads: ["Manajemen Iklan", "Promosi dan Performa"],
+  fastapi_ads: ["Inventaris Iklan", "Data schema terverifikasi · read-only"],
   analytics: ["Statistik", "Analitik Platform"],
+  fastapi_analytics: ["Analitik Produk", "Agregat event dan crash dari FastAPI Â· RLS"],
   audit: ["Audit Log", "Riwayat Aktivitas"],
+  fastapi_activity_logs: ["Audit Log FastAPI", "Log server yang terlihat melalui RLS"],
   settings: ["Pengaturan", "Profil, Keamanan & Sistem"],
 };
 
 const views = {
   dashboard: DashboardView,
+  fastapi_overview: FastApiOverviewView,
   kost: KostView,
+  fastapi_kosts: FastApiKostsView,
   owners: OwnersView,
+  fastapi_owners: FastApiOwnersView,
+  verification: OwnerVerificationQueueView,
   users: UsersView,
+  fastapi_users: FastApiUsersView,
   reports: ReportsView,
+  fastapi_reports: FastApiReportQueueView,
   ads: AdsView,
+  fastapi_ads: FastApiAdsView,
   analytics: AnalyticsView,
+  fastapi_analytics: FastApiAnalyticsView,
   audit: AuditView,
+  fastapi_activity_logs: FastApiActivityLogsView,
   settings: SettingsView,
 };
 
@@ -77,7 +113,11 @@ function Shell({ initialAdmin }) {
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
   const [admin, setAdmin] = useState(initialAdmin);
-  const [activeView, setActiveViewState] = useState("dashboard");
+  const [activeView, setActiveViewState] = useState(
+    initialAdmin?.role === "moderator"
+      ? "fastapi_reports"
+      : ["super_admin", "admin"].includes(initialAdmin?.role) ? "fastapi_overview" : "dashboard"
+  );
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [theme, setThemeState] = useState("light");
@@ -87,6 +127,7 @@ function Shell({ initialAdmin }) {
   const [menu, setMenu] = useState(""); // "bell" | "profile" | ""
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [targetEntityId, setTargetEntityId] = useState(null);
+  const isApiFirstView = activeView.startsWith("fastapi_") || activeView === "verification";
 
   /* preferensi tampilan & shortcut */
   useEffect(() => {
@@ -135,18 +176,19 @@ function Shell({ initialAdmin }) {
     window.scrollTo({ top: 0 });
   }, []);
 
-  /* muat data */
+  /* Snapshot legacy hanya dimuat saat halaman legacy dibuka. */
   const load = useCallback(async () => {
     setError("");
     try {
       const res = await api("data");
       setData(res.data);
-      setAdmin(res.data.admin);
     } catch (e) {
       setError(e.message);
     }
   }, []);
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    if (!isApiFirstView && !data) load();
+  }, [isApiFirstView, data, load]);
 
   /* proteksi navigasi kembali setelah logout */
   useEffect(() => {
@@ -164,8 +206,8 @@ function Shell({ initialAdmin }) {
     const res = await api(path, { method, body });
     if (res.data) {
       setData(res.data);
-      if (res.admin) setAdmin(res.admin);
     }
+    if (res.admin) setAdmin(res.admin);
     return res;
   }, []);
 
@@ -575,7 +617,9 @@ function Shell({ initialAdmin }) {
 
           {menu && <div className="fixed inset-0 z-30" onClick={() => setMenu("")} aria-hidden="true" />}
 
-          {error && !data ? (
+          {isApiFirstView ? (
+            <View key={activeView} />
+          ) : error && !data ? (
             <ErrorState message={error} onRetry={load} />
           ) : !data ? (
             activeView === "dashboard" ? (
@@ -583,9 +627,7 @@ function Shell({ initialAdmin }) {
             ) : (
               <SkeletonTable rows={7} cols={6} />
             )
-          ) : (
-            <View key={activeView} />
-          )}
+          ) : <View key={activeView} />}
         </main>
 
         <KostFormModal kost={kostForm} onClose={() => setKostForm(null)} />

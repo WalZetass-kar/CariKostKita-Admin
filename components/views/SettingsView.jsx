@@ -8,7 +8,6 @@ import {
   Monitor,
   Moon,
   Save,
-  Smartphone,
   Sun,
   Users,
   Plus,
@@ -25,7 +24,6 @@ import {
   Badge,
   ConfirmDialog,
   DataTable,
-  EmptyState,
   ErrorState,
   Field,
   FilterTabs,
@@ -45,7 +43,7 @@ import {
   useToast,
 } from "../ui";
 import { ROLES, ROLE_LABELS } from "@/lib/constants";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 
 export function SettingsView() {
   const { admin } = useApp();
@@ -101,34 +99,78 @@ function useSave(path, method = "PATCH") {
 function ProfileTab() {
   const { admin } = useApp();
   const form = useForm({
-    name: admin.name,
-    email: admin.email,
-    phone: admin.phone || "",
-    photo: admin.photo || "",
+    name: admin?.name || "",
+    email: admin?.email || "",
+    phone: admin?.phone || "",
+    photo: admin?.photo || "",
   });
   const { save, saving, errors } = useSave("settings/profile");
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [source, setSource] = useState("");
+  const [attempt, setAttempt] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setLoadError("");
+    api("settings/profile")
+      .then((response) => {
+        if (!active) return;
+        const profile = response.profile || {};
+        form.setValues({
+          name: profile.name || "",
+          email: profile.email || admin?.email || "",
+          phone: profile.phone || "",
+          photo: profile.photo || "",
+        });
+        setSource(response.source || "fastapi");
+      })
+      .catch((error) => active && setLoadError(error.message || "Profil tidak bisa dimuat."))
+      .finally(() => active && setLoading(false));
+    return () => { active = false; };
+  }, [admin?.id, attempt]);
+
+  const submit = async (event) => {
+    event.preventDefault();
+    const response = await save(form.values, "Profil berhasil diperbarui.");
+    if (response?.admin) {
+      form.setValues({
+        name: response.admin.name || "",
+        email: response.admin.email || "",
+        phone: response.admin.phone || "",
+        photo: response.admin.photo || "",
+      });
+    }
+    if (response?.source) setSource(response.source);
+  };
+
+  if (loading) return <Panel className="max-w-3xl"><LoadingState rows={3} /></Panel>;
+  if (loadError) return <ErrorState message={loadError} onRetry={() => setAttempt((value) => value + 1)} />;
 
   return (
     <Panel className="max-w-3xl">
+      {source === "legacy" && (
+        <div role="status" className="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950">
+          FastAPI profile endpoint belum tersedia. Perubahan memakai fallback lokal dan belum tersinkron ke Supabase.
+        </div>
+      )}
       <div className="mb-5 flex items-center gap-3">
         <Avatar name={form.values.name} src={form.values.photo} size={64} />
         <div>
-          <h2 className="text-2xl font-extrabold text-ink">{admin.name}</h2>
+          <h2 className="text-2xl font-extrabold text-ink">{form.values.name}</h2>
           <p className="text-muted">
-            {admin.email} · <Badge status={admin.role} label={ROLE_LABELS[admin.role] || admin.role} />
+            {form.values.email} · <Badge status={admin.role} label={ROLE_LABELS[admin.role] || admin.role} />
           </p>
         </div>
       </div>
       <form
         noValidate
-        onSubmit={(e) => {
-          e.preventDefault();
-          save(form.values, "Profil admin berhasil diperbarui.");
-        }}
+        onSubmit={submit}
         className="grid gap-4 sm:grid-cols-2"
       >
         <Field label="Nama" {...form.bind("name")} error={errors.name} required />
-        <Field label="Email" type="email" {...form.bind("email")} error={errors.email} required />
+        <Field label="Email login" type="email" {...form.bind("email")} readOnly hint="Email dikelola Supabase dan tidak dapat diubah di sini." />
         <Field label="Nomor Telepon" {...form.bind("phone")} error={errors.phone} />
         <ImageField
           label="Foto Profil"
@@ -170,37 +212,25 @@ function SecurityTab() {
   const toast = useToast();
   const form = useForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const { save, saving, errors } = useSave("settings/password", "POST");
-  const [sessions, setSessions] = useState(null);
-  const [error, setError] = useState("");
   const [confirm, setConfirm] = useState(null);
-
-  const load = () =>
-    api("sessions")
-      .then((r) => setSessions(r.sessions))
-      .catch((e) => setError(e.message));
-  useEffect(() => {
-    load();
-  }, []);
 
   const submit = async (e) => {
     e.preventDefault();
-    const res = await save(form.values, "Password berhasil diubah. Perangkat lain telah dikeluarkan.");
+    const res = await save(form.values, "Password Supabase berhasil diubah.");
     if (res) {
       form.reset();
-      load();
     }
   };
 
   const revoke = async () => {
-    if (confirm === "all") {
+    try {
       const res = await act("sessions/revoke-others");
-      toast(`${res.revoked} perangkat lain dikeluarkan.`);
-    } else {
-      await act(`sessions/${confirm}`, { method: "DELETE" });
-      toast("Perangkat berhasil dikeluarkan.");
+      if (res.revoked) toast("Refresh token sesi perangkat lain berhasil dicabut.");
+    } catch (error) {
+      toast(error.message || "Gagal mencabut sesi perangkat lain.", "error");
+    } finally {
+      setConfirm(null);
     }
-    setConfirm(null);
-    load();
   };
 
   return (
@@ -221,47 +251,21 @@ function SecurityTab() {
       </Panel>
       <Panel>
         <div className="mb-3 flex items-start justify-between gap-3">
-          <PanelTitle eyebrow="Session" title="Perangkat Login" />
-          {sessions && sessions.length > 1 && (
-            <GhostButton onClick={() => setConfirm("all")}>
+          <PanelTitle eyebrow="Session Supabase" title="Perangkat Login" />
+          <GhostButton onClick={() => setConfirm("others")}>
               <LogOut size={16} />
-              <span>Keluar semua lainnya</span>
-            </GhostButton>
-          )}
+              <span>Keluar dari perangkat lain</span>
+          </GhostButton>
         </div>
-        {error ? (
-          <ErrorState message={error} onRetry={load} />
-        ) : !sessions ? (
-          <LoadingState rows={3} />
-        ) : sessions.length ? (
-          <ul className="grid gap-3">
-            {sessions.map((s) => (
-              <li key={s.id} className="flex items-center gap-3 rounded-lg border border-line p-3 bg-paper">
-                <Smartphone size={20} className="shrink-0 text-maroon" />
-                <div className="min-w-0 flex-1">
-                  <strong className="block text-ink">
-                    {s.device} {s.current && <Badge tone="ok" label="Perangkat ini" />}
-                  </strong>
-                  <span className="block text-xs text-muted">IP {s.ip} · Aktif terakhir {formatDateTime(s.lastActive)}</span>
-                  <span className="block text-xs text-muted">Berlaku sampai {formatDateTime(s.expiresAt)}</span>
-                </div>
-                {!s.current && (
-                  <GhostButton tone="danger" onClick={() => setConfirm(s.id)}>
-                    Keluarkan
-                  </GhostButton>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <EmptyState title="Tidak ada session aktif" />
-        )}
+        <p className="text-sm leading-6 text-muted">
+          Supabase tidak menyediakan daftar perangkat yang aman untuk ditampilkan panel ini. Kamu bisa mencabut refresh token sesi lain; perangkat tersebut mungkin masih memakai access token sampai token itu kedaluwarsa. Sesi Admin-Gue ini tetap aktif.
+        </p>
       </Panel>
       <ConfirmDialog
         open={Boolean(confirm)}
         tone="danger"
-        title="Keluarkan Perangkat"
-        message={confirm === "all" ? "Keluarkan semua perangkat lain dari akun ini?" : "Keluarkan perangkat ini dari akun Admin?"}
+        title="Keluar dari perangkat lain"
+        message="Refresh token sesi Supabase pada perangkat lain akan dicabut. Access token aktifnya tetap berlaku sampai kedaluwarsa; perangkat Admin-Gue ini tetap masuk."
         confirmLabel="Keluarkan"
         onConfirm={revoke}
         onClose={() => setConfirm(null)}
