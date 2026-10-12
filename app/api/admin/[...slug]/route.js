@@ -409,7 +409,41 @@ const routes = [
   ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin"]],
 
   ["PATCH", "settings/notifications", async (auth, { body }) => write(auth, (db) => ({ notifications: svc.updateNotifications(db, auth.admin, body) }))],
-  ["PATCH", "settings/system", async (auth, { body }) => write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) })), ["super_admin"]],
+  ["GET", "settings/system", async ({ session }) => {
+    const apiUrl = fastApiBase();
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+        headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        return { system: payload.data || payload };
+      }
+    } catch {}
+    return { system: getDb().system };
+  }, ["super_admin", "admin"]],
+  ["PATCH", "settings/system", async (auth, { body }) => {
+    const { session } = auth;
+    const apiUrl = fastApiBase();
+    let remotePayload = null;
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      });
+      if (res.ok) {
+        remotePayload = await res.json();
+      }
+    } catch {}
+    const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
+    return {
+      system: remotePayload?.data || local.system,
+      ...local,
+    };
+  }, ["super_admin"]],
 
   ["GET", "admins", async ({ admin }) => ({ admins: svc.listAdmins(getDb(), admin) }), ["super_admin"]],
   ["POST", "admins", async (auth, { body }) => write(auth, (db) => ({ admin: svc.createAdmin(db, auth.admin, body) })), ["super_admin"]],

@@ -349,51 +349,144 @@ function AppearanceTab() {
 
 function SystemTab() {
   const { data, admin } = useApp();
-  const form = useForm({ ...(data?.system || {}) });
+  const form = useForm({
+    appName: "CariKostKita",
+    tagline: "Temukan kost impianmu dengan mudah di Pekanbaru",
+    whatsapp: "6281270008899",
+    apkUrl: "https://github.com/g-423/KosKita/releases/download/v1.0.0-beta/CariKostKita-v1.0.0-beta.apk",
+    versionName: "v1.0.0-beta",
+    releaseNotes: "Rilis resmi CariKostKita untuk mahasiswa dan warga Pekanbaru.",
+    supportEmail: "support@carikostkita.id",
+    contactPhone: "0761-555-0123",
+    address: "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
+    instagram: "https://instagram.com/carikostkita",
+    facebook: "https://facebook.com/carikostkita",
+    tiktok: "https://tiktok.com/@carikostkita",
+    siteTitle: "CariKostKita - Cari Kost Terpercaya di Pekanbaru",
+    siteDescription: "Platform pencarian kost terverifikasi dengan info harga, lokasi, dan fasilitas akurat.",
+    ...(data?.system || {}),
+  });
   const { save, saving, errors } = useSave("settings/system");
+  const [loadingInitial, setLoadingInitial] = useState(true);
   const locked = admin?.role !== "super_admin";
   const b = (n) => ({ ...form.bind(n), disabled: locked });
 
+  useEffect(() => {
+    let active = true;
+    api("settings/system")
+      .then((res) => {
+        if (!active || !res?.system) return;
+        form.setValues((prev) => ({
+          ...prev,
+          ...res.system,
+          appName: res.system.appName || res.system.app_name || prev.appName,
+          whatsapp: res.system.whatsapp || res.system.contact_whatsapp || prev.whatsapp,
+          apkUrl: res.system.apkUrl || res.system.apk_url || prev.apkUrl,
+          versionName: res.system.versionName || res.system.version_name || prev.versionName,
+          releaseNotes: res.system.releaseNotes || res.system.release_notes || prev.releaseNotes,
+          supportEmail: res.system.supportEmail || res.system.support_email || prev.supportEmail,
+          contactPhone: res.system.contactPhone || res.system.contact_phone || prev.contactPhone,
+          address: res.system.address || res.system.office_address || prev.address,
+          siteTitle: res.system.siteTitle || res.system.site_title || prev.siteTitle,
+          siteDescription: res.system.siteDescription || res.system.site_description || prev.siteDescription,
+        }));
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setLoadingInitial(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <Panel className="max-w-4xl">
-      <PanelTitle eyebrow="Sistem" title="Informasi Aplikasi & Website CariKostKita" />
-      <p className="mb-4 text-sm text-muted">
-        Konfigurasi ini dikonsumsi secara publik oleh Website dan Android.
-        {locked && " Hanya Super Admin yang memiliki hak akses untuk mengubah data ini."}
-      </p>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <PanelTitle eyebrow="Sistem & Landing Page" title="Pengaturan Platform & Rilis APK" />
+          <p className="text-sm text-muted">
+            Data pada halaman ini langsung tersinkronisasi ke <strong>Landing Page</strong> dan aplikasi mobile CariKostKita tanpa perlu ubah kode manual.
+            {locked && " Hanya Super Admin yang memiliki hak akses untuk mengubah data ini."}
+          </p>
+        </div>
+      </div>
+
       <form
         noValidate
         onSubmit={(e) => {
           e.preventDefault();
-          save(form.values, "Pengaturan sistem disimpan.");
+          save(form.values, "Pengaturan sistem dan rilis APK berhasil disimpan.");
         }}
-        className="grid gap-4 sm:grid-cols-2"
+        className="mt-6 grid gap-6"
       >
-        <Field label="Nama Aplikasi" {...b("appName")} error={errors.appName} required />
-        <Field label="Tagline" {...b("tagline")} />
-        <ImageField
-          label="Logo Aplikasi"
-          value={locked ? data?.system?.logo : form.values.logo}
-          onChange={(v) => !locked && form.set("logo", v)}
-          error={errors.logo}
-        />
-        <div className="grid gap-4">
-          <Field label="Email Support" type="email" {...b("supportEmail")} error={errors.supportEmail} required />
-          <Field label="Nomor Kontak Telepon" {...b("contactPhone")} error={errors.contactPhone} />
+        {/* Bagian 1: Sinkronisasi Rilis APK Landing Page */}
+        <div className="rounded-xl border border-line bg-track/30 p-4">
+          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-1">
+            📦 Rilis Berkas Aplikasi Android (APK)
+          </h4>
+          <p className="text-xs text-muted mb-4">
+            Link APK ini otomatis dipakai oleh semua tombol <em>&ldquo;Download APK&rdquo;</em> di Landing Page.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="URL Berkas APK Terbaru (Direct Download Link)"
+              className="sm:col-span-2"
+              {...b("apkUrl")}
+              error={errors.apkUrl}
+              placeholder="https://github.com/.../CariKostKita-v1.0.0.apk"
+              hint="Masukkan URL langsung ke file .apk (misal dari GitHub Release atau server storage)."
+              required
+            />
+            <Field
+              label="Versi Aplikasi"
+              {...b("versionName")}
+              error={errors.versionName}
+              placeholder="v1.0.1"
+              hint="Contoh: v1.0.0-beta atau v1.0.1"
+            />
+            <Field
+              label="WhatsApp Hotline Layanan"
+              {...b("whatsapp")}
+              error={errors.whatsapp}
+              placeholder="6281270008899"
+              hint="Otomatis dipakai tombol chat WhatsApp di Landing Page (gunakan awalan 62)"
+              required
+            />
+            <TextArea
+              label="Catatan Rilis (Changelog)"
+              className="sm:col-span-2"
+              {...b("releaseNotes")}
+              error={errors.releaseNotes}
+              placeholder="Apa yang baru pada versi ini..."
+            />
+          </div>
         </div>
-        <Field label="WhatsApp Hotline" {...b("whatsapp")} error={errors.whatsapp} hint="Format internasional tanpa tanda +, contoh 6281234567890" />
-        <Field label="Alamat Kantor" {...b("address")} />
-        <Field label="Instagram URL" {...b("instagram")} error={errors.instagram} placeholder="https://instagram.com/carikostkita" />
-        <Field label="Facebook URL" {...b("facebook")} error={errors.facebook} placeholder="https://facebook.com/carikostkita" />
-        <Field label="TikTok URL" {...b("tiktok")} error={errors.tiktok} placeholder="https://tiktok.com/@carikostkita" />
-        <Field label="YouTube URL" {...b("youtube")} error={errors.youtube} placeholder="https://youtube.com/@carikostkita" />
-        <Field label="Judul Website (SEO Meta Title)" className="sm:col-span-2" {...b("siteTitle")} error={errors.siteTitle} required />
-        <TextArea label="Deskripsi Website (SEO Meta Description)" className="sm:col-span-2" {...b("siteDescription")} />
+
+        {/* Bagian 2: Identitas Platform & Kontak */}
+        <div>
+          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-3">
+            🌐 Informasi Aplikasi & Kontak
+          </h4>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Nama Aplikasi" {...b("appName")} error={errors.appName} required />
+            <Field label="Tagline Aplikasi" {...b("tagline")} />
+            <Field label="Email Support" type="email" {...b("supportEmail")} error={errors.supportEmail} required />
+            <Field label="Nomor Kontak Kantor" {...b("contactPhone")} error={errors.contactPhone} />
+            <Field label="Alamat Kantor" className="sm:col-span-2" {...b("address")} />
+            <Field label="Instagram URL" {...b("instagram")} error={errors.instagram} placeholder="https://instagram.com/carikostkita" />
+            <Field label="Facebook URL" {...b("facebook")} error={errors.facebook} placeholder="https://facebook.com/carikostkita" />
+            <Field label="TikTok URL" {...b("tiktok")} error={errors.tiktok} placeholder="https://tiktok.com/@carikostkita" />
+            <Field label="Judul Website (SEO Meta Title)" className="sm:col-span-2" {...b("siteTitle")} error={errors.siteTitle} required />
+            <TextArea label="Deskripsi Website (SEO Meta Description)" className="sm:col-span-2" {...b("siteDescription")} />
+          </div>
+        </div>
+
         {!locked && (
-          <div className="sm:col-span-2 pt-2 border-t border-line">
+          <div className="pt-3 border-t border-line flex justify-end">
             <PrimaryButton type="submit" loading={saving}>
               <Save size={18} />
-              <span>Simpan Pengaturan Sistem</span>
+              <span>Simpan Perubahan & Sinkronkan</span>
             </PrimaryButton>
           </div>
         )}
