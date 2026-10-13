@@ -174,8 +174,8 @@ function Shell({ initialAdmin }) {
     }
   }, []);
   useEffect(() => {
-    if (activeView === "settings" && !data) load();
-  }, [activeView, data, load]);
+    load();
+  }, [load]);
 
   /* proteksi navigasi kembali setelah logout */
   useEffect(() => {

@@ -350,58 +350,73 @@ function AppearanceTab() {
 function SystemTab() {
   const { data, admin } = useApp();
   const form = useForm({
-    appName: "CariKostKita",
-    tagline: "Temukan kost impianmu dengan mudah di Pekanbaru",
-    whatsapp: "6281270008899",
-    apkUrl: "https://github.com/g-423/KosKita/releases/download/v1.0.0-beta/CariKostKita-v1.0.0-beta.apk",
-    versionName: "v1.0.0-beta",
-    releaseNotes: "Rilis resmi CariKostKita untuk mahasiswa dan warga Pekanbaru.",
-    supportEmail: "support@carikostkita.id",
-    contactPhone: "0761-555-0123",
-    address: "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
-    targetCity: "Pekanbaru",
-    apkSize: "6.9 MB",
-    minAndroid: "Android 8.0+",
-    heroBadge1: "Lokasi dekat kampus & area strategis",
-    heroBadge2: "Detail kost & foto kamar lengkap",
-    instagram: "https://instagram.com/carikostkita",
-    facebook: "https://facebook.com/carikostkita",
-    tiktok: "https://tiktok.com/@carikostkita",
-    siteTitle: "CariKostKita - Cari Kost Terpercaya di Pekanbaru",
-    siteDescription: "Platform pencarian kost terverifikasi dengan info harga, lokasi, dan fasilitas akurat.",
-    ...(data?.system || {}),
+    appName: "",
+    tagline: "",
+    whatsapp: "",
+    apkUrl: "",
+    versionName: "",
+    releaseNotes: "",
+    supportEmail: "",
+    contactPhone: "",
+    address: "",
+    targetCity: "",
+    apkSize: "",
+    minAndroid: "",
+    heroBadge1: "",
+    heroBadge2: "",
+    instagram: "",
+    facebook: "",
+    tiktok: "",
+    siteTitle: "",
+    siteDescription: "",
   });
   const { save, saving, errors } = useSave("settings/system");
   const [loadingInitial, setLoadingInitial] = useState(true);
   const locked = !["super_admin", "admin"].includes(admin?.role);
   const b = (n) => ({ ...form.bind(n), disabled: locked });
 
+  const populate = (s) => {
+    if (!s) return;
+    form.setValues((prev) => ({
+      ...prev,
+      appName: s.appName ?? s.app_name ?? prev.appName ?? "",
+      tagline: s.tagline ?? prev.tagline ?? "",
+      whatsapp: s.whatsapp ?? s.contact_whatsapp ?? prev.whatsapp ?? "",
+      apkUrl: s.apkUrl ?? s.apk_url ?? prev.apkUrl ?? "",
+      versionName: s.versionName ?? s.version_name ?? prev.versionName ?? "",
+      releaseNotes: s.releaseNotes ?? s.release_notes ?? prev.releaseNotes ?? "",
+      supportEmail: s.supportEmail ?? s.support_email ?? prev.supportEmail ?? "",
+      contactPhone: s.contactPhone ?? s.contact_phone ?? prev.contactPhone ?? "",
+      address: s.address ?? s.office_address ?? prev.address ?? "",
+      targetCity: s.targetCity ?? s.target_city ?? prev.targetCity ?? "Pekanbaru",
+      apkSize: s.apkSize ?? s.apk_size ?? prev.apkSize ?? "6.9 MB",
+      minAndroid: s.minAndroid ?? s.min_android ?? prev.minAndroid ?? "Android 8.0+",
+      heroBadge1: s.heroBadge1 ?? s.hero_badge_1 ?? prev.heroBadge1 ?? "",
+      heroBadge2: s.heroBadge2 ?? s.hero_badge_2 ?? prev.heroBadge2 ?? "",
+      instagram: s.instagram ?? prev.instagram ?? "",
+      facebook: s.facebook ?? prev.facebook ?? "",
+      tiktok: s.tiktok ?? prev.tiktok ?? "",
+      siteTitle: s.siteTitle ?? s.site_title ?? prev.siteTitle ?? "",
+      siteDescription: s.siteDescription ?? s.site_description ?? prev.siteDescription ?? "",
+    }));
+  };
+
+  useEffect(() => {
+    if (data?.system) {
+      populate(data.system);
+    }
+  }, [data?.system]);
+
   useEffect(() => {
     let active = true;
     api("settings/system")
       .then((res) => {
         if (!active || !res?.system) return;
-        form.setValues((prev) => ({
-          ...prev,
-          ...res.system,
-          appName: res.system.appName || res.system.app_name || prev.appName,
-          whatsapp: res.system.whatsapp || res.system.contact_whatsapp || prev.whatsapp,
-          apkUrl: res.system.apkUrl || res.system.apk_url || prev.apkUrl,
-          versionName: res.system.versionName || res.system.version_name || prev.versionName,
-          releaseNotes: res.system.releaseNotes || res.system.release_notes || prev.releaseNotes,
-          supportEmail: res.system.supportEmail || res.system.support_email || prev.supportEmail,
-          contactPhone: res.system.contactPhone || res.system.contact_phone || prev.contactPhone,
-          address: res.system.address || res.system.office_address || prev.address,
-          targetCity: res.system.targetCity || res.system.target_city || prev.targetCity,
-          apkSize: res.system.apkSize || res.system.apk_size || prev.apkSize,
-          minAndroid: res.system.minAndroid || res.system.min_android || prev.minAndroid,
-          heroBadge1: res.system.heroBadge1 || res.system.hero_badge_1 || prev.heroBadge1,
-          heroBadge2: res.system.heroBadge2 || res.system.hero_badge_2 || prev.heroBadge2,
-          siteTitle: res.system.siteTitle || res.system.site_title || prev.siteTitle,
-          siteDescription: res.system.siteDescription || res.system.site_description || prev.siteDescription,
-        }));
+        populate(res.system);
       })
-      .catch(() => {})
+      .catch(() => {
+        if (data?.system) populate(data.system);
+      })
       .finally(() => {
         if (active) setLoadingInitial(false);
       });
@@ -409,6 +424,14 @@ function SystemTab() {
       active = false;
     };
   }, []);
+
+  if (loadingInitial && !data?.system) {
+    return (
+      <Panel className="max-w-4xl">
+        <LoadingState rows={6} />
+      </Panel>
+    );
+  }
 
   return (
     <Panel className="max-w-4xl">
@@ -428,10 +451,7 @@ function SystemTab() {
           e.preventDefault();
           const res = await save(form.values, "Pengaturan sistem dan rilis APK berhasil disimpan.");
           if (res?.system) {
-            form.setValues((prev) => ({
-              ...prev,
-              ...res.system,
-            }));
+            populate(res.system);
           }
         }}
         className="mt-6 grid gap-6"

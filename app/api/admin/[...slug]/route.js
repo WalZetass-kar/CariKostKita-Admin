@@ -440,7 +440,22 @@ const routes = [
       });
       if (res.ok) {
         const payload = await res.json();
-        return { system: payload.data || payload };
+        const live = payload.data || payload;
+        mutate((db) => {
+          db.system = { ...(db.system || {}), ...live };
+        });
+        return { system: live };
+      }
+    } catch {}
+    try {
+      const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
+      if (pubRes.ok) {
+        const pubPayload = await pubRes.json();
+        const live = pubPayload.data || pubPayload;
+        mutate((db) => {
+          db.system = { ...(db.system || {}), ...live };
+        });
+        return { system: live };
       }
     } catch {}
     return { system: getDb().system };
@@ -467,11 +482,12 @@ const routes = [
     }
     const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
     const savedSystem = remotePayload?.data || local.system;
+    mutate((db) => {
+      db.system = savedSystem;
+    });
     if (local.data) {
       local.data.system = savedSystem;
     }
-    const db = getDb();
-    db.system = savedSystem;
     return {
       ...local,
       system: savedSystem,
