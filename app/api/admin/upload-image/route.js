@@ -33,27 +33,27 @@ export async function POST(request) {
       .replace(/\.[^.]+$/, "");
     const safeFileName = `${sanitizedBase}-${Date.now()}${extMatch[0].toLowerCase()}`;
 
-    // Target directories
+    // Target directories: support running from Admin-Gue or parent directory
     const cwd = process.cwd();
-    const landingUploadsDir = path.resolve(cwd, "../Landing Page/public/uploads");
-    const adminUploadsDir = path.resolve(cwd, "public/uploads");
+    const candidateDirs = [
+      path.resolve(cwd, "../Landing Page/public/uploads"),
+      path.resolve(cwd, "public/uploads"),
+      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Landing Page/public/uploads",
+      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Admin-Gue/public/uploads",
+    ];
 
-    try {
-      if (!fs.existsSync(landingUploadsDir)) {
-        fs.mkdirSync(landingUploadsDir, { recursive: true });
+    for (const dir of candidateDirs) {
+      try {
+        const parent = path.dirname(dir);
+        if (fs.existsSync(parent)) {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          fs.writeFileSync(path.join(dir, safeFileName), bytes);
+        }
+      } catch (err) {
+        // continue to other paths
       }
-      fs.writeFileSync(path.join(landingUploadsDir, safeFileName), bytes);
-    } catch (err) {
-      console.warn("Could not write to Landing Page uploads dir:", err.message);
-    }
-
-    try {
-      if (!fs.existsSync(adminUploadsDir)) {
-        fs.mkdirSync(adminUploadsDir, { recursive: true });
-      }
-      fs.writeFileSync(path.join(adminUploadsDir, safeFileName), bytes);
-    } catch (err) {
-      console.warn("Could not write to Admin-Gue uploads dir:", err.message);
     }
 
     const fileUrl = `/uploads/${safeFileName}`;

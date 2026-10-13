@@ -432,7 +432,9 @@ const routes = [
 
   ["PATCH", "settings/notifications", async (auth, { body }) => write(auth, (db) => ({ notifications: svc.updateNotifications(db, auth.admin, body) }))],
   ["GET", "settings/system", async ({ session }) => {
+    const localSystem = getDb().system || {};
     const apiUrl = fastApiBase();
+    let remotePayload = {};
     try {
       const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
         headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
@@ -440,25 +442,23 @@ const routes = [
       });
       if (res.ok) {
         const payload = await res.json();
-        const live = payload.data || payload;
-        mutate((db) => {
-          db.system = { ...(db.system || {}), ...live };
-        });
-        return { system: live };
+        remotePayload = payload.data || payload || {};
       }
     } catch {}
-    try {
-      const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
-      if (pubRes.ok) {
-        const pubPayload = await pubRes.json();
-        const live = pubPayload.data || pubPayload;
-        mutate((db) => {
-          db.system = { ...(db.system || {}), ...live };
-        });
-        return { system: live };
-      }
-    } catch {}
-    return { system: getDb().system };
+    if (Object.keys(remotePayload).length === 0) {
+      try {
+        const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
+        if (pubRes.ok) {
+          const pubPayload = await pubRes.json();
+          remotePayload = pubPayload.data || pubPayload || {};
+        }
+      } catch {}
+    }
+    const merged = { ...remotePayload, ...localSystem };
+    mutate((db) => {
+      db.system = merged;
+    });
+    return { system: merged };
   }, ["super_admin", "admin"]],
   ["PATCH", "settings/system", async (auth, { body }) => {
     const { session } = auth;
@@ -481,7 +481,7 @@ const routes = [
       console.error("FastAPI settings update network failure:", err);
     }
     const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
-    const savedSystem = remotePayload?.data || local.system;
+    const savedSystem = { ...(remotePayload?.data || {}), ...local.system };
     mutate((db) => {
       db.system = savedSystem;
     });

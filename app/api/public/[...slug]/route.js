@@ -38,15 +38,18 @@ async function dispatch(request, context) {
       return pub({ success: true });
     }
     case "GET settings": {
+      const localSystem = getDb().system || {};
       const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+      let remoteSettings = {};
       try {
         const res = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
         if (res.ok) {
           const payload = await res.json();
-          return pub({ settings: payload.data || payload });
+          remoteSettings = payload.data || payload || {};
         }
       } catch {}
-      return pub({ settings: getDb().system });
+      const merged = { ...remoteSettings, ...localSystem };
+      return pub({ settings: merged });
     }
     case "GET kosts": {
       const db = getDb();

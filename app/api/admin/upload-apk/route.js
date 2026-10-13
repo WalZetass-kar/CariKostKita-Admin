@@ -36,27 +36,27 @@ export async function POST(request) {
       .replace(/\.apk$/i, "");
     const safeFileName = `${sanitizedBase}-${Date.now()}.apk`;
 
-    // Target directories
+    // Target directories: support running from Admin-Gue or parent directory
     const cwd = process.cwd();
-    const landingReleasesDir = path.resolve(cwd, "../Landing Page/public/releases");
-    const adminReleasesDir = path.resolve(cwd, "public/releases");
+    const candidateDirs = [
+      path.resolve(cwd, "../Landing Page/public/releases"),
+      path.resolve(cwd, "public/releases"),
+      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Landing Page/public/releases",
+      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Admin-Gue/public/releases",
+    ];
 
-    try {
-      if (!fs.existsSync(landingReleasesDir)) {
-        fs.mkdirSync(landingReleasesDir, { recursive: true });
+    for (const dir of candidateDirs) {
+      try {
+        const parent = path.dirname(dir);
+        if (fs.existsSync(parent)) {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          fs.writeFileSync(path.join(dir, safeFileName), bytes);
+        }
+      } catch (err) {
+        // continue to other paths
       }
-      fs.writeFileSync(path.join(landingReleasesDir, safeFileName), bytes);
-    } catch (err) {
-      console.warn("Could not write to Landing Page releases dir:", err.message);
-    }
-
-    try {
-      if (!fs.existsSync(adminReleasesDir)) {
-        fs.mkdirSync(adminReleasesDir, { recursive: true });
-      }
-      fs.writeFileSync(path.join(adminReleasesDir, safeFileName), bytes);
-    } catch (err) {
-      console.warn("Could not write to Admin-Gue releases dir:", err.message);
     }
 
     const fileUrl = `/releases/${safeFileName}`;
