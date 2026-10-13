@@ -16,6 +16,12 @@ import {
   Power,
   ShieldCheck,
   CheckCircle,
+  Upload,
+  FileArchive,
+  Image as ImageIcon,
+  Sparkles,
+  Megaphone,
+  Link as LinkIcon,
 } from "lucide-react";
 import { useApp } from "../AppContext";
 import { api } from "@/lib/api";
@@ -369,9 +375,23 @@ function SystemTab() {
     tiktok: "",
     siteTitle: "",
     siteDescription: "",
+    bannerActive: false,
+    bannerText: "",
+    bannerLink: "",
+    bannerType: "promo",
+    heroImageUrl: "",
+    logoUrl: "",
+    githubUrl: "",
   });
   const { save, saving, errors } = useSave("settings/system");
   const [loadingInitial, setLoadingInitial] = useState(true);
+  const [uploadingApk, setUploadingApk] = useState(false);
+  const [uploadApkMsg, setUploadApkMsg] = useState("");
+  const [uploadApkErr, setUploadApkErr] = useState("");
+  const [uploadingHeroImg, setUploadingHeroImg] = useState(false);
+  const [uploadHeroMsg, setUploadHeroMsg] = useState("");
+  const [uploadHeroErr, setUploadHeroErr] = useState("");
+
   const locked = !["super_admin", "admin"].includes(admin?.role);
   const b = (n) => ({ ...form.bind(n), disabled: locked });
 
@@ -398,6 +418,13 @@ function SystemTab() {
       tiktok: s.tiktok ?? prev.tiktok ?? "",
       siteTitle: s.siteTitle ?? s.site_title ?? prev.siteTitle ?? "",
       siteDescription: s.siteDescription ?? s.site_description ?? prev.siteDescription ?? "",
+      bannerActive: Boolean(s.bannerActive ?? s.banner_active ?? prev.bannerActive),
+      bannerText: s.bannerText ?? s.banner_text ?? prev.bannerText ?? "",
+      bannerLink: s.bannerLink ?? s.banner_link ?? prev.bannerLink ?? "",
+      bannerType: s.bannerType ?? s.banner_type ?? prev.bannerType ?? "promo",
+      heroImageUrl: s.heroImageUrl ?? s.hero_image_url ?? prev.heroImageUrl ?? "",
+      logoUrl: s.logoUrl ?? s.logo_url ?? prev.logoUrl ?? "",
+      githubUrl: s.githubUrl ?? s.github_url ?? prev.githubUrl ?? "https://github.com/g-423/KosKita",
     }));
   };
 
@@ -425,6 +452,61 @@ function SystemTab() {
     };
   }, []);
 
+  const handleApkUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingApk(true);
+    setUploadApkErr("");
+    setUploadApkMsg("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload-apk", {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        throw new Error(json.error || "Gagal mengunggah berkas APK.");
+      }
+      form.set("apkUrl", json.url);
+      if (json.size) form.set("apkSize", json.size);
+      setUploadApkMsg(`Berkas ${json.fileName} (${json.size}) berhasil diunggah.`);
+    } catch (err) {
+      setUploadApkErr(err.message || "Gagal mengunggah berkas APK.");
+    } finally {
+      setUploadingApk(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleHeroImgUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadingHeroImg(true);
+    setUploadHeroErr("");
+    setUploadHeroMsg("");
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload-image", {
+        method: "POST",
+        body: formData,
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) {
+        throw new Error(json.error || "Gagal mengunggah gambar showcase.");
+      }
+      form.set("heroImageUrl", json.url);
+      setUploadHeroMsg(`Gambar showcase berhasil diunggah: ${json.url}`);
+    } catch (err) {
+      setUploadHeroErr(err.message || "Gagal mengunggah gambar showcase.");
+    } finally {
+      setUploadingHeroImg(false);
+      event.target.value = "";
+    }
+  };
+
   if (loadingInitial && !data?.system) {
     return (
       <Panel className="max-w-4xl">
@@ -439,7 +521,7 @@ function SystemTab() {
         <div>
           <PanelTitle eyebrow="Sistem & Landing Page" title="Pengaturan Platform & Rilis APK" />
           <p className="text-sm text-muted">
-            Data pada halaman ini langsung tersinkronisasi ke <strong>Landing Page</strong> dan aplikasi mobile CariKostKita tanpa perlu ubah kode manual.
+            Semua perubahan pada form ini langsung tersinkronkan ke <strong>Landing Page</strong> CariKostKita tanpa perlu ubah kode manual.
             {locked && " Hanya Administrator yang memiliki hak akses untuk mengubah data ini."}
           </p>
         </div>
@@ -449,7 +531,7 @@ function SystemTab() {
         noValidate
         onSubmit={async (e) => {
           e.preventDefault();
-          const res = await save(form.values, "Pengaturan sistem dan rilis APK berhasil disimpan.");
+          const res = await save(form.values, "Pengaturan sistem, banner, dan rilis APK berhasil disimpan.");
           if (res?.system) {
             populate(res.system);
           }
@@ -458,20 +540,49 @@ function SystemTab() {
       >
         {/* Bagian 1: Sinkronisasi Rilis APK Landing Page */}
         <div className="rounded-xl border border-line bg-track/30 p-4">
-          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-1">
-            📦 Rilis Berkas Aplikasi Android (APK)
-          </h4>
-          <p className="text-xs text-muted mb-4">
-            Link APK ini otomatis dipakai oleh semua tombol <em>&ldquo;Download APK&rdquo;</em> di Landing Page.
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider flex items-center gap-2">
+              <FileArchive size={17} className="text-accent" />
+              <span>Rilis Berkas Aplikasi Android (APK)</span>
+            </h4>
+            {!locked && (
+              <label className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition">
+                <Upload size={14} className={uploadingApk ? "animate-spin" : ""} />
+                <span>{uploadingApk ? "Mengunggah..." : "Unggah File .apk Baru"}</span>
+                <input
+                  type="file"
+                  accept=".apk"
+                  className="hidden"
+                  onChange={handleApkUpload}
+                  disabled={uploadingApk}
+                />
+              </label>
+            )}
+          </div>
+          <p className="text-xs text-muted mb-3">
+            Unggah file APK langsung dari komputer atau masukkan link download APK. Tombol <em>&ldquo;Download APK&rdquo;</em> di Landing Page akan otomatis mengunduh dari tautan ini.
           </p>
+
+          {uploadApkMsg && (
+            <div className="mb-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle size={15} />
+              <span>{uploadApkMsg}</span>
+            </div>
+          )}
+          {uploadApkErr && (
+            <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-800 dark:text-red-300 text-xs">
+              {uploadApkErr}
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Field
-              label="URL Berkas APK Terbaru (Direct Download Link)"
+              label="URL Download Berkas APK Terbaru"
               className="sm:col-span-2"
               {...b("apkUrl")}
               error={errors.apkUrl}
-              placeholder="https://github.com/.../CariKostKita-v1.0.0.apk"
-              hint="Masukkan URL langsung ke file .apk (misal dari GitHub Release atau server storage)."
+              placeholder="https://.../CariKostKita.apk atau /releases/app.apk"
+              hint="Dapat berupa URL eksternal (GitHub Release / CDN) atau path file yang diunggah (/releases/...)."
               required
             />
             <Field
@@ -482,19 +593,11 @@ function SystemTab() {
               hint="Contoh: v1.0.0-beta atau v1.0.1"
             />
             <Field
-              label="WhatsApp Hotline Layanan"
-              {...b("whatsapp")}
-              error={errors.whatsapp}
-              placeholder="6281270008899"
-              hint="Otomatis dipakai tombol chat WhatsApp di Landing Page (gunakan awalan 62)"
-              required
-            />
-            <Field
               label="Ukuran File APK"
               {...b("apkSize")}
               error={errors.apkSize}
               placeholder="6.9 MB"
-              hint="Ditampilkan di badge spesifikasi dan FAQ"
+              hint="Ditampilkan di badge spesifikasi dan panduan unduh"
             />
             <Field
               label="Minimum Versi Android"
@@ -503,31 +606,127 @@ function SystemTab() {
               placeholder="Android 8.0+"
               hint="Contoh: Android 8.0+ atau Android 9.0+"
             />
+            <Field
+              label="WhatsApp Hotline Layanan"
+              {...b("whatsapp")}
+              error={errors.whatsapp}
+              placeholder="6281270008899"
+              hint="Dipakai tombol chat WhatsApp di Landing Page (gunakan format 62...)"
+              required
+            />
             <TextArea
               label="Catatan Rilis (Changelog)"
               className="sm:col-span-2"
               {...b("releaseNotes")}
               error={errors.releaseNotes}
-              placeholder="Apa yang baru pada versi ini..."
+              placeholder="Rangkuman pembaruan penting pada versi ini..."
             />
           </div>
         </div>
 
-        {/* Bagian 2: Identitas Platform & Konten Landing Page */}
+        {/* Bagian 2: Banner Pengumuman & Promosi Landing Page */}
         <div className="rounded-xl border border-line bg-track/30 p-4">
-          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-1">
-            🎯 Wilayah Layanan & Tampilan Landing Page
-          </h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider flex items-center gap-2">
+              <Megaphone size={17} className="text-accent" />
+              <span>Banner Pengumuman & Promosi</span>
+            </h4>
+            <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-ink">
+              <input
+                type="checkbox"
+                checked={Boolean(form.values.bannerActive)}
+                onChange={(e) => form.set("bannerActive", e.target.checked)}
+                disabled={locked}
+                className="w-4 h-4 rounded border-line text-accent focus:ring-accent"
+              />
+              <span>Aktifkan Banner di Landing Page</span>
+            </label>
+          </div>
           <p className="text-xs text-muted mb-4">
-            Mengatur kota operasional dan kartu sorotan yang muncul pada banner utama Landing Page.
+            Menampilkan bilah banner pengumuman / promosi di bagian paling atas Landing Page untuk menyambut pengunjung.
           </p>
           <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Teks Banner Pengumuman"
+              className="sm:col-span-2"
+              {...b("bannerText")}
+              error={errors.bannerText}
+              placeholder="🎉 Promo Rilis Beta: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!"
+              hint="Pesan utama yang ditampilkan di banner atas"
+            />
+            <Field
+              label="Tautan Tombol Banner (Opsional)"
+              {...b("bannerLink")}
+              error={errors.bannerLink}
+              placeholder="#pemilik atau https://..."
+              hint="Anchor section (#pemilik, #install) atau URL tautan luar"
+            />
+            <SelectField
+              label="Tipe Tampilan Banner"
+              value={form.values.bannerType || "promo"}
+              onChange={(e) => form.set("bannerType", e.target.value)}
+              disabled={locked}
+              options={[
+                ["promo", "Promo (Gradien Menarik)"],
+                ["info", "Informasi Penting (Elegan)"],
+                ["warning", "Pemberitahuan Sistem (Waspada)"],
+              ]}
+            />
+          </div>
+        </div>
+
+        {/* Bagian 3: Gambar Mockup Hero & Logo Aplikasi */}
+        <div className="rounded-xl border border-line bg-track/30 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider flex items-center gap-2">
+              <ImageIcon size={17} className="text-accent" />
+              <span>Gambar Tampilan Hero & Wilayah Layanan</span>
+            </h4>
+            {!locked && (
+              <label className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition">
+                <Upload size={14} className={uploadingHeroImg ? "animate-spin" : ""} />
+                <span>{uploadingHeroImg ? "Mengunggah..." : "Unggah Gambar Showcase"}</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleHeroImgUpload}
+                  disabled={uploadingHeroImg}
+                />
+              </label>
+            )}
+          </div>
+          <p className="text-xs text-muted mb-3">
+            Sesuaikan kota operasional, kartu sorotan, dan screenshot/mockup aplikasi yang tampil pada layar 3D hero.
+          </p>
+
+          {uploadHeroMsg && (
+            <div className="mb-3 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle size={15} />
+              <span>{uploadHeroMsg}</span>
+            </div>
+          )}
+          {uploadHeroErr && (
+            <div className="mb-3 p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-800 dark:text-red-300 text-xs">
+              {uploadHeroErr}
+            </div>
+          )}
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="URL Gambar Showcase Hero (Layar Ponsel 3D)"
+              className="sm:col-span-2"
+              {...b("heroImageUrl")}
+              error={errors.heroImageUrl}
+              placeholder="/uploads/my-mockup.png atau https://.../image.png"
+              hint="Jika diisi, gambar ini akan langsung menggantikan mockup default pada layar ponsel 3D di Hero Landing Page."
+            />
             <Field
               label="Kota / Wilayah Layanan Utama"
               {...b("targetCity")}
               error={errors.targetCity}
               placeholder="Pekanbaru"
-              hint="Otomatis mengubah nama wilayah di seluruh teks Landing Page"
+              hint="Otomatis menyesuaikan nama wilayah di seluruh teks Landing Page"
               required
             />
             <Field
@@ -546,10 +745,11 @@ function SystemTab() {
           </div>
         </div>
 
-        {/* Bagian 3: Identitas Platform & Kontak */}
+        {/* Bagian 4: Identitas Platform, Kontak & Tautan Media Sosial */}
         <div>
-          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-3">
-            🌐 Informasi Aplikasi & Kontak Kantor
+          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-3 flex items-center gap-2">
+            <LinkIcon size={17} className="text-accent" />
+            <span>Informasi Aplikasi, Kontak & Tautan Resmi</span>
           </h4>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nama Aplikasi" {...b("appName")} error={errors.appName} required />
@@ -557,6 +757,7 @@ function SystemTab() {
             <Field label="Email Support" type="email" {...b("supportEmail")} error={errors.supportEmail} required />
             <Field label="Nomor Kontak Kantor" {...b("contactPhone")} error={errors.contactPhone} />
             <Field label="Alamat Kantor" className="sm:col-span-2" {...b("address")} />
+            <Field label="Tautan Repositori GitHub" {...b("githubUrl")} error={errors.githubUrl} placeholder="https://github.com/..." />
             <Field label="Instagram URL" {...b("instagram")} error={errors.instagram} placeholder="https://instagram.com/carikostkita" />
             <Field label="Facebook URL" {...b("facebook")} error={errors.facebook} placeholder="https://facebook.com/carikostkita" />
             <Field label="TikTok URL" {...b("tiktok")} error={errors.tiktok} placeholder="https://tiktok.com/@carikostkita" />
@@ -569,7 +770,7 @@ function SystemTab() {
           <div className="pt-3 border-t border-line flex justify-end">
             <PrimaryButton type="submit" loading={saving}>
               <Save size={18} />
-              <span>Simpan Perubahan & Sinkronkan</span>
+              <span>Simpan Perubahan & Sinkronkan ke Landing Page</span>
             </PrimaryButton>
           </div>
         )}
