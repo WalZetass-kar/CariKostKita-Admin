@@ -37,8 +37,17 @@ async function dispatch(request, context) {
       mutate((db) => svc.recordAdEvent(db, id, body.type, body.platform));
       return pub({ success: true });
     }
-    case "GET settings":
+    case "GET settings": {
+      const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+      try {
+        const res = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
+        if (res.ok) {
+          const payload = await res.json();
+          return pub({ settings: payload.data || payload });
+        }
+      } catch {}
       return pub({ settings: getDb().system });
+    }
     case "GET kosts": {
       const db = getDb();
       const kosts = db.kosts.filter((k) => k.status === "Aktif").map((k) => ({ ...k, ownerName: db.owners.find((o) => o.id === k.ownerId)?.name || "" }));

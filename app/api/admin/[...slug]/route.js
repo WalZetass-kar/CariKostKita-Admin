@@ -295,24 +295,46 @@ const routes = [
     const apiUrl = fastApiBase();
     const headers = { Authorization: `Bearer ${session.token}`, Accept: "application/json" };
     try {
-      const [overviewRes, kostsRes, usersRes, reportsRes, adsRes] = await Promise.all([
+      const [overviewRes, kostsRes, usersRes, reportsRes, adsRes, settingsRes] = await Promise.all([
         fetch(`${apiUrl}/api/v1/admin/overview`, { headers, cache: "no-store" }).catch(() => null),
         fetch(`${apiUrl}/api/v1/admin/kosts?page=1&page_size=50`, { headers, cache: "no-store" }).catch(() => null),
         fetch(`${apiUrl}/api/v1/admin/users?page=1&page_size=50`, { headers, cache: "no-store" }).catch(() => null),
         fetch(`${apiUrl}/api/v1/admin/reports?page=1&page_size=50`, { headers, cache: "no-store" }).catch(() => null),
         fetch(`${apiUrl}/api/v1/admin/ads?page=1&page_size=50`, { headers, cache: "no-store" }).catch(() => null),
+        fetch(`${apiUrl}/api/v1/admin/settings`, { headers, cache: "no-store" }).catch(() => null),
       ]);
 
       if (overviewRes && overviewRes.ok) {
-        const [overview, kosts, users, reports, ads] = await Promise.all([
+        const [overview, kosts, users, reports, ads, settings] = await Promise.all([
           overviewRes.json().catch(() => ({})),
           kostsRes && kostsRes.ok ? kostsRes.json().catch(() => ({})) : Promise.resolve({}),
           usersRes && usersRes.ok ? usersRes.json().catch(() => ({})) : Promise.resolve({}),
           reportsRes && reportsRes.ok ? reportsRes.json().catch(() => ({})) : Promise.resolve({}),
           adsRes && adsRes.ok ? adsRes.json().catch(() => ({})) : Promise.resolve({}),
+          settingsRes && settingsRes.ok ? settingsRes.json().catch(() => ({})) : Promise.resolve({}),
         ]);
 
         const db = getDb();
+        const liveSettings = settings.data || settings;
+        if (liveSettings && Object.keys(liveSettings).length > 0) {
+          db.system = { ...(db.system || {}), ...liveSettings };
+        }
+
+        const rawUsers = users.data || [];
+        const staffUsers = rawUsers.filter((u) => ["developer", "admin", "moderator"].includes(u.role));
+        const realAdmins = staffUsers.length > 0
+          ? staffUsers.map((u) => ({
+              id: String(u.id),
+              name: u.name || "Admin",
+              username: u.email?.split("@")[0] || (u.name || "admin").toLowerCase().replace(/\s+/g, ""),
+              email: u.email || "",
+              phone: u.no_hp || "",
+              role: u.role === "developer" ? "super_admin" : u.role,
+              active: u.is_active ?? true,
+              createdAt: u.created_at || "2026-01-01",
+            }))
+          : [publicAdmin(admin)];
+
         return {
           data: {
             overview: overview.data || overview,
@@ -324,7 +346,7 @@ const routes = [
               rooms: k.total_kamar || 0,
               status: k.status || "TERSEDIA",
             })),
-            users: (users.data || []).map((u) => ({
+            users: rawUsers.map((u) => ({
               ...u,
               name: u.name || u.nama,
               status: u.is_active ? "Aktif" : "Nonaktif",
@@ -336,8 +358,8 @@ const routes = [
               totalUsers: overview.data?.users?.total ?? 0,
               totalReports: overview.data?.reports?.total ?? 0,
             },
-            system: db.system,
-            admins: db.admins.map(publicAdmin),
+            system: liveSettings && Object.keys(liveSettings).length > 0 ? { ...(db.system || {}), ...liveSettings } : db.system,
+            admins: realAdmins,
             audit: db.audit || [],
           },
         };
@@ -444,13 +466,46 @@ const routes = [
       console.error("FastAPI settings update network failure:", err);
     }
     const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
+    const savedSystem = remotePayload?.data || local.system;
+    if (local.data) {
+      local.data.system = savedSystem;
+    }
+    const db = getDb();
+    db.system = savedSystem;
     return {
-      system: remotePayload?.data || local.system,
       ...local,
+      system: savedSystem,
     };
-  }, ["super_admin"]],
+  }, ["super_admin", "admin"]],
 
-  ["GET", "admins", async ({ admin }) => ({ admins: svc.listAdmins(getDb(), admin) }), ["super_admin"]],
+  ["GET", "admins", async ({ admin, session }) => {
+    const apiUrl = fastApiBase();
+    try {
+      const res = await fetch(`${apiUrl}/api/v1/admin/users?page=1&page_size=100`, {
+        headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const staff = (json.data || []).filter((u) => ["developer", "admin", "moderator"].includes(u.role));
+        if (staff.length > 0) {
+          return {
+            admins: staff.map((u) => ({
+              id: String(u.id),
+              name: u.name || "Admin",
+              username: u.email?.split("@")[0] || (u.name || "admin").toLowerCase().replace(/\s+/g, ""),
+              email: u.email || "",
+              phone: u.no_hp || "",
+              role: u.role === "developer" ? "super_admin" : u.role,
+              active: u.is_active ?? true,
+              createdAt: u.created_at || "2026-01-01",
+            })),
+          };
+        }
+      }
+    } catch {}
+    return { admins: [publicAdmin(admin)] };
+  }, ["super_admin", "admin"]],
   ["POST", "admins", async (auth, { body }) => write(auth, (db) => ({ admin: svc.createAdmin(db, auth.admin, body) })), ["super_admin"]],
   ["PATCH", "admins/:id", async (auth, { body, params }) => write(auth, (db) => ({ admin: svc.updateAdmin(db, auth.admin, params.id, body) })), ["super_admin"]],
   ["DELETE", "admins/:id", async (auth, { params }) => write(auth, (db) => svc.deleteAdmin(db, auth.admin, params.id)), ["super_admin"]],
@@ -526,6 +581,11 @@ async function write(auth, fn, proxyTarget = null) {
      } else {
         data = svc.loadAll(db, fresh);
      }
+  }
+
+  if (data) {
+    if (result.system) data.system = result.system;
+    else if (db.system) data.system = db.system;
   }
   
   return { ...result, data, admin: publicAdmin(fresh) };

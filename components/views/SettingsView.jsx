@@ -373,7 +373,7 @@ function SystemTab() {
   });
   const { save, saving, errors } = useSave("settings/system");
   const [loadingInitial, setLoadingInitial] = useState(true);
-  const locked = admin?.role !== "super_admin";
+  const locked = !["super_admin", "admin"].includes(admin?.role);
   const b = (n) => ({ ...form.bind(n), disabled: locked });
 
   useEffect(() => {
@@ -417,16 +417,22 @@ function SystemTab() {
           <PanelTitle eyebrow="Sistem & Landing Page" title="Pengaturan Platform & Rilis APK" />
           <p className="text-sm text-muted">
             Data pada halaman ini langsung tersinkronisasi ke <strong>Landing Page</strong> dan aplikasi mobile CariKostKita tanpa perlu ubah kode manual.
-            {locked && " Hanya Super Admin yang memiliki hak akses untuk mengubah data ini."}
+            {locked && " Hanya Administrator yang memiliki hak akses untuk mengubah data ini."}
           </p>
         </div>
       </div>
 
       <form
         noValidate
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          save(form.values, "Pengaturan sistem dan rilis APK berhasil disimpan.");
+          const res = await save(form.values, "Pengaturan sistem dan rilis APK berhasil disimpan.");
+          if (res?.system) {
+            form.setValues((prev) => ({
+              ...prev,
+              ...res.system,
+            }));
+          }
         }}
         className="mt-6 grid gap-6"
       >
@@ -647,7 +653,26 @@ function AdminsTab() {
     }
   };
 
-  const adminList = data?.admins || [];
+  const [localAdmins, setLocalAdmins] = useState(null);
+  useEffect(() => {
+    let active = true;
+    api("admins")
+      .then((res) => {
+        if (active && Array.isArray(res?.admins)) {
+          setLocalAdmins(res.admins);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const adminList = (localAdmins && localAdmins.length > 0)
+    ? localAdmins
+    : (data?.admins && data.admins.length > 0)
+    ? data.admins
+    : (currentAdmin ? [currentAdmin] : []);
 
   return (
     <div className="space-y-6">
