@@ -359,6 +359,11 @@ function SystemTab() {
     supportEmail: "support@carikostkita.id",
     contactPhone: "0761-555-0123",
     address: "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
+    targetCity: "Pekanbaru",
+    apkSize: "6.9 MB",
+    minAndroid: "Android 8.0+",
+    heroBadge1: "Lokasi dekat kampus & area strategis",
+    heroBadge2: "Detail kost & foto kamar lengkap",
     instagram: "https://instagram.com/carikostkita",
     facebook: "https://facebook.com/carikostkita",
     tiktok: "https://tiktok.com/@carikostkita",
@@ -387,6 +392,11 @@ function SystemTab() {
           supportEmail: res.system.supportEmail || res.system.support_email || prev.supportEmail,
           contactPhone: res.system.contactPhone || res.system.contact_phone || prev.contactPhone,
           address: res.system.address || res.system.office_address || prev.address,
+          targetCity: res.system.targetCity || res.system.target_city || prev.targetCity,
+          apkSize: res.system.apkSize || res.system.apk_size || prev.apkSize,
+          minAndroid: res.system.minAndroid || res.system.min_android || prev.minAndroid,
+          heroBadge1: res.system.heroBadge1 || res.system.hero_badge_1 || prev.heroBadge1,
+          heroBadge2: res.system.heroBadge2 || res.system.hero_badge_2 || prev.heroBadge2,
           siteTitle: res.system.siteTitle || res.system.site_title || prev.siteTitle,
           siteDescription: res.system.siteDescription || res.system.site_description || prev.siteDescription,
         }));
@@ -453,6 +463,20 @@ function SystemTab() {
               hint="Otomatis dipakai tombol chat WhatsApp di Landing Page (gunakan awalan 62)"
               required
             />
+            <Field
+              label="Ukuran File APK"
+              {...b("apkSize")}
+              error={errors.apkSize}
+              placeholder="6.9 MB"
+              hint="Ditampilkan di badge spesifikasi dan FAQ"
+            />
+            <Field
+              label="Minimum Versi Android"
+              {...b("minAndroid")}
+              error={errors.minAndroid}
+              placeholder="Android 8.0+"
+              hint="Contoh: Android 8.0+ atau Android 9.0+"
+            />
             <TextArea
               label="Catatan Rilis (Changelog)"
               className="sm:col-span-2"
@@ -463,10 +487,43 @@ function SystemTab() {
           </div>
         </div>
 
-        {/* Bagian 2: Identitas Platform & Kontak */}
+        {/* Bagian 2: Identitas Platform & Konten Landing Page */}
+        <div className="rounded-xl border border-line bg-track/30 p-4">
+          <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-1">
+            🎯 Wilayah Layanan & Tampilan Landing Page
+          </h4>
+          <p className="text-xs text-muted mb-4">
+            Mengatur kota operasional dan kartu sorotan yang muncul pada banner utama Landing Page.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Kota / Wilayah Layanan Utama"
+              {...b("targetCity")}
+              error={errors.targetCity}
+              placeholder="Pekanbaru"
+              hint="Otomatis mengubah nama wilayah di seluruh teks Landing Page"
+              required
+            />
+            <Field
+              label="Kartu Sorotan 1 (Floating Card Atas)"
+              {...b("heroBadge1")}
+              error={errors.heroBadge1}
+              placeholder="Lokasi dekat kampus & area strategis"
+            />
+            <Field
+              label="Kartu Sorotan 2 (Floating Card Bawah)"
+              className="sm:col-span-2"
+              {...b("heroBadge2")}
+              error={errors.heroBadge2}
+              placeholder="Detail kost & foto kamar lengkap"
+            />
+          </div>
+        </div>
+
+        {/* Bagian 3: Identitas Platform & Kontak */}
         <div>
           <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider mb-3">
-            🌐 Informasi Aplikasi & Kontak
+            🌐 Informasi Aplikasi & Kontak Kantor
           </h4>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Nama Aplikasi" {...b("appName")} error={errors.appName} required />
