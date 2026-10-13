@@ -436,8 +436,13 @@ const routes = [
       });
       if (res.ok) {
         remotePayload = await res.json();
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        console.error("FastAPI settings update returned error:", res.status, errJson);
       }
-    } catch {}
+    } catch (err) {
+      console.error("FastAPI settings update network failure:", err);
+    }
     const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
     return {
       system: remotePayload?.data || local.system,
