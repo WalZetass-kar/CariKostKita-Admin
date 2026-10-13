@@ -100,6 +100,85 @@ export function UserEditModal({ user, onClose }) {
   );
 }
 
+/** Modal untuk menambah pengguna atau staf admin baru */
+export function UserFormModal({ user, onClose, onSaved }) {
+  const { act, admin } = useApp();
+  const toast = useToast();
+  const isSuperAdmin = admin?.role === "super_admin";
+  const [role, setRole] = useState(user?.role || (isSuperAdmin ? "admin" : "user"));
+  const form = useForm({
+    name: user?.name || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  if (!user) return null;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setErrors({});
+    try {
+      const isStaffRole = ["super_admin", "admin", "moderator", "marketing"].includes(role);
+      const endpoint = isStaffRole ? "admins" : "users";
+      const body = { ...form.values, role };
+      await act(endpoint, { method: "POST", body });
+      toast(`${isStaffRole ? "Staf admin" : "Pengguna"} baru berhasil ditambahkan.`);
+      onClose();
+      onSaved?.();
+    } catch (err) {
+      setErrors(err.fields || {});
+      toast(err.message || "Gagal menambahkan akun.", "error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal open title="Tambah Pengguna / Staf Baru" onClose={saving ? undefined : onClose} maxWidth="max-w-md">
+      <form onSubmit={submit} noValidate className="grid gap-3.5">
+        <Field label="Nama Lengkap" {...form.bind("name")} error={errors.name} required />
+        <Field label="Username" {...form.bind("username")} error={errors.username} required placeholder="contoh: joko_admin" />
+        <Field label="Email" type="email" {...form.bind("email")} error={errors.email} required placeholder="user@carikostkita.id" />
+        <Field label="Nomor Telepon" {...form.bind("phone")} error={errors.phone} placeholder="08xxxxxxxxxx" />
+        <SelectField
+          label="Role / Peran Akun"
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          error={errors.role}
+          options={
+            isSuperAdmin
+              ? [
+                  ["super_admin", "Super Admin (Akses Penuh)"],
+                  ["admin", "Admin (Operasional & Kost)"],
+                  ["moderator", "Moderator (Verifikasi & Laporan)"],
+                  ["marketing", "Marketing (Iklan & Promo)"],
+                  ["owner", "Pemilik Kost (Mitra)"],
+                  ["user", "Pencari Kost (Pengguna Biasa)"],
+                ]
+              : [
+                  ["admin", "Admin"],
+                  ["moderator", "Moderator"],
+                  ["marketing", "Marketing"],
+                  ["owner", "Pemilik Kost"],
+                  ["user", "Pencari Kost"],
+                ]
+          }
+        />
+        <Field label="Password Akun" type="password" {...form.bind("password")} error={errors.password} required placeholder="Minimal 8 karakter" />
+        <div className="flex justify-end gap-2 pt-3 border-t border-line">
+          <GhostButton onClick={onClose} disabled={saving}>Batal</GhostButton>
+          <PrimaryButton type="submit" loading={saving}><Save size={18} /><span>Simpan Akun Baru</span></PrimaryButton>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
 export function UsersView() {
   const { data, act, admin, targetEntityId, clearTargetEntityId } = useApp();
   const toast = useToast();

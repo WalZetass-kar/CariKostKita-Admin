@@ -24,6 +24,8 @@ import { FastApiAnalyticsView } from "./views/FastApiAnalyticsView";
 import { FastApiActivityLogsView } from "./views/FastApiActivityLogsView";
 import { SettingsView } from "./views/SettingsView";
 import { KostFormModal } from "./views/KostView";
+import { AdFormModal } from "./views/AdsView";
+import { UserFormModal } from "./views/UsersView";
 
 const navItems = [
   ["fastapi_overview", "Ringkasan", LayoutDashboard],
@@ -110,6 +112,8 @@ function Shell({ initialAdmin }) {
   const [theme, setThemeState] = useState("light");
   const [search, setSearch] = useState("");
   const [kostForm, setKostForm] = useState(null);
+  const [adForm, setAdForm] = useState(null);
+  const [userForm, setUserForm] = useState(null);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [menu, setMenu] = useState(""); // "bell" | "profile" | ""
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -264,6 +268,8 @@ function Shell({ initialAdmin }) {
       search,
       setSearch,
       openKostForm: (k = {}) => setKostForm(k),
+      openAdForm: (a = {}) => setAdForm(a),
+      openUserForm: (u = {}) => setUserForm(u),
       theme,
       setTheme,
       collapsed,
@@ -299,7 +305,7 @@ function Shell({ initialAdmin }) {
         {/* SIDEBAR */}
         <aside
           aria-label="Navigasi utama"
-          className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col gap-6 bg-sidebar p-4 text-[#EEEAD7] transition-transform duration-300 lg:sticky lg:top-0 lg:z-30 lg:h-screen lg:w-auto lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-50 flex w-[280px] max-w-[85vw] flex-col gap-5 bg-sidebar p-4 text-[#EEEAD7] transition-transform duration-300 max-h-screen overflow-y-auto lg:sticky lg:top-0 lg:z-30 lg:h-screen lg:w-auto lg:translate-x-0 ${
             mobileOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
           } ${collapsed ? "lg:items-center lg:px-3" : ""}`}
         >
@@ -430,9 +436,11 @@ function Shell({ initialAdmin }) {
             >
               <Menu size={20} />
             </button>
-            <div className="flex items-center gap-1.5">
-              <strong className="text-base font-extrabold text-maroon">{data?.system?.appName || "CariKostKita"}</strong>
-              <span className="rounded bg-maroon/10 px-1.5 py-0.5 text-[10px] font-bold text-maroon">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <strong className="text-sm sm:text-base font-extrabold text-maroon truncate max-w-[130px] sm:max-w-none">
+                {data?.system?.appName || "CariKostKita"}
+              </strong>
+              <span className="shrink-0 rounded bg-maroon/10 px-1.5 py-0.5 text-[10px] font-bold text-maroon">
                 {ROLE_LABELS[admin?.role] || "Admin"}
               </span>
             </div>
@@ -618,6 +626,8 @@ function Shell({ initialAdmin }) {
         </main>
 
         <KostFormModal kost={kostForm} onClose={() => setKostForm(null)} />
+        <AdFormModal ad={adForm} onClose={() => setAdForm(null)} onSaved={load} />
+        <UserFormModal user={userForm} onClose={() => setUserForm(null)} onSaved={load} />
         <GlobalSearchModal
           open={searchModalOpen}
           onClose={() => setSearchModalOpen(false)}

@@ -80,12 +80,14 @@ export function FastApiReportQueueView() {
             <PanelTitle eyebrow="Moderasi" title="Laporan Pelanggaran Kost" />
             <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan tindak lanjuti laporan keluhan atau indikasi pelanggaran listing kost.</p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
+          <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
+          </PrimaryButton>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2" role="tablist" aria-label="Status laporan">
+        <div className="mt-4 flex overflow-x-auto gap-2 pb-1 scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch]" role="tablist" aria-label="Status laporan">
           {TABS.map(([key, label]) => (
             <button key={key} role="tab" aria-selected={status === key} onClick={() => { setPage(1); setStatus(key); }}
-              className={`rounded-full border px-3 py-1.5 text-sm transition ${status === key ? "border-accent bg-accent text-white" : "border-line bg-paper text-muted hover:text-ink"}`}>
+              className={`rounded-full border px-3.5 py-1.5 text-xs sm:text-sm font-semibold shrink-0 transition ${status === key ? "border-accent bg-accent text-white" : "border-line bg-paper text-muted hover:text-ink"}`}>
               {label}
             </button>
           ))}
@@ -103,40 +105,53 @@ export function FastApiReportQueueView() {
       ) : (
         <div className="grid gap-4">
           {reports.map((report) => (
-            <Panel key={report.id}>
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="text-base font-extrabold text-ink">Laporan #{report.id}</h3>
+            <Panel key={report.id} className="p-4 sm:p-5">
+              <div className="flex flex-col gap-3.5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3 className="text-base font-extrabold text-ink truncate">Laporan #{report.id}</h3>
+                      <p className="mt-0.5 text-xs text-muted truncate">{report.kost_name || `Kost #${report.kost_id ?? "—"}`} · {report.reporter_name || `Pelapor #${report.reporter_id}`}</p>
+                    </div>
                     <Badge status={report.status} tone={report.status === "BARU" ? "warn" : report.status === "DITOLAK" ? "bad" : report.status === "SELESAI" ? "ok" : "info"} />
                   </div>
-                  <p className="mt-1 text-sm text-muted">{report.kost_name || `Kost #${report.kost_id ?? "—"}`} · {report.reporter_name || `Pelapor #${report.reporter_id}`}</p>
-                  <div className="mt-3 flex items-center gap-1.5 text-xs text-muted"><Clock3 size={14} /> {formatDateTime(report.created_at)}</div>
-                  <div className="mt-4 rounded-lg border border-line bg-track p-4">
-                    <p className="mb-1 text-xs font-extrabold uppercase tracking-wide text-muted">{report.reason || "Detail laporan"}</p>
-                    <p className="whitespace-pre-wrap text-sm leading-6 text-ink">{report.description || "Tidak ada deskripsi tambahan."}</p>
+
+                  <div className="flex items-center gap-1.5 text-xs text-muted"><Clock3 size={13} /> {formatDateTime(report.created_at)}</div>
+
+                  <div className="rounded-lg border border-line bg-track/50 p-3">
+                    <p className="mb-1 text-[11px] font-extrabold uppercase tracking-wide text-muted">{report.reason || "Detail keluhan"}</p>
+                    <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-ink">{report.description || "Tidak ada deskripsi tambahan."}</p>
                   </div>
-                  {report.admin_action && <p className="mt-3 text-sm text-muted"><span className="font-bold text-ink">Catatan moderasi terakhir:</span> {report.admin_action}</p>}
+                  {report.admin_action && <p className="text-xs text-muted"><span className="font-bold text-ink">Catatan moderasi:</span> {report.admin_action}</p>}
                 </div>
+
                 {!(["SELESAI", "DITOLAK"].includes(report.status)) && (
-                  <div className="flex flex-wrap gap-2 lg:justify-end">
-                    {report.status === "BARU" && <button onClick={() => { setAction({ report, status: "DITINJAU" }); setNote(""); }} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm text-ink hover:bg-track"><Flag size={16} /> Tandai ditinjau</button>}
-                    <PrimaryButton onClick={() => { setAction({ report, status: "SELESAI" }); setNote(""); }}><CheckCircle2 size={16} /> Selesaikan</PrimaryButton>
-                    <button onClick={() => { setAction({ report, status: "DITOLAK" }); setNote(""); }} className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-line px-3 text-sm text-bad-fg hover:bg-track"><XCircle size={16} /> Tolak</button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2 w-full lg:w-auto pt-2 border-t border-line/60 lg:border-t-0 lg:pt-0">
+                    {report.status === "BARU" && (
+                      <button onClick={() => { setAction({ report, status: "DITINJAU" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold text-ink hover:bg-track w-full sm:w-auto transition">
+                        <Flag size={15} /> Tandai Ditinjau
+                      </button>
+                    )}
+                    <PrimaryButton onClick={() => { setAction({ report, status: "SELESAI" }); setNote(""); }} className="w-full sm:w-auto justify-center text-xs sm:text-sm">
+                      <CheckCircle2 size={16} /> Selesaikan
+                    </PrimaryButton>
+                    <button onClick={() => { setAction({ report, status: "DITOLAK" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold text-bad-fg hover:bg-track w-full sm:w-auto transition">
+                      <XCircle size={16} /> Tolak
+                    </button>
                   </div>
                 )}
               </div>
             </Panel>
           ))}
-          <nav className="flex items-center justify-between gap-3" aria-label="Halaman antrean laporan">
-            <span className="text-sm text-muted" aria-live="polite">Halaman {page} · {reports.length} laporan</span>
-            <div className="flex gap-2">
+          <nav className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line pt-3" aria-label="Halaman antrean laporan">
+            <span className="text-xs text-muted text-center sm:text-left" aria-live="polite">Halaman {page} · {reports.length} laporan ditampilkan</span>
+            <div className="flex gap-2 w-full sm:w-auto">
               <button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={loading || page === 1}
-                className="min-h-10 rounded-lg border border-line px-3 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-50">
+                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-40 flex-1 sm:flex-initial">
                 Sebelumnya
               </button>
               <button type="button" onClick={() => setPage((current) => current + 1)} disabled={loading || !hasMore}
-                className="min-h-10 rounded-lg border border-line px-3 text-sm text-ink disabled:cursor-not-allowed disabled:opacity-50">
+                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-40 flex-1 sm:flex-initial">
                 Berikutnya
               </button>
             </div>
@@ -150,9 +165,9 @@ export function FastApiReportQueueView() {
             <h2 id="report-action-title" className="text-lg font-extrabold text-ink">Konfirmasi keputusan laporan</h2>
             <p className="mt-1 text-sm text-muted">Laporan #{action.report.id} akan diubah menjadi {TABS.find(([key]) => key === action.status)?.[1]}.</p>
             <TextArea label="Catatan tindakan (opsional)" rows={4} value={note} onChange={(event) => setNote(event.target.value)} maxLength={1000} />
-            <div className="mt-5 flex justify-end gap-2">
-              <button disabled={saving} onClick={() => setAction(null)} className="rounded-lg border border-line px-4 py-2 text-sm text-ink">Batal</button>
-              <PrimaryButton loading={saving} onClick={submit}>Simpan keputusan</PrimaryButton>
+            <div className="mt-5 flex flex-col-reverse sm:flex-row justify-end gap-2">
+              <button disabled={saving} onClick={() => setAction(null)} className="rounded-lg border border-line px-4 py-2 text-sm text-ink w-full sm:w-auto">Batal</button>
+              <PrimaryButton loading={saving} onClick={submit} className="w-full sm:w-auto justify-center">Simpan keputusan</PrimaryButton>
             </div>
           </section>
         </div>

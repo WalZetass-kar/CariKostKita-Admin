@@ -11,6 +11,14 @@ const apiErrorMessage = (payload, fallback) => {
 };
 
 const fastApiBase = () => (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+
+let dataCache = { value: null, expiresAt: 0, token: null };
+let overviewCache = { value: null, expiresAt: 0, token: null };
+
+export function invalidateAdminCache() {
+  dataCache = { value: null, expiresAt: 0, token: null };
+  overviewCache = { value: null, expiresAt: 0, token: null };
+}
 const profileAdmin = (profile, admin) => ({
   ...admin,
   name: profile?.nama || admin.name,
@@ -102,13 +110,18 @@ const routes = [
     return payload;
   }, ["super_admin", "admin"]],
   ["GET", "fastapi-overview", async ({ session }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const now = Date.now();
+    if (overviewCache.value && overviewCache.expiresAt > now && overviewCache.token === session.token) {
+      return overviewCache.value;
+    }
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/overview`, {
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
       cache: "no-store",
     });
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Ringkasan FastAPI tidak dapat dimuat."));
+    overviewCache = { value: payload, expiresAt: now + 15000, token: session.token };
     return payload;
   }, ["super_admin", "admin"]],
   ["GET", "fastapi-analytics", async ({ session }, { url }) => {
@@ -292,6 +305,10 @@ const routes = [
     return payload;
   }, ["super_admin", "admin", "moderator"]],
   ["GET", "data", async ({ admin, session }) => {
+    const now = Date.now();
+    if (dataCache.value && dataCache.expiresAt > now && dataCache.token === session.token) {
+      return dataCache.value;
+    }
     const apiUrl = fastApiBase();
     const headers = { Authorization: `Bearer ${session.token}`, Accept: "application/json" };
     try {
@@ -335,7 +352,7 @@ const routes = [
             }))
           : [publicAdmin(admin)];
 
-        return {
+        const result = {
           data: {
             overview: overview.data || overview,
             kosts: (kosts.data || []).map((k) => ({
@@ -363,6 +380,8 @@ const routes = [
             audit: db.audit || [],
           },
         };
+        dataCache = { value: result, expiresAt: now + 15000, token: session.token };
+        return result;
       }
     } catch {
       // Fallback to legacy/db.json
@@ -418,6 +437,7 @@ const routes = [
   ["POST", "users/:id/restore", async (auth, { params }) => write(auth, (db) => ({ user: svc.restoreUser(db, auth.admin, params.id) })), ["super_admin", "admin"]],
   ["DELETE", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin"]],
   ["POST", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin"]],
+  ["POST", "users", async (auth, { body }) => write(auth, (db) => ({ user: svc.createUser(db, auth.admin, body) })), ["super_admin", "admin"]],
   ["POST", "users/bulk", async (auth, { body }) => write(auth, (db) => svc.bulkUserAction(db, auth.admin, body)), ["super_admin", "admin"]],
 
   ["PATCH", "reports/:id", async (auth, { body, params }) => write(auth, (db) => ({ report: svc.updateReport(db, auth.admin, params.id, body) }), { method: 'PATCH', path: `/api/v1/admin/reports/${params.id}`, body: { status: body.status === "Selesai" ? "SELESAI" : body.status === "Ditolak" ? "DITOLAK" : "DITINJAU", admin_action: body.adminAction || body.note }, isFastApi: true }), ["super_admin", "admin", "moderator"]],
@@ -543,6 +563,7 @@ const routes = [
 ];
 
 async function write(auth, fn, proxyTarget = null) {
+  invalidateAdminCache();
   const { admin, session } = auth;
   let result = {};
   

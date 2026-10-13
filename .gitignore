@@ -11,3 +11,8 @@ pnpm-debug.log*
 
 # data lokal admin
 /data/
+.vercel
+/public/uploads/*
+!/public/uploads/.gitkeep
+/public/releases/*
+!/public/releases/.gitkeep

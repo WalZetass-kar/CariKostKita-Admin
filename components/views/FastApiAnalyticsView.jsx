@@ -45,9 +45,11 @@ export function FastApiAnalyticsView() {
             <PanelTitle eyebrow="Performa" title="Analitik & Telemetri" />
             <p className="max-w-3xl text-sm leading-6 text-muted">Statistik aktivitas pengguna, interaksi fitur, dan metrik stabilitas sistem CariKostKita.</p>
           </div>
-          <div className="flex flex-wrap items-end gap-2">
-            <SelectField label="Rentang waktu" value={days} onChange={(event) => setDays(Number(event.target.value))} options={PERIODS} />
-            <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-2.5 w-full sm:w-auto">
+            <SelectField label="Rentang waktu" value={days} onChange={(event) => setDays(Number(event.target.value))} options={PERIODS} className="w-full sm:w-auto" />
+            <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
+            </PrimaryButton>
           </div>
         </div>
       </Panel>
@@ -74,12 +76,31 @@ export function FastApiAnalyticsView() {
           <Panel className="p-0">
             <div className="border-b border-line px-5 py-4"><PanelTitle eyebrow="Kejadian · bukan funnel konversi" title="Interaksi aplikasi" /></div>
             {events.length === 0 ? <EmptyState title="Belum ada event" message="Tidak ada event yang terlihat pada rentang waktu ini. Ini tidak membuktikan tabel kosong jika RLS membatasi visibilitas." /> : (
-              <DataTable headers={["Event", "Jumlah kejadian"]} minWidth={420}>
-                {events.map((item) => <tr key={item.event} className="hover:bg-track/60">
-                  <Td><div className="font-bold text-ink">{EVENT_LABELS[item.event] || item.event}</div><div className="text-xs text-muted">{item.event}</div></Td>
-                  <Td><span className="tabular-nums font-bold text-ink">{Number(item.total || 0).toLocaleString("id-ID")}</span></Td>
-                </tr>)}
-              </DataTable>
+              <div className="w-full overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-line bg-track/40">
+                      <th className="px-4 py-3 text-xs font-extrabold uppercase text-muted">Event</th>
+                      <th className="px-4 py-3 text-right text-xs font-extrabold uppercase text-muted">Jumlah Kejadian</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-line">
+                    {events.map((item) => (
+                      <tr key={item.event} className="hover:bg-track/50 transition">
+                        <td className="px-4 py-3 align-middle">
+                          <div className="font-extrabold text-sm text-ink">{EVENT_LABELS[item.event] || item.event}</div>
+                          <div className="text-xs text-muted font-mono">{item.event}</div>
+                        </td>
+                        <td className="px-4 py-3 align-middle text-right">
+                          <span className="tabular-nums font-extrabold text-sm sm:text-base text-ink">
+                            {Number(item.total || 0).toLocaleString("id-ID")}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </Panel>
           <p role="status" aria-live="polite" aria-atomic="true" className="text-xs text-muted">Data dibatasi akses akun staf dan policy RLS; tidak mewakili angka global bila policy menyembunyikan baris.</p>

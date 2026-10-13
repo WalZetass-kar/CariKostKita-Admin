@@ -96,7 +96,7 @@ export function PanelTitle({ eyebrow, title }) {
 
 export function DataTable({ headers, children, minWidth = 760 }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="w-full overflow-x-auto touch-pan-x [-webkit-overflow-scrolling:touch]">
       <table className="w-full border-collapse" style={{ minWidth }}>
         <thead>
           <tr>
@@ -486,9 +486,9 @@ export function SearchBox({ value, onChange, placeholder = "Cari...", className 
 
 export function FilterTabs({ options, value, onChange, counts }) {
   return (
-    <div className="flex overflow-x-auto rounded-lg border border-line bg-paper">
+    <div className="flex overflow-x-auto rounded-lg border border-line bg-paper touch-pan-x [-webkit-overflow-scrolling:touch] max-w-full scrollbar-none">
       {options.map((o) => (
-        <button key={o} type="button" onClick={() => onChange(o)} className={`min-h-10 whitespace-nowrap border-r border-line px-4 font-extrabold last:border-r-0 ${value === o ? "bg-maroon text-[#EEEAD7]" : "text-muted hover:bg-track"}`}>
+        <button key={o} type="button" onClick={() => onChange(o)} className={`min-h-10 whitespace-nowrap border-r border-line px-3.5 sm:px-4 text-xs sm:text-sm font-extrabold last:border-r-0 shrink-0 transition ${value === o ? "bg-maroon text-[#EEEAD7]" : "text-muted hover:bg-track"}`}>
           {o}{counts && counts[o] !== undefined ? ` (${counts[o]})` : ""}
         </button>
       ))}

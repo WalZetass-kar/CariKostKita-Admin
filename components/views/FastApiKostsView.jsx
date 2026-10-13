@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Building2, Eye, MapPin, RefreshCw, Search, ToggleLeft, ToggleRight } from "lucide-react";
+import { Building2, Eye, MapPin, Plus, RefreshCw, Search, ToggleLeft, ToggleRight } from "lucide-react";
 import { api } from "@/lib/api";
+import { useApp } from "../AppContext";
 import { Badge, DataTable, EmptyState, ErrorState, GhostButton, IconButton, Modal, Panel, PanelTitle, PrimaryButton, SelectField, SkeletonTable, Td, useToast } from "../ui";
 import { formatCurrency } from "@/lib/format";
 
@@ -18,6 +19,7 @@ const dateLabel = (value) =>
   value ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(value)) : "—";
 
 export function FastApiKostsView() {
+  const { openKostForm } = useApp();
   const toast = useToast();
   const [rows, setRows] = useState([]);
   const [page, setPage] = useState(1);
@@ -82,20 +84,27 @@ export function FastApiKostsView() {
   };
 
   return (
-    <div className="grid gap-5">
-      <Panel>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <div className="grid gap-4 sm:gap-5">
+      <Panel className="p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <PanelTitle eyebrow="Properti" title="Manajemen Kost" />
-            <p className="max-w-3xl text-sm leading-6 text-muted">
+            <p className="mt-1 max-w-3xl text-xs sm:text-sm leading-relaxed text-muted">
               Kelola direktori listing kost, status ketersediaan, dan pantau status verifikasi secara real-time.
             </p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading}>
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
-          </PrimaryButton>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <PrimaryButton onClick={() => openKostForm?.({})} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+              <Plus size={16} />
+              <span>Tambah Kost</span>
+            </PrimaryButton>
+            <GhostButton onClick={load} disabled={loading} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              <span>Perbarui</span>
+            </GhostButton>
+          </div>
         </div>
-        <form onSubmit={search} className="mt-4 grid gap-3 sm:grid-cols-[minmax(220px,1fr)_240px_auto]">
+        <form onSubmit={search} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_240px_auto]">
           <label className="relative block">
             <span className="sr-only">Cari nama kost</span>
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />

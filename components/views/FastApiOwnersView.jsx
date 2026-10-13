@@ -48,13 +48,13 @@ export function FastApiOwnersView() {
       <Panel>
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div><PanelTitle eyebrow="Mitra" title="Direktori Pemilik Kost" /><p className="max-w-3xl text-sm leading-6 text-muted">Kelola dan pantau seluruh akun pemilik kost yang terdaftar di platform CariKostKita.</p></div>
-          <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
+          <PrimaryButton onClick={load} disabled={loading} className="w-full md:w-auto justify-center"><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
         </div>
-        <form onSubmit={search} className="mt-4 grid gap-3 sm:grid-cols-[minmax(210px,1fr)_220px_170px_auto]">
+        <form onSubmit={search} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(210px,1fr)_220px_170px_auto]">
           <label className="relative block"><span className="sr-only">Cari nama pemilik</span><Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" /><input value={queryInput} maxLength={100} onChange={(event) => setQueryInput(event.target.value)} placeholder="Cari nama pemilik…" className="h-10 w-full rounded-lg border border-line bg-field pl-9 pr-3 text-sm text-ink" /></label>
           <SelectField label="Verifikasi" className="sm:gap-1" value={verification} onChange={(event) => { setVerification(event.target.value); setPage(1); }} options={VERIFICATION} />
           <SelectField label="Status akun" className="sm:gap-1" value={active} onChange={(event) => { setActive(event.target.value); setPage(1); }} options={[["", "Semua akun"], ["true", "Aktif"], ["false", "Nonaktif"]]} />
-          <PrimaryButton type="submit"><Search size={16} /> Cari</PrimaryButton>
+          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center"><Search size={16} /> Cari</PrimaryButton>
         </form>
       </Panel>
 

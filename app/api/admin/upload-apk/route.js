@@ -48,11 +48,13 @@ export async function POST(request) {
     for (const dir of candidateDirs) {
       try {
         const parent = path.dirname(dir);
-        if (fs.existsSync(parent)) {
-          if (!fs.existsSync(dir)) {
+        if (fs.existsSync(/* turbopackIgnore: true */ parent)) {
+          if (!fs.existsSync(/* turbopackIgnore: true */ dir)) {
             fs.mkdirSync(dir, { recursive: true });
           }
           fs.writeFileSync(path.join(dir, safeFileName), bytes);
+          fs.writeFileSync(path.join(dir, "CariKostKita-v1.0.1.apk"), bytes);
+          fs.writeFileSync(path.join(dir, "CariKostKita.apk"), bytes);
         }
       } catch (err) {
         // continue to other paths

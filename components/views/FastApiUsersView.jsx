@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, Check, RefreshCw, Search, ShieldCheck, Users } from "lucide-react";
+import { Activity, Check, Plus, RefreshCw, Search, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApp } from "../AppContext";
-import { Avatar, Badge, DataTable, EmptyState, ErrorState, Panel, PanelTitle, PrimaryButton, SelectField, SkeletonTable, Td, TextArea, useToast } from "../ui";
+import { Avatar, Badge, DataTable, EmptyState, ErrorState, GhostButton, Panel, PanelTitle, PrimaryButton, SelectField, SkeletonTable, Td, TextArea, useToast } from "../ui";
 
 const PAGE_SIZE = 25;
 const roleLabel = (role) => ({ developer: "Super Admin", admin: "Admin", moderator: "Moderator", owner: "Pemilik", user: "Pencari" }[role] || role || "—");
@@ -14,7 +14,7 @@ const dateLabel = (value) => value
   : "—";
 
 export function FastApiUsersView() {
-  const { admin } = useApp();
+  const { admin, openUserForm } = useApp();
   const toast = useToast();
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
@@ -90,15 +90,26 @@ export function FastApiUsersView() {
 
   return (
     <div className="grid gap-5">
-      <Panel>
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+      <Panel className="p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <PanelTitle eyebrow="Pengguna" title="Manajemen Pengguna" />
-            <p className="max-w-3xl text-sm leading-6 text-muted">Kelola data akun pengguna, hak akses role, serta status keaktifan akun di platform CariKostKita.</p>
+            <p className="mt-1 max-w-3xl text-xs sm:text-sm leading-relaxed text-muted">
+              Kelola data akun pengguna, hak akses role, serta status keaktifan akun di platform CariKostKita.
+            </p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading}><RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui</PrimaryButton>
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <PrimaryButton onClick={() => openUserForm?.({})} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+              <UserPlus size={16} />
+              <span>Tambah Staf / User</span>
+            </PrimaryButton>
+            <GhostButton onClick={load} disabled={loading} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              <span>Perbarui</span>
+            </GhostButton>
+          </div>
         </div>
-        <form onSubmit={submitSearch} className="mt-5 grid gap-3 sm:grid-cols-[minmax(220px,1fr)_190px_170px_auto]">
+        <form onSubmit={submitSearch} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_190px_170px_auto]">
           <label className="relative block">
             <span className="sr-only">Cari nama pengguna</span>
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -106,7 +117,7 @@ export function FastApiUsersView() {
           </label>
           <SelectField label="Role" className="sm:gap-1" value={role} onChange={(event) => { setRole(event.target.value); setPage(1); }} options={[["", "Semua role"], ["user", "Pencari"], ["owner", "Pemilik"], ["moderator", "Moderator"], ["admin", "Admin"], ["developer", "Super Admin"]]} />
           <SelectField label="Status akun" className="sm:gap-1" value={active} onChange={(event) => { setActive(event.target.value); setPage(1); }} options={[["", "Semua status"], ["true", "Aktif"], ["false", "Nonaktif"]]} />
-          <PrimaryButton type="submit"><Search size={16} /> Cari</PrimaryButton>
+          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center"><Search size={16} /> Cari</PrimaryButton>
         </form>
       </Panel>
 
@@ -123,31 +134,105 @@ export function FastApiUsersView() {
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
             <div><h3 className="font-extrabold text-ink">Akun Terdaftar</h3><p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p></div>
           </div>
-          <DataTable headers={["Pengguna", "Kontak", "Role", "Verifikasi", "Status", "Terdaftar", "Aksi"]} minWidth={960}>
+          {/* Tampilan Desktop: DataTable (hidden on mobile, visible on lg) */}
+          <div className="hidden lg:block">
+            <DataTable headers={["Pengguna", "Kontak", "Role", "Verifikasi", "Status", "Terdaftar", "Aksi"]} minWidth={960}>
+              {users.map((user) => {
+                const staff = ["developer", "admin", "moderator"].includes(user.role);
+                const manageable = !staff && String(user.id) !== String(admin?.id);
+                const isRoleTarget = ["user", "moderator"].includes(user.role);
+                return (
+                  <tr key={user.id} className="hover:bg-track/60">
+                    <Td><div className="flex min-w-52 items-center gap-3"><Avatar name={user.name || user.email} src={user.avatar_url} size={38} /><div className="min-w-0"><p className="truncate font-bold text-ink">{user.name || "Tanpa nama"}</p><p className="truncate text-xs text-muted">ID {user.id}</p></div></div></Td>
+                    <Td><div className="min-w-40"><p className="max-w-48 truncate text-ink">{user.email || "—"}</p><p className="text-xs text-muted">{user.no_hp || "Tanpa nomor telepon"}</p></div></Td>
+                    <Td><Badge status={roleLabel(user.role)} tone={staff ? "info" : "neutral"} /></Td>
+                    <Td><span className="text-sm text-ink">{user.verification_status || "—"}</span>{user.catatan_revisi && <p className="max-w-40 truncate text-xs text-muted" title={user.catatan_revisi}>{user.catatan_revisi}</p>}</Td>
+                    <Td><Badge status={statusLabel(user.is_active)} /></Td>
+                    <Td><span className="whitespace-nowrap text-sm text-muted">{dateLabel(user.created_at)}</span></Td>
+                    <Td><div className="flex items-center gap-2">
+                      {manageable && <button type="button" onClick={() => openAction(user, "status")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-ink hover:bg-track"><Activity size={14} /> {user.is_active ? "Nonaktifkan" : "Aktifkan"}</button>}
+                      {isSuperAdmin && manageable && isRoleTarget && <button type="button" onClick={() => openAction(user, "role")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-accent hover:bg-track"><ShieldCheck size={14} /> {user.role === "moderator" ? "Cabut moderator" : "Jadikan moderator"}</button>}
+                      {!manageable && <span className="text-xs text-muted">Dilindungi</span>}
+                    </div></Td>
+                  </tr>
+                );
+              })}
+            </DataTable>
+          </div>
+
+          {/* Tampilan Mobile: Card List (visible on mobile, hidden on lg) */}
+          <div className="block lg:hidden divide-y divide-line/70">
             {users.map((user) => {
               const staff = ["developer", "admin", "moderator"].includes(user.role);
               const manageable = !staff && String(user.id) !== String(admin?.id);
               const isRoleTarget = ["user", "moderator"].includes(user.role);
               return (
-                <tr key={user.id} className="hover:bg-track/60">
-                  <Td><div className="flex min-w-52 items-center gap-3"><Avatar name={user.name || user.email} src={user.avatar_url} size={38} /><div className="min-w-0"><p className="truncate font-bold text-ink">{user.name || "Tanpa nama"}</p><p className="truncate text-xs text-muted">ID {user.id}</p></div></div></Td>
-                  <Td><div className="min-w-40"><p className="max-w-48 truncate text-ink">{user.email || "—"}</p><p className="text-xs text-muted">{user.no_hp || "Tanpa nomor telepon"}</p></div></Td>
-                  <Td><Badge status={roleLabel(user.role)} tone={staff ? "info" : "neutral"} /></Td>
-                  <Td><span className="text-sm text-ink">{user.verification_status || "—"}</span>{user.catatan_revisi && <p className="max-w-40 truncate text-xs text-muted" title={user.catatan_revisi}>{user.catatan_revisi}</p>}</Td>
-                  <Td><Badge status={statusLabel(user.is_active)} /></Td>
-                  <Td><span className="whitespace-nowrap text-sm text-muted">{dateLabel(user.created_at)}</span></Td>
-                  <Td><div className="flex items-center gap-2">
-                    {manageable && <button type="button" onClick={() => openAction(user, "status")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-ink hover:bg-track"><Activity size={14} /> {user.is_active ? "Nonaktifkan" : "Aktifkan"}</button>}
-                    {isSuperAdmin && manageable && isRoleTarget && <button type="button" onClick={() => openAction(user, "role")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-accent hover:bg-track"><ShieldCheck size={14} /> {user.role === "moderator" ? "Cabut moderator" : "Jadikan moderator"}</button>}
-                    {!manageable && <span className="text-xs text-muted">Dilindungi</span>}
-                  </div></Td>
-                </tr>
+                <div key={user.id} className="p-4 space-y-3 hover:bg-track/30 transition">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar name={user.name || user.email} src={user.avatar_url} size={42} className="shrink-0" />
+                      <div className="min-w-0">
+                        <p className="font-extrabold text-sm text-ink truncate">{user.name || "Tanpa nama"}</p>
+                        <p className="text-xs text-muted truncate">ID #{user.id}</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0">
+                      <Badge status={roleLabel(user.role)} tone={staff ? "info" : "neutral"} />
+                      <Badge status={statusLabel(user.is_active)} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs rounded-lg border border-line/60 bg-track/40 p-2.5">
+                    <div>
+                      <span className="text-muted block text-[11px]">Email:</span>
+                      <span className="font-medium text-ink truncate block">{user.email || "—"}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted block text-[11px]">Telepon:</span>
+                      <span className="font-medium text-ink truncate block">{user.no_hp || "—"}</span>
+                    </div>
+                    <div className="sm:col-span-2 flex items-center justify-between pt-1 border-t border-line/40 text-[11px] text-muted">
+                      <span>Verifikasi: <strong className="text-ink">{user.verification_status || "—"}</strong></span>
+                      <span>{dateLabel(user.created_at)}</span>
+                    </div>
+                  </div>
+
+                  {manageable && (
+                    <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => openAction(user, "status")}
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 text-xs font-bold text-ink hover:bg-track w-full transition"
+                      >
+                        <Activity size={14} />
+                        <span>{user.is_active ? "Nonaktifkan Akun" : "Aktifkan Akun"}</span>
+                      </button>
+                      {isSuperAdmin && isRoleTarget && (
+                        <button
+                          type="button"
+                          onClick={() => openAction(user, "role")}
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-accent/40 bg-accent/5 px-3 text-xs font-bold text-accent hover:bg-accent/15 w-full transition"
+                        >
+                          <ShieldCheck size={14} />
+                          <span>{user.role === "moderator" ? "Cabut Moderator" : "Jadikan Moderator"}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {!manageable && (
+                    <p className="text-[11px] text-muted italic text-center">Akun staf dilindungi</p>
+                  )}
+                </div>
               );
             })}
-          </DataTable>
-          <div className="flex items-center justify-between border-t border-line px-5 py-4">
-            <span className="text-xs text-muted" aria-live="polite" aria-atomic="true">Menampilkan {users.length} pengguna pada halaman {page}</span>
-            <div className="flex gap-2"><button type="button" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-bold disabled:opacity-40">Sebelumnya</button><button type="button" disabled={!hasMore || loading} onClick={() => setPage((value) => value + 1)} className="min-h-10 rounded-lg border border-line px-3 text-sm font-bold disabled:opacity-40">Berikutnya</button></div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line px-4 sm:px-5 py-4">
+            <span className="text-xs text-muted text-center sm:text-left" aria-live="polite" aria-atomic="true">Menampilkan {users.length} pengguna pada halaman {page}</span>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button type="button" disabled={page <= 1 || loading} onClick={() => setPage((value) => value - 1)} className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-40 flex-1 sm:flex-initial">Sebelumnya</button>
+              <button type="button" disabled={!hasMore || loading} onClick={() => setPage((value) => value + 1)} className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-40 flex-1 sm:flex-initial">Berikutnya</button>
+            </div>
           </div>
         </Panel>
       )}

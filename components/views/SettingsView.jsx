@@ -540,13 +540,13 @@ function SystemTab() {
       >
         {/* Bagian 1: Sinkronisasi Rilis APK Landing Page */}
         <div className="rounded-xl border border-line bg-track/30 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
             <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider flex items-center gap-2">
-              <FileArchive size={17} className="text-accent" />
+              <FileArchive size={17} className="text-accent shrink-0" />
               <span>Rilis Berkas Aplikasi Android (APK)</span>
             </h4>
             {!locked && (
-              <label className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition">
+              <label className="inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition w-full sm:w-auto">
                 <Upload size={14} className={uploadingApk ? "animate-spin" : ""} />
                 <span>{uploadingApk ? "Mengunggah..." : "Unggah File .apk Baru"}</span>
                 <input
@@ -677,13 +677,13 @@ function SystemTab() {
 
         {/* Bagian 3: Gambar Mockup Hero & Logo Aplikasi */}
         <div className="rounded-xl border border-line bg-track/30 p-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-2">
             <h4 className="font-extrabold text-ink text-sm uppercase tracking-wider flex items-center gap-2">
-              <ImageIcon size={17} className="text-accent" />
+              <ImageIcon size={17} className="text-accent shrink-0" />
               <span>Gambar Tampilan Hero & Wilayah Layanan</span>
             </h4>
             {!locked && (
-              <label className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition">
+              <label className="inline-flex items-center justify-center gap-2 px-3.5 py-2 sm:py-1.5 text-xs font-bold rounded-lg border border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 cursor-pointer transition w-full sm:w-auto">
                 <Upload size={14} className={uploadingHeroImg ? "animate-spin" : ""} />
                 <span>{uploadingHeroImg ? "Mengunggah..." : "Unggah Gambar Showcase"}</span>
                 <input
@@ -768,7 +768,7 @@ function SystemTab() {
 
         {!locked && (
           <div className="pt-3 border-t border-line flex justify-end">
-            <PrimaryButton type="submit" loading={saving}>
+            <PrimaryButton type="submit" loading={saving} className="w-full sm:w-auto justify-center">
               <Save size={18} />
               <span>Simpan Perubahan & Sinkronkan ke Landing Page</span>
             </PrimaryButton>
@@ -905,7 +905,7 @@ function AdminsTab() {
               Atur daftar staf pengelola, penetapan role, dan batas kewenangan sistem.
             </p>
           </div>
-          <PrimaryButton onClick={openCreate}>
+          <PrimaryButton onClick={openCreate} className="w-full sm:w-auto justify-center">
             <Plus size={18} />
             <span>Tambah Admin Baru</span>
           </PrimaryButton>
@@ -1052,11 +1052,11 @@ function AdminsTab() {
             placeholder={editAdmin ? "Kosongkan jika tidak diganti" : "Minimal 8 karakter"}
             required={!editAdmin}
           />
-          <div className="flex justify-end gap-2 pt-2 border-t border-line">
-            <GhostButton onClick={() => setModalOpen(false)} disabled={saving}>
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-line">
+            <GhostButton onClick={() => setModalOpen(false)} disabled={saving} className="w-full sm:w-auto justify-center">
               Batal
             </GhostButton>
-            <PrimaryButton type="submit" loading={saving}>
+            <PrimaryButton type="submit" loading={saving} className="w-full sm:w-auto justify-center">
               <Save size={18} />
               <span>{editAdmin ? "Simpan Perubahan" : "Buat Akun Admin"}</span>
             </PrimaryButton>

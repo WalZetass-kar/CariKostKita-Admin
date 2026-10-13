@@ -4,13 +4,6 @@ import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, LogIn, User, ShieldCheck } from "lucide-react";
 import { Spinner } from "@/components/ui";
 
-const DEMO_ACCOUNTS = [
-  { role: "Super Admin", username: "admin", email: "admin@carikostkita.id", desc: "Akses penuh sistem" },
-  { role: "Admin", username: "dina", email: "dina@carikostkita.id", desc: "Kost, Pemilik, Laporan" },
-  { role: "Moderator", username: "moderator", email: "moderator@carikostkita.id", desc: "Review kost & verifikasi" },
-  { role: "Marketing", username: "marketing", email: "marketing@carikostkita.id", desc: "Iklan & promosi banner" },
-];
-
 export default function LoginForm() {
   return <Inner />;
 }
@@ -31,13 +24,6 @@ function Inner() {
     const t = localStorage.getItem("ckk.theme");
     if (t === "dark") document.documentElement.classList.add("dark");
   }, []);
-
-  const selectDemoAccount = (acc) => {
-    setIdentifier(acc.username);
-    setPassword("Admin#12345");
-    setErrors({});
-    setMessage("");
-  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -175,34 +161,6 @@ function Inner() {
             </span>
             {errors.password && <span role="alert" className="text-xs font-bold text-bad-fg">{errors.password}</span>}
           </label>
-
-          {/* Quick Demo Accounts Selector */}
-          <div className="space-y-2 rounded-xl border border-line bg-field p-3.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-extrabold text-ink">Akun Demo Pengujian:</span>
-              <span className="text-[11px] font-mono text-muted">Password: Admin#12345</span>
-            </div>
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              {DEMO_ACCOUNTS.map((acc) => (
-                <button
-                  key={acc.username}
-                  type="button"
-                  onClick={() => selectDemoAccount(acc)}
-                  className={`flex flex-col text-left p-2 rounded-lg border transition-all text-xs ${
-                    identifier === acc.username
-                      ? "border-maroon bg-maroon/10 font-bold shadow-sm"
-                      : "border-line bg-paper hover:bg-track/60"
-                  }`}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span className="font-extrabold text-ink truncate">{acc.role}</span>
-                    <span className="text-[10px] text-maroon font-mono">@{acc.username}</span>
-                  </div>
-                  <span className="text-[10px] text-muted truncate mt-0.5">{acc.desc}</span>
-                </button>
-              ))}
-            </div>
-          </div>
 
           <button
             type="submit"

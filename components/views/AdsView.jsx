@@ -134,7 +134,7 @@ export function AdPreview({ ad }) {
   );
 }
 
-function AdFormModal({ ad, onClose }) {
+export function AdFormModal({ ad, onClose, onSaved }) {
   const { act } = useApp();
   const toast = useToast();
   const form = useForm(emptyAd());
@@ -162,6 +162,7 @@ function AdFormModal({ ad, onClose }) {
       await act(isEdit ? `ads/${ad.id}` : "ads", { method: isEdit ? "PATCH" : "POST", body: { ...v, platform } });
       toast(isEdit ? "Iklan berhasil diperbarui." : "Iklan berhasil ditambahkan.");
       onClose();
+      onSaved?.();
     } catch (err) {
       setErrors(err.fields || {});
       toast(err.message, "error");
