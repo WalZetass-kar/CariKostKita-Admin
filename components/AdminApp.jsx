@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bell, BriefcaseBusiness, Building2, ChartNoAxesCombined, ChevronDown,
   Flag, History, LayoutDashboard, LogOut, Megaphone, Menu, Search, Settings,
-  Users, X, Shield, Sparkles, BadgeCheck
+  Users, X, Shield, Sparkles, BadgeCheck, Globe
 } from "lucide-react";
 import { ApiError, api } from "@/lib/api";
 import { AppProvider } from "./AppContext";
@@ -20,6 +20,7 @@ import { OwnerVerificationQueueView } from "./views/OwnerVerificationQueueView";
 import { FastApiUsersView } from "./views/FastApiUsersView";
 import { FastApiReportQueueView } from "./views/FastApiReportQueueView";
 import { FastApiAdsView } from "./views/FastApiAdsView";
+import { LandingPageManagerView } from "./views/LandingPageManagerView";
 import { FastApiAnalyticsView } from "./views/FastApiAnalyticsView";
 import { FastApiActivityLogsView } from "./views/FastApiActivityLogsView";
 import { SettingsView } from "./views/SettingsView";
@@ -35,6 +36,7 @@ const navItems = [
   ["fastapi_users", "Pengguna", Users],
   ["fastapi_reports", "Laporan Kost", Flag],
   ["fastapi_ads", "Manajemen Iklan", Megaphone],
+  ["landing_page", "Konten Landing Page", Globe],
   ["fastapi_analytics", "Analitik & Telemetri", ChartNoAxesCombined],
   ["fastapi_activity_logs", "Audit Log", History],
   ["settings", "Pengaturan", Settings],
@@ -48,6 +50,7 @@ const viewMeta = {
   fastapi_users: ["Pengguna", "Manajemen Pengguna"],
   fastapi_reports: ["Moderasi", "Laporan Pelanggaran Kost"],
   fastapi_ads: ["Pemasaran", "Manajemen Iklan"],
+  landing_page: ["CMS", "Manajemen Konten Landing Page"],
   fastapi_analytics: ["Performa", "Analitik & Telemetri"],
   fastapi_activity_logs: ["Keamanan", "Audit Log Aktivitas"],
   settings: ["Sistem", "Pengaturan Profil & Sistem"],
@@ -70,6 +73,7 @@ const views = {
   fastapi_users: FastApiUsersView,
   fastapi_reports: FastApiReportQueueView,
   fastapi_ads: FastApiAdsView,
+  landing_page: LandingPageManagerView,
   fastapi_analytics: FastApiAnalyticsView,
   fastapi_activity_logs: FastApiActivityLogsView,
   settings: SettingsView,

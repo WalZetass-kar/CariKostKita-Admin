@@ -37,6 +37,7 @@ async function dispatch(request, context) {
       mutate((db) => svc.recordAdEvent(db, id, body.type, body.platform));
       return pub({ success: true });
     }
+    case "GET landing":
     case "GET settings": {
       const localSystem = getDb().system || {};
       const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");

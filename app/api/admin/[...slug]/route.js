@@ -479,7 +479,7 @@ const routes = [
       db.system = merged;
     });
     return { system: merged };
-  }, ["super_admin", "admin"]],
+  }, ["super_admin", "admin", "marketing"]],
   ["PATCH", "settings/system", async (auth, { body }) => {
     const { session } = auth;
     const apiUrl = fastApiBase();
@@ -512,7 +512,15 @@ const routes = [
       ...local,
       system: savedSystem,
     };
-  }, ["super_admin", "admin"]],
+  }, ["super_admin", "admin", "marketing"]],
+  ["GET", "settings/landing", async (auth, ctx) => {
+    const res = await dispatch("GET", ["settings", "system"], auth, ctx);
+    return res;
+  }, ["super_admin", "admin", "marketing"]],
+  ["PATCH", "settings/landing", async (auth, ctx) => {
+    const res = await dispatch("PATCH", ["settings", "system"], auth, ctx);
+    return res;
+  }, ["super_admin", "admin", "marketing"]],
 
   ["GET", "admins", async ({ admin, session }) => {
     const apiUrl = fastApiBase();
