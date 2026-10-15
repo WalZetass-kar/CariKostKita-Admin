@@ -47,6 +47,70 @@ async function readFastApiProfile(apiUrl, token) {
   return { response, payload };
 }
 
+async function getSystemSettingsHandler({ session }) {
+  const localSystem = getDb().system || {};
+  const apiUrl = fastApiBase();
+  let remotePayload = {};
+  try {
+    const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+      headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const payload = await res.json();
+      remotePayload = payload.data || payload || {};
+    }
+  } catch {}
+  if (Object.keys(remotePayload).length === 0) {
+    try {
+      const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
+      if (pubRes.ok) {
+        const pubPayload = await pubRes.json();
+        remotePayload = pubPayload.data || pubPayload || {};
+      }
+    } catch {}
+  }
+  const merged = { ...remotePayload, ...localSystem };
+  mutate((db) => {
+    db.system = merged;
+  });
+  return { system: merged };
+}
+
+async function patchSystemSettingsHandler(auth, { body }) {
+  const { session } = auth;
+  const apiUrl = fastApiBase();
+  let remotePayload = null;
+  try {
+    const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    if (res.ok) {
+      remotePayload = await res.json();
+    } else {
+      const errJson = await res.json().catch(() => ({}));
+      console.error("FastAPI settings update returned error:", res.status, errJson);
+    }
+  } catch (err) {
+    console.error("FastAPI settings update network failure:", err);
+  }
+  const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
+  const savedSystem = { ...(remotePayload?.data || {}), ...local.system };
+  mutate((db) => {
+    db.system = savedSystem;
+  });
+  if (local.data) {
+    local.data.system = savedSystem;
+  }
+  return {
+    ...local,
+    system: savedSystem,
+  };
+}
+
 /**
  * REST API Admin. Semua endpoint wajib login. Setiap mutasi mengembalikan
  * snapshot data terbaru ("data") sehingga UI selalu konsisten dengan server.
@@ -459,76 +523,10 @@ const routes = [
   ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin"]],
 
   ["PATCH", "settings/notifications", async (auth, { body }) => write(auth, (db) => ({ notifications: svc.updateNotifications(db, auth.admin, body) }))],
-  ["GET", "settings/system", async ({ session }) => {
-    const localSystem = getDb().system || {};
-    const apiUrl = fastApiBase();
-    let remotePayload = {};
-    try {
-      const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
-        headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
-        cache: "no-store",
-      });
-      if (res.ok) {
-        const payload = await res.json();
-        remotePayload = payload.data || payload || {};
-      }
-    } catch {}
-    if (Object.keys(remotePayload).length === 0) {
-      try {
-        const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
-        if (pubRes.ok) {
-          const pubPayload = await pubRes.json();
-          remotePayload = pubPayload.data || pubPayload || {};
-        }
-      } catch {}
-    }
-    const merged = { ...remotePayload, ...localSystem };
-    mutate((db) => {
-      db.system = merged;
-    });
-    return { system: merged };
-  }, ["super_admin", "admin", "marketing"]],
-  ["PATCH", "settings/system", async (auth, { body }) => {
-    const { session } = auth;
-    const apiUrl = fastApiBase();
-    let remotePayload = null;
-    try {
-      const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(body),
-        cache: "no-store",
-      });
-      if (res.ok) {
-        remotePayload = await res.json();
-      } else {
-        const errJson = await res.json().catch(() => ({}));
-        console.error("FastAPI settings update returned error:", res.status, errJson);
-      }
-    } catch (err) {
-      console.error("FastAPI settings update network failure:", err);
-    }
-    const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
-    const savedSystem = { ...(remotePayload?.data || {}), ...local.system };
-    mutate((db) => {
-      db.system = savedSystem;
-    });
-    if (local.data) {
-      local.data.system = savedSystem;
-    }
-    return {
-      ...local,
-      system: savedSystem,
-    };
-  }, ["super_admin", "admin", "marketing"]],
-  ["GET", "settings/landing", async (auth, ctx) => {
-    const res = await dispatch("GET", ["settings", "system"], auth, ctx);
-    return res;
-  }, ["super_admin", "admin", "marketing"]],
-  ["PATCH", "settings/landing", async (auth, ctx) => {
-    const res = await dispatch("PATCH", ["settings", "system"], auth, ctx);
-    return res;
-  }, ["super_admin", "admin", "marketing"]],
+  ["GET", "settings/system", getSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
+  ["PATCH", "settings/system", patchSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
+  ["GET", "settings/landing", getSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
+  ["PATCH", "settings/landing", patchSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
 
   ["GET", "admins", async ({ admin, session }) => {
     const apiUrl = fastApiBase();

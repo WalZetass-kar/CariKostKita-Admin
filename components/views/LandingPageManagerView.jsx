@@ -38,7 +38,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useApp } from "../AppContext";
-import { api } from "@/lib/api";
+import { api, readImage } from "@/lib/api";
 import {
   Badge,
   ConfirmDialog,
@@ -75,6 +75,8 @@ export function LandingPageManagerView() {
     targetCity: "Pekanbaru",
     brandColor: "#6D0808",
     logoUrl: "",
+    footerLogoUrl: "",
+    appIconUrl: "",
     faviconUrl: "",
     ogImageUrl: "",
     siteTitle: "",
@@ -90,6 +92,13 @@ export function LandingPageManagerView() {
     bannerType: "promo",
     bannerText: "",
     bannerLink: "",
+    // Pop-up Modal Dialog
+    popupActive: false,
+    popupTitle: "",
+    popupContent: "",
+    popupImageUrl: "",
+    popupButtonLabel: "",
+    popupButtonUrl: "",
     // Hero
     heroHeadline: "",
     heroSubheadline: "",
@@ -130,6 +139,7 @@ export function LandingPageManagerView() {
     finalCtaButtonLabel: "Download APK Sekarang",
     footerTagline: "Kost terbaik, untuk masa depanmu.",
     footerCopyright: "© 2026 CariKostKita. All rights reserved.",
+    securityModalActive: true,
     securityModalTitle: "Panduan Dialog Download Android",
     securityModalDesc: "Saat mengunduh berkas APK di luar Google Play Store, peramban (Chrome) akan menampilkan pesan standar keamanan:",
     securityModalNote: "Berkas APK CariKostKita 100% aman dan diverifikasi langsung dari repositori resmi proyek.",
@@ -272,15 +282,31 @@ export function LandingPageManagerView() {
     else setUploadingImg(true);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const endpoint = isApk ? "/api/admin/upload-apk" : "/api/admin/upload-image";
-      const res = await fetch(endpoint, { method: "POST", body: formData });
-      const json = await res.json();
-      if (!res.ok || json.error) throw new Error(json.error || "Gagal mengunggah berkas.");
-      handleChange(fieldName, json.url);
-      if (isApk && json.size) handleChange("apkSize", json.size);
-      toast(`Berkas berhasil diunggah: ${json.url}`);
+      if (!isApk && file.type && file.type.startsWith("image/")) {
+        let dataUrl;
+        if (file.type === "image/svg+xml") {
+          const reader = new FileReader();
+          dataUrl = await new Promise((resolve, reject) => {
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          });
+        } else {
+          dataUrl = await readImage(file, 1200);
+        }
+        handleChange(fieldName, dataUrl);
+        toast("Gambar berhasil dipilih dan siap disimpan!");
+      } else {
+        const formData = new FormData();
+        formData.append("file", file);
+        const endpoint = isApk ? "/api/admin/upload-apk" : "/api/admin/upload-image";
+        const res = await fetch(endpoint, { method: "POST", body: formData });
+        const json = await res.json();
+        if (!res.ok || json.error) throw new Error(json.error || "Gagal mengunggah berkas.");
+        handleChange(fieldName, json.url);
+        if (isApk && json.size) handleChange("apkSize", json.size);
+        toast(`Berkas berhasil diunggah: ${json.url}`);
+      }
     } catch (err) {
       toast(err.message || "Gagal upload.", "error");
     } finally {
@@ -385,44 +411,187 @@ export function LandingPageManagerView() {
               </div>
               <p className="text-[11px] text-muted mt-1">Warna ini diterapkan dinamis pada tombol CTA, lencana, dan aksen navigasi.</p>
             </div>
-            <div className="sm:col-span-2 grid gap-4 sm:grid-cols-2 pt-2 border-t border-line">
-              <div>
-                <Field
-                  label="URL Logo Brand (SVG / PNG)"
-                  value={settings.logoUrl || ""}
-                  onChange={(e) => handleChange("logoUrl", e.target.value)}
-                  placeholder="/logo.svg atau https://..."
-                />
-                <label className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-accent cursor-pointer hover:underline">
-                  <Upload size={13} />
-                  <span>{uploadingImg ? "Mengunggah..." : "Upload Logo Baru"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "logoUrl")}
-                    disabled={uploadingImg}
-                  />
-                </label>
-              </div>
-              <div>
-                <Field
-                  label="URL Favicon Browser (.ico / .png)"
-                  value={settings.faviconUrl || ""}
-                  onChange={(e) => handleChange("faviconUrl", e.target.value)}
-                  placeholder="/favicon.ico atau https://..."
-                />
-                <label className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-accent cursor-pointer hover:underline">
-                  <Upload size={13} />
-                  <span>{uploadingImg ? "Mengunggah..." : "Upload Favicon Baru"}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => handleFileUpload(e, "faviconUrl")}
-                    disabled={uploadingImg}
-                  />
-                </label>
+            <div className="sm:col-span-2 space-y-4 pt-3 border-t border-line">
+              <h4 className="font-extrabold text-sm text-ink uppercase tracking-wider flex items-center gap-2">
+                <ImageIcon size={16} className="text-accent" />
+                <span>Logo & Aset Identitas Visual</span>
+              </h4>
+              <p className="text-xs text-muted">
+                Atur secara mandiri logo untuk navbar atas, logo footer bawah, favicon browser, dan ikon aplikasi.
+              </p>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* 1. Logo Navbar Header */}
+                <div className="rounded-xl border border-line bg-track/20 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-ink">1. Logo Navbar Header</span>
+                    {settings.logoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleChange("logoUrl", "")}
+                        className="text-[11px] font-bold text-red-600 hover:underline"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg border border-line bg-field flex items-center justify-center overflow-hidden shrink-0">
+                      {settings.logoUrl ? (
+                        <img src={settings.logoUrl} alt="Navbar Logo" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <Globe size={20} className="text-muted" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Field
+                        value={settings.logoUrl || ""}
+                        onChange={(e) => handleChange("logoUrl", e.target.value)}
+                        placeholder="https://... atau upload file"
+                      />
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
+                    <Upload size={13} />
+                    <span>Upload Logo Navbar</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "logoUrl")}
+                      disabled={uploadingImg}
+                    />
+                  </label>
+                </div>
+
+                {/* 2. Logo Footer Website */}
+                <div className="rounded-xl border border-line bg-track/20 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-ink">2. Logo Footer Website</span>
+                    {settings.footerLogoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleChange("footerLogoUrl", "")}
+                        className="text-[11px] font-bold text-red-600 hover:underline"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg border border-line bg-field flex items-center justify-center overflow-hidden shrink-0">
+                      {settings.footerLogoUrl || settings.logoUrl ? (
+                        <img src={settings.footerLogoUrl || settings.logoUrl} alt="Footer Logo" className="w-full h-full object-contain p-1" />
+                      ) : (
+                        <Globe size={20} className="text-muted" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Field
+                        value={settings.footerLogoUrl || ""}
+                        onChange={(e) => handleChange("footerLogoUrl", e.target.value)}
+                        placeholder="Jika kosong, gunakan logo navbar"
+                      />
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
+                    <Upload size={13} />
+                    <span>Upload Logo Footer</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "footerLogoUrl")}
+                      disabled={uploadingImg}
+                    />
+                  </label>
+                </div>
+
+                {/* 3. Favicon Browser */}
+                <div className="rounded-xl border border-line bg-track/20 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-ink">3. Favicon Browser Tab</span>
+                    {settings.faviconUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleChange("faviconUrl", "")}
+                        className="text-[11px] font-bold text-red-600 hover:underline"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg border border-line bg-field flex items-center justify-center overflow-hidden shrink-0">
+                      {settings.faviconUrl ? (
+                        <img src={settings.faviconUrl} alt="Favicon" className="w-6 h-6 object-contain" />
+                      ) : (
+                        <Globe size={20} className="text-muted" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Field
+                        value={settings.faviconUrl || ""}
+                        onChange={(e) => handleChange("faviconUrl", e.target.value)}
+                        placeholder="/favicon.ico atau https://..."
+                      />
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
+                    <Upload size={13} />
+                    <span>Upload Favicon</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "faviconUrl")}
+                      disabled={uploadingImg}
+                    />
+                  </label>
+                </div>
+
+                {/* 4. Ikon Aplikasi (App Icon) */}
+                <div className="rounded-xl border border-line bg-track/20 p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-ink">4. Ikon Aplikasi (App Icon)</span>
+                    {settings.appIconUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleChange("appIconUrl", "")}
+                        className="text-[11px] font-bold text-red-600 hover:underline"
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl border border-line bg-field flex items-center justify-center overflow-hidden shrink-0 shadow-sm">
+                      {settings.appIconUrl || settings.logoUrl ? (
+                        <img src={settings.appIconUrl || settings.logoUrl} alt="App Icon" className="w-full h-full object-cover" />
+                      ) : (
+                        <Bolt size={20} className="text-muted" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <Field
+                        value={settings.appIconUrl || ""}
+                        onChange={(e) => handleChange("appIconUrl", e.target.value)}
+                        placeholder="Ikon APK / mockup aplikasi"
+                      />
+                    </div>
+                  </div>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
+                    <Upload size={13} />
+                    <span>Upload Ikon Aplikasi</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "appIconUrl")}
+                      disabled={uploadingImg}
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -456,16 +625,38 @@ export function LandingPageManagerView() {
                 onChange={(e) => handleChange("metaKeywords", e.target.value)}
                 placeholder="cari kost pekanbaru, kost UIR, kost UNRI, kost Bukit Raya, APK CariKostKita"
               />
-              <div className="sm:col-span-2">
-                <Field
-                  label="OpenGraph Social Share Preview Image (1200x630)"
-                  value={settings.ogImageUrl || ""}
-                  onChange={(e) => handleChange("ogImageUrl", e.target.value)}
-                  placeholder="/og-image.jpg atau https://..."
-                />
-                <label className="inline-flex items-center gap-1.5 mt-2 text-xs font-bold text-accent cursor-pointer hover:underline">
+              <div className="sm:col-span-2 rounded-xl border border-line bg-track/20 p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-xs text-ink">OpenGraph Social Share Preview Image (1200x630)</span>
+                  {settings.ogImageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleChange("ogImageUrl", "")}
+                      className="text-[11px] font-bold text-red-600 hover:underline"
+                    >
+                      Hapus
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-20 h-12 rounded-lg border border-line bg-field flex items-center justify-center overflow-hidden shrink-0">
+                    {settings.ogImageUrl ? (
+                      <img src={settings.ogImageUrl} alt="OG Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon size={20} className="text-muted" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <Field
+                      value={settings.ogImageUrl || ""}
+                      onChange={(e) => handleChange("ogImageUrl", e.target.value)}
+                      placeholder="/og-image.jpg atau https://..."
+                    />
+                  </div>
+                </div>
+                <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
                   <Upload size={13} />
-                  <span>{uploadingImg ? "Mengunggah..." : "Upload Gambar OpenGraph"}</span>
+                  <span>Upload Gambar OpenGraph</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -627,6 +818,86 @@ export function LandingPageManagerView() {
                   ["info", "Informasi Penting (Elegan Netral)"],
                   ["warning", "Pemberitahuan Sistem (Kuning Waspada)"],
                 ]}
+              />
+            </div>
+          </div>
+
+          {/* Modal Pop-up Beranda */}
+          <div className="rounded-xl border border-line bg-track/20 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-extrabold text-sm text-ink uppercase tracking-wider flex items-center gap-2">
+                <Layers size={16} className="text-accent" />
+                <span>Dialog Pop-up Beranda (Modal Pop-up Otomatis)</span>
+              </h4>
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-ink">
+                <input
+                  type="checkbox"
+                  checked={Boolean(settings.popupActive)}
+                  onChange={(e) => handleChange("popupActive", e.target.checked)}
+                  className="w-4 h-4 rounded border-line text-accent focus:ring-accent"
+                />
+                <span>Aktifkan Pop-up</span>
+              </label>
+            </div>
+            <p className="text-xs text-muted mb-4">
+              Jika diaktifkan, dialog pop-up akan muncul saat pengunjung membuka Landing Page. Jika dinonaktifkan, pop-up 100% tidak akan dirender.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Judul Pop-up"
+                className="sm:col-span-2"
+                value={settings.popupTitle || ""}
+                onChange={(e) => handleChange("popupTitle", e.target.value)}
+                placeholder="🎉 Selamat Datang di CariKostKita!"
+              />
+              <TextArea
+                label="Konten / Pesan Pop-up"
+                className="sm:col-span-2"
+                value={settings.popupContent || ""}
+                onChange={(e) => handleChange("popupContent", e.target.value)}
+                placeholder="Tulis pesan pengumuman penting, diskon, atau event khusus di sini..."
+              />
+              <div className="sm:col-span-2">
+                <Field
+                  label="URL Banner / Gambar Pop-up (Opsional)"
+                  value={settings.popupImageUrl || ""}
+                  onChange={(e) => handleChange("popupImageUrl", e.target.value)}
+                  placeholder="https://... atau upload berkas"
+                />
+                <div className="flex items-center gap-3 mt-2">
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold text-accent cursor-pointer hover:underline">
+                    <Upload size={13} />
+                    <span>Upload Gambar Pop-up</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "popupImageUrl")}
+                      disabled={uploadingImg}
+                    />
+                  </label>
+                  {settings.popupImageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => handleChange("popupImageUrl", "")}
+                      className="text-xs font-bold text-red-600 hover:underline"
+                    >
+                      Hapus Gambar
+                    </button>
+                  )}
+                </div>
+              </div>
+              <Field
+                label="Label Tombol Aksi Pop-up (Opsional)"
+                value={settings.popupButtonLabel || ""}
+                onChange={(e) => handleChange("popupButtonLabel", e.target.value)}
+                placeholder="Lihat Sekarang"
+              />
+              <Field
+                label="Tautan Tombol Aksi Pop-up (Opsional)"
+                value={settings.popupButtonUrl || ""}
+                onChange={(e) => handleChange("popupButtonUrl", e.target.value)}
+                placeholder="#pemilik atau https://..."
               />
             </div>
           </div>
@@ -1455,7 +1726,18 @@ export function LandingPageManagerView() {
           </div>
 
           <div className="pt-4 border-t border-line">
-            <h4 className="font-bold text-sm text-ink mb-3">Modal Panduan Dialog Keamanan Android (Play Protect)</h4>
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-sm text-ink">Modal Panduan Dialog Keamanan Android (Play Protect)</h4>
+              <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-ink">
+                <input
+                  type="checkbox"
+                  checked={settings.securityModalActive !== false}
+                  onChange={(e) => handleChange("securityModalActive", e.target.checked)}
+                  className="w-4 h-4 rounded border-line text-accent focus:ring-accent"
+                />
+                <span>Aktifkan Panduan Dialog</span>
+              </label>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
                 label="Judul Modal"

@@ -42,6 +42,7 @@ export async function POST(request) {
       "D:/projek java dan web/CariKostKita_FastAPI_Docs/Admin-Gue/public/uploads",
     ];
 
+    // Attempt local disk save if possible (for local development)
     for (const dir of candidateDirs) {
       try {
         const parent = path.dirname(dir);
@@ -56,11 +57,14 @@ export async function POST(request) {
       }
     }
 
-    const fileUrl = `/uploads/${safeFileName}`;
+    // Generate Base64 Data URL for universal cross-domain persistence across Vercel deployments
+    const mime = file.type || (extMatch[1].toLowerCase() === "svg" ? "image/svg+xml" : `image/${extMatch[1].toLowerCase() === "jpg" ? "jpeg" : extMatch[1].toLowerCase()}`);
+    const dataUrl = `data:${mime};base64,${bytes.toString("base64")}`;
 
     return NextResponse.json({
       success: true,
-      url: fileUrl,
+      url: dataUrl,
+      localUrl: `/uploads/${safeFileName}`,
       fileName: safeFileName,
     });
   } catch (error) {
