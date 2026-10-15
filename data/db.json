@@ -1,5 +1,23 @@
 {
-  "admins": [],
+  "admins": [
+    {
+      "id": "6",
+      "name": "Super Admin Official",
+      "username": "admin",
+      "email": "admin@carikostkita.id",
+      "phone": "08110000001",
+      "role": "super_admin",
+      "photo": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=",
+      "active": true,
+      "createdAt": "2026-10-15",
+      "notifications": {
+        "newReport": true,
+        "newOwner": true,
+        "pendingKost": true,
+        "other": true
+      }
+    }
+  ],
   "owners": [],
   "kosts": [],
   "users": [],
@@ -7,6 +25,16 @@
   "ads": [],
   "adEvents": [],
   "audit": [
+    {
+      "id": "aud-00b7c00e4a",
+      "adminId": "6",
+      "adminName": "Super Admin Official",
+      "activity": "Mengubah profil Admin",
+      "target": "Admin: Super Admin Official",
+      "object": "Pengaturan",
+      "time": "2026-10-15T12:30:09.797Z",
+      "status": "Sukses"
+    },
     {
       "id": "aud-cee0436cf6",
       "adminId": "6",
