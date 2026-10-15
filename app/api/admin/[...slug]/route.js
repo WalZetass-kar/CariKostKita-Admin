@@ -338,7 +338,7 @@ const routes = [
         }
 
         const rawUsers = users.data || [];
-        const staffUsers = rawUsers.filter((u) => ["developer", "admin", "moderator"].includes(u.role));
+        const staffUsers = rawUsers.filter((u) => ["super_admin", "developer", "admin", "moderator", "marketing"].includes(u.role));
         const realAdmins = staffUsers.length > 0
           ? staffUsers.map((u) => ({
               id: String(u.id),

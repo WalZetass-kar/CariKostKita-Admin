@@ -10,7 +10,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # data lokal admin
-/data/
+/data/*.tmp
 .vercel
 /public/uploads/*
 !/public/uploads/.gitkeep
