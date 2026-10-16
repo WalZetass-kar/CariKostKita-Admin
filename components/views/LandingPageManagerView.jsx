@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { useApp } from "../AppContext";
 import { api, readImage } from "@/lib/api";
+import { broadcastSettingsUpdated } from "@/lib/realtime";
 import {
   Badge,
   ConfirmDialog,
@@ -215,9 +216,25 @@ export function LandingPageManagerView() {
         method: "PATCH",
         body: settings,
       });
-      if (res?.system || res?.data) {
-        setSettings((prev) => ({ ...prev, ...(res.system || res.data) }));
+      const saved = res?.system || res?.data || null;
+      if (saved) {
+        setSettings((prev) => ({ ...prev, ...saved }));
       }
+      // Invalidation is published ONLY after the backend confirms the commit.
+      // The revision comes from FastAPI (single authority); subscribers use
+      // it to dedupe and order rapid sequential saves.
+      const revision = saved?.revision ?? res?.revision ?? 0;
+      const updated_at = saved?.updated_at ?? res?.updated_at ?? null;
+      const changedKeys = saved?.changed_keys ?? res?.changed_keys ?? Object.keys(settings);
+      broadcastSettingsUpdated({ revision, updated_at, changedKeys }).then((delivered) => {
+        if (!delivered) {
+          console.info(
+            "Perubahan tersimpan di server; event real-time tidak terkirim " +
+              "(Supabase Realtime belum dikonfigurasi atau offline). " +
+              "Landing Page akan mengejar via version check 30 detik / saat tab fokus."
+          );
+        }
+      });
       toast("Semua perubahan Landing Page berhasil disimpan!");
     } catch (err) {
       toast(err.message || "Gagal menyimpan perubahan.", "error");

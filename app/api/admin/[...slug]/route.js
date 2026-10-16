@@ -99,6 +99,10 @@ async function patchSystemSettingsHandler(auth, { body }) {
   }
   const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
   const savedSystem = { ...(remotePayload?.data || {}), ...local.system };
+  // FastAPI is the revision authority: never let the local snapshot (which
+  // carries no revision) clobber the confirmed revision metadata.
+  if (remotePayload?.revision !== undefined) savedSystem.revision = remotePayload.revision;
+  if (remotePayload?.updated_at !== undefined) savedSystem.updated_at = remotePayload.updated_at;
   mutate((db) => {
     db.system = savedSystem;
   });
@@ -108,6 +112,10 @@ async function patchSystemSettingsHandler(auth, { body }) {
   return {
     ...local,
     system: savedSystem,
+    revision: remotePayload?.revision ?? savedSystem.revision ?? 0,
+    updated_at: remotePayload?.updated_at ?? savedSystem.updated_at ?? null,
+    changed_keys: remotePayload?.changed_keys ?? [],
+    realtime: remotePayload?.realtime ?? null,
   };
 }
 
