@@ -10,7 +10,17 @@ const apiErrorMessage = (payload, fallback) => {
   return fallback;
 };
 
-const fastApiBase = () => (process.env.CARIKOSTKITA_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
+// Base URL backend FastAPI. Default-nya production, bukan localhost:
+// default localhost membuat seluruh panggilan API gagal diam-diam di Vercel
+// ketika env CARIKOSTKITA_API_URL belum diisi. Pengembangan lokal menimpanya
+// lewat .env (CARIKOSTKITA_API_URL=http://127.0.0.1:8000).
+const fastApiBase = () =>
+  (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+
+// Base URL gateway lama (Laravel). Route legacy memakai prefix /api/v1.
+// Default production juga, demi alasan yang sama seperti di atas.
+const legacyApiBase = () =>
+  (process.env.NEXT_PUBLIC_API_URL || "https://carikostkitafastapi.vercel.app/api/v1").replace(/\/$/, "");
 
 let dataCache = { value: null, expiresAt: 0, token: null };
 let overviewCache = { value: null, expiresAt: 0, token: null };
@@ -608,7 +618,7 @@ const routes = [
       // Fallback to legacy/db.json
     }
 
-    const laravelUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
+    const laravelUrl = legacyApiBase();
     const res = await fetch(`${laravelUrl}/admin/bff/load-all`, {
       headers: { "Authorization": `Bearer ${session.token}`, "Accept": "application/json" }
     }).catch(() => null);
@@ -736,7 +746,7 @@ async function write(auth, fn, proxyTarget = null) {
   
   if (proxyTarget) {
      const isFastApi = proxyTarget.isFastApi || proxyTarget.path?.startsWith("/api/v1/");
-     const baseUrl = isFastApi ? fastApiBase() : (process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1');
+     const baseUrl = isFastApi ? fastApiBase() : legacyApiBase();
      let res;
      try {
        res = await fetch(`${baseUrl}${proxyTarget.path}`, {
@@ -776,7 +786,7 @@ async function write(auth, fn, proxyTarget = null) {
        data.overview = ovJson.data;
      }
   } else {
-     const laravelUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
+     const laravelUrl = legacyApiBase();
      const dataRes = await fetch(`${laravelUrl}/admin/bff/load-all`, {
        headers: { "Authorization": `Bearer ${session.token}`, "Accept": "application/json" }
      }).catch(() => null);
