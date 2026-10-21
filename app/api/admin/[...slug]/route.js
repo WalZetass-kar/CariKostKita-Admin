@@ -10,7 +10,7 @@ const apiErrorMessage = (payload, fallback) => {
   return fallback;
 };
 
-const fastApiBase = () => (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+const fastApiBase = () => (process.env.CARIKOSTKITA_API_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 let dataCache = { value: null, expiresAt: 0, token: null };
 let overviewCache = { value: null, expiresAt: 0, token: null };
@@ -51,26 +51,46 @@ async function getSystemSettingsHandler({ session }) {
   const localSystem = getDb().system || {};
   const apiUrl = fastApiBase();
   let remotePayload = {};
+  let res;
   try {
-    const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+    res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
       cache: "no-store",
     });
-    if (res.ok) {
-      const payload = await res.json();
-      remotePayload = payload.data || payload || {};
-    }
-  } catch {}
-  if (Object.keys(remotePayload).length === 0) {
-    try {
-      const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
-      if (pubRes.ok) {
-        const pubPayload = await pubRes.json();
-        remotePayload = pubPayload.data || pubPayload || {};
-      }
-    } catch {}
+  } catch (err) {
+    console.error("FastAPI settings read network failure:", err);
+    throw new HttpError(502, "Backend tidak dapat dijangkau. Pengaturan Landing Page tidak dapat dimuat.");
   }
-  const merged = { ...remotePayload, ...localSystem };
+  if (res.ok) {
+    const payload = await res.json();
+    remotePayload = payload.data || payload || {};
+  } else {
+    const errJson = await res.json().catch(() => ({}));
+    if (isMissingFastApiRoute(res, errJson)) {
+      // The route does not exist on this deployment yet: fall back to the
+      // public contract, which carries the same content.
+      try {
+        const pubRes = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
+        if (pubRes.ok) {
+          const pubPayload = await pubRes.json();
+          remotePayload = pubPayload.data || pubPayload || {};
+        }
+      } catch {}
+    } else {
+      // Any other failure (auth, unavailable store, server error) must be
+      // reported. Falling back to the local file would show stale content as
+      // if it were the current CMS state.
+      console.error("FastAPI settings read rejected:", res.status, errJson);
+      throw new HttpError(
+        res.status,
+        apiErrorMessage(errJson, "Pengaturan Landing Page tidak dapat dimuat dari server.")
+      );
+    }
+  }
+  // The durable store is the single source of truth. The local db.json may
+  // only fill gaps; it must never override a value the store confirmed,
+  // otherwise a stale file silently reverts an admin edit.
+  const merged = { ...localSystem, ...remotePayload };
   mutate((db) => {
     db.system = merged;
   });
@@ -80,29 +100,38 @@ async function getSystemSettingsHandler({ session }) {
 async function patchSystemSettingsHandler(auth, { body }) {
   const { session } = auth;
   const apiUrl = fastApiBase();
-  let remotePayload = null;
+  let res;
   try {
-    const res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
+    res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
       body: JSON.stringify(body),
       cache: "no-store",
     });
-    if (res.ok) {
-      remotePayload = await res.json();
-    } else {
-      const errJson = await res.json().catch(() => ({}));
-      console.error("FastAPI settings update returned error:", res.status, errJson);
-    }
   } catch (err) {
     console.error("FastAPI settings update network failure:", err);
+    throw new HttpError(
+      502,
+      "Backend tidak dapat dijangkau. Perubahan Landing Page tidak disimpan."
+    );
   }
+  const payload = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // The edit was NOT stored durably. Report it instead of writing the
+    // local file and pretending the landing page was updated.
+    console.error("FastAPI settings update rejected:", res.status, payload);
+    throw new HttpError(
+      res.status,
+      apiErrorMessage(
+        payload,
+        "Perubahan ditolak backend, sehingga Landing Page tidak diperbarui."
+      )
+    );
+  }
+  const remotePayload = payload.data || {};
   const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
-  const savedSystem = { ...(remotePayload?.data || {}), ...local.system };
-  // FastAPI is the revision authority: never let the local snapshot (which
-  // carries no revision) clobber the confirmed revision metadata.
-  if (remotePayload?.revision !== undefined) savedSystem.revision = remotePayload.revision;
-  if (remotePayload?.updated_at !== undefined) savedSystem.updated_at = remotePayload.updated_at;
+  // The confirmed database state wins over the local mirror.
+  const savedSystem = { ...(local.system || {}), ...remotePayload };
   mutate((db) => {
     db.system = savedSystem;
   });
@@ -112,10 +141,11 @@ async function patchSystemSettingsHandler(auth, { body }) {
   return {
     ...local,
     system: savedSystem,
-    revision: remotePayload?.revision ?? savedSystem.revision ?? 0,
-    updated_at: remotePayload?.updated_at ?? savedSystem.updated_at ?? null,
-    changed_keys: remotePayload?.changed_keys ?? [],
-    realtime: remotePayload?.realtime ?? null,
+    revision: payload.revision ?? savedSystem.revision ?? 0,
+    updated_at: payload.updated_at ?? savedSystem.updated_at ?? null,
+    changed_keys: payload.changed_keys ?? [],
+    persistence: payload.persistence ?? null,
+    realtime: payload.realtime ?? null,
   };
 }
 
@@ -166,6 +196,117 @@ const routes = [
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal mengubah status ketersediaan kost."));
     return payload;
   }, ["super_admin", "admin"]],
+  ["POST", "fastapi-kosts/bulk-verify", async ({ session }, { body }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/bulk-verify`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memproses persetujuan verifikasi massal."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["POST", "fastapi-kosts/bulk-delete", async ({ session }, { body }) => {
+    invalidateAdminCache();
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/bulk-delete`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memproses penghapusan massal listing kos."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["DELETE", "fastapi-kosts/:id", async ({ session }, { params }) => {
+    invalidateAdminCache();
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/${encodeURIComponent(params.id)}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menghapus listing kos."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["POST", "fastapi-bulk-import/preview", async ({ session }, { body }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/import/preview`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memvalidasi file import data kos."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["POST", "fastapi-bulk-import/commit", async ({ session }, { body }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/kosts/import/commit`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menyimpan hasil import data kos."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["GET", "fastapi-bulk-import/template", async ({ session }, { url }) => {
+    const apiUrl = fastApiBase();
+    const format = url.searchParams.get("format") || "xlsx";
+    try {
+      const headers = session?.token ? { Authorization: `Bearer ${session.token}` } : {};
+      const res = await fetch(`${apiUrl}/api/v1/admin/kosts/import/template?format=${format}`, {
+        headers,
+        cache: "no-store",
+      });
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        const base64 = Buffer.from(arrayBuf).toString("base64");
+        return {
+          format,
+          filename: `Template_Import_Kost_CariKostKita.${format}`,
+          file_base64: base64,
+        };
+      }
+    } catch (err) {
+      console.warn("FastAPI template endpoint failed, using local generator:", err);
+    }
+
+    // Direct local generator fallback so template download NEVER fails with 404
+    const { getLocalTemplateBase64 } = await import("@/lib/templateGenerator");
+    const base64 = getLocalTemplateBase64(format);
+    return {
+      format,
+      filename: `Template_Import_Kost_CariKostKita.${format}`,
+      file_base64: base64,
+    };
+  }],
   ["GET", "fastapi-owners", async ({ session }, { url }) => {
     const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
     const query = new URLSearchParams({ role: "owner" });
@@ -531,10 +672,14 @@ const routes = [
   ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin"]],
 
   ["PATCH", "settings/notifications", async (auth, { body }) => write(auth, (db) => ({ notifications: svc.updateNotifications(db, auth.admin, body) }))],
-  ["GET", "settings/system", getSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
-  ["PATCH", "settings/system", patchSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
-  ["GET", "settings/landing", getSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
-  ["PATCH", "settings/landing", patchSystemSettingsHandler, ["super_admin", "admin", "marketing"]],
+  // The settings routes are served by FastAPI, which only recognises the
+  // trusted roles developer/admin/moderator. The legacy `marketing` role has
+  // no counterpart in the database schema, so it is not offered here: a save
+  // would be rejected by the backend instead of silently doing nothing.
+  ["GET", "settings/system", getSystemSettingsHandler, ["super_admin", "admin"]],
+  ["PATCH", "settings/system", patchSystemSettingsHandler, ["super_admin", "admin"]],
+  ["GET", "settings/landing", getSystemSettingsHandler, ["super_admin", "admin"]],
+  ["PATCH", "settings/landing", patchSystemSettingsHandler, ["super_admin", "admin"]],
 
   ["GET", "admins", async ({ admin, session }) => {
     const apiUrl = fastApiBase();

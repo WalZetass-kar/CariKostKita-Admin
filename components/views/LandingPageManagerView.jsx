@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Globe,
   Save,
@@ -161,6 +161,12 @@ export function LandingPageManagerView() {
   const [uploadingApk, setUploadingApk] = useState(false);
   const [uploadingImg, setUploadingImg] = useState(false);
 
+  // Baseline of the last confirmed content. Only the difference against this
+  // baseline is sent to the backend, so a save can never reset a field the
+  // administrator did not touch.
+  const baselineRef = useRef(null);
+  const [saveReport, setSaveReport] = useState(null);
+
   const tabs = [
     "Branding & SEO",
     "Navigasi",
@@ -183,16 +189,23 @@ export function LandingPageManagerView() {
       .then((res) => {
         if (!active) return;
         const s = res?.system || res?.data || res || {};
-        setSettings((prev) => ({
-          ...prev,
-          ...s,
-          navLinks: Array.isArray(s.navLinks) && s.navLinks.length ? s.navLinks : (Array.isArray(s.nav_links) && s.nav_links.length ? s.nav_links : prev.navLinks),
-          trustItems: Array.isArray(s.trustItems) && s.trustItems.length ? s.trustItems : (Array.isArray(s.trust_items) && s.trust_items.length ? s.trust_items : prev.trustItems),
-          featureItems: Array.isArray(s.featureItems) && s.featureItems.length ? s.featureItems : (Array.isArray(s.feature_items) && s.feature_items.length ? s.feature_items : prev.featureItems),
-          installSteps: Array.isArray(s.installSteps) && s.installSteps.length ? s.installSteps : (Array.isArray(s.install_steps) && s.install_steps.length ? s.install_steps : prev.installSteps),
-          ownerSteps: Array.isArray(s.ownerSteps) && s.ownerSteps.length ? s.ownerSteps : (Array.isArray(s.owner_steps) && s.owner_steps.length ? s.owner_steps : prev.ownerSteps),
-          faqItems: Array.isArray(s.faqItems) && s.faqItems.length ? s.faqItems : (Array.isArray(s.faq_items) && s.faq_items.length ? s.faq_items : prev.faqItems),
-        }));
+        const merged = { ...s };
+        setSettings((prev) => {
+          const next = {
+            ...prev,
+            ...merged,
+            navLinks: Array.isArray(s.navLinks) && s.navLinks.length ? s.navLinks : (Array.isArray(s.nav_links) && s.nav_links.length ? s.nav_links : prev.navLinks),
+            trustItems: Array.isArray(s.trustItems) && s.trustItems.length ? s.trustItems : (Array.isArray(s.trust_items) && s.trust_items.length ? s.trust_items : prev.trustItems),
+            featureItems: Array.isArray(s.featureItems) && s.featureItems.length ? s.featureItems : (Array.isArray(s.feature_items) && s.feature_items.length ? s.feature_items : prev.featureItems),
+            installSteps: Array.isArray(s.installSteps) && s.installSteps.length ? s.installSteps : (Array.isArray(s.install_steps) && s.install_steps.length ? s.install_steps : prev.installSteps),
+            ownerSteps: Array.isArray(s.ownerSteps) && s.ownerSteps.length ? s.ownerSteps : (Array.isArray(s.owner_steps) && s.owner_steps.length ? s.owner_steps : prev.ownerSteps),
+            faqItems: Array.isArray(s.faqItems) && s.faqItems.length ? s.faqItems : (Array.isArray(s.faq_items) && s.faq_items.length ? s.faq_items : prev.faqItems),
+          };
+          // Remember exactly what the server confirmed so the next save can
+          // send only the fields that actually changed.
+          baselineRef.current = next;
+          return next;
+        });
       })
       .catch((err) => {
         if (active) setError(err.message || "Gagal memuat pengaturan Landing Page.");
@@ -209,29 +222,60 @@ export function LandingPageManagerView() {
     setSettings((prev) => ({ ...prev, [field]: value }));
   };
 
+  /** Only the fields that differ from the confirmed baseline are submitted. */
+  const buildDiff = () => {
+    const baseline = baselineRef.current || {};
+    const diff = {};
+    for (const [key, value] of Object.entries(settings)) {
+      if (key === "revision" || key === "updated_at") continue;
+      const before = baseline[key];
+      const same =
+        Array.isArray(value) && Array.isArray(before)
+          ? JSON.stringify(value) === JSON.stringify(before)
+          : value === before;
+      if (!same) diff[key] = value;
+    }
+    return diff;
+  };
+
   const saveSettings = async () => {
     setSaving(true);
+    setSaveReport(null);
     try {
+      const diff = buildDiff();
+      if (Object.keys(diff).length === 0) {
+        toast("Tidak ada perubahan yang perlu disimpan.");
+        setSaving(false);
+        return;
+      }
       const res = await api("settings/landing", {
         method: "PATCH",
-        body: settings,
+        body: diff,
       });
       const saved = res?.system || res?.data || null;
       if (saved) {
-        setSettings((prev) => ({ ...prev, ...saved }));
+        setSettings((prev) => {
+          const next = { ...prev, ...saved };
+          baselineRef.current = next;
+          return next;
+        });
+      } else {
+        baselineRef.current = { ...settings };
       }
       // Invalidation is published ONLY after the backend confirms the commit.
       // The revision comes from FastAPI (single authority); subscribers use
       // it to dedupe and order rapid sequential saves.
-      const revision = saved?.revision ?? res?.revision ?? 0;
-      const updated_at = saved?.updated_at ?? res?.updated_at ?? null;
-      const changedKeys = saved?.changed_keys ?? res?.changed_keys ?? Object.keys(settings);
+      const revision = res?.revision ?? saved?.revision ?? 0;
+      const updated_at = res?.updated_at ?? saved?.updated_at ?? null;
+      const changedKeys = res?.changed_keys ?? saved?.changed_keys ?? Object.keys(diff);
+      const persistence = res?.persistence ?? null;
+      setSaveReport({ revision, updated_at, changedKeys, persistence });
       broadcastSettingsUpdated({ revision, updated_at, changedKeys }).then((delivered) => {
         if (!delivered) {
           console.info(
             "Perubahan tersimpan di server; event real-time tidak terkirim " +
               "(Supabase Realtime belum dikonfigurasi atau offline). " +
-              "Landing Page akan mengejar via version check 30 detik / saat tab fokus."
+              "Landing Page akan mengejar via version check 10 detik / saat tab fokus."
           );
         }
       });
@@ -372,6 +416,32 @@ export function LandingPageManagerView() {
           </PrimaryButton>
         </div>
       </Panel>
+
+      {error && (
+        <div className="rounded-lg border border-danger/40 bg-danger/5 px-4 py-3 text-sm text-danger">
+          {error}
+        </div>
+      )}
+
+      {saveReport && (
+        <div className="rounded-lg border border-line bg-paper px-4 py-3 text-xs text-muted space-y-1">
+          <p className="font-bold text-ink">
+            Perubahan tersimpan di database (revisi {saveReport.revision || "—"})
+          </p>
+          <p>
+            Field yang diperbarui:{" "}
+            <span className="font-mono">
+              {(saveReport.changedKeys || []).join(", ") || "—"}
+            </span>
+          </p>
+          {saveReport.persistence && saveReport.persistence.revision_durable === false && (
+            <p className="text-warning">
+              Penyimpanan berjalan, tetapi revisi belum dipatok di database. Jalankan ulang
+              migration <span className="font-mono">supabase_landing_settings_persistence.sql</span>.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Tabs */}
       <FilterTabs options={tabs} value={activeTab} onChange={setActiveTab} />

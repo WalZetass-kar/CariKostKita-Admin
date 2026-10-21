@@ -49,8 +49,25 @@ async function dispatch(request, context) {
           remoteSettings = payload.data || payload || {};
         }
       } catch {}
-      const merged = { ...remoteSettings, ...localSystem };
+      // The durable store wins for every field it defines. The local db.json
+      // is a mirror only: letting it override the store is what made an admin
+      // edit disappear from the landing page on the next save.
+      const merged = { ...localSystem, ...remoteSettings };
       return pub({ settings: merged });
+    }
+    case "GET realtime-config": {
+      // Browser-safe Realtime wiring (channel, event, and the public anon
+      // Supabase credentials when the backend can prove they are anon-only).
+      const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+      let config = {};
+      try {
+        const res = await fetch(`${apiUrl}/api/v1/public/settings/realtime`, { cache: "no-store" });
+        if (res.ok) {
+          const payload = await res.json();
+          config = payload.data || payload || {};
+        }
+      } catch {}
+      return pub({ config });
     }
     case "GET kosts": {
       const db = getDb();
