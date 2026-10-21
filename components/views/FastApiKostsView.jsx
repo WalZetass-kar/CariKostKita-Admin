@@ -128,22 +128,26 @@ export function FastApiKostsView() {
     setDeleteLoading(true);
     try {
       if (deleteDialog.type === "single") {
-        await api(`fastapi-kosts/${deleteDialog.kost.id}`, { method: "DELETE" });
-        toast(`Listing kost "${deleteDialog.kost.name || ""}" berhasil dihapus.`);
+        const res = await api(`fastapi-kosts/${deleteDialog.kost.id}`, { method: "DELETE" });
+        toast(res?.message || `Listing kost "${deleteDialog.kost.name || ""}" berhasil dihapus.`);
       } else if (deleteDialog.type === "selected") {
         const targetIds = Array.from(selectedIds);
         const res = await api("fastapi-kosts/bulk-delete", {
           method: "POST",
           body: { kost_ids: targetIds, delete_all: false },
         });
-        toast(res.message || `Berhasil menghapus ${targetIds.length} kost terpilih.`);
+        const removed = res?.count ?? targetIds.length;
+        toast(res?.message || `Berhasil menghapus ${removed} kost terpilih.`);
         setSelectedIds(new Set());
       } else if (deleteDialog.type === "all") {
+        // `confirm` wajib diisi untuk penghapusan seluruh katalog; dialog
+        // konfirmasi di layar sudah menjadi persetujuan eksplisit pengguna.
         const res = await api("fastapi-kosts/bulk-delete", {
           method: "POST",
-          body: { delete_all: true },
+          body: { delete_all: true, confirm: true },
         });
-        toast(res.message || "Seluruh listing kost berhasil dihapus.");
+        const removed = res?.count ?? 0;
+        toast(res?.message || `Seluruh listing kost berhasil dihapus (${removed} listing).`);
         setSelectedIds(new Set());
       }
       setDeleteDialog(null);
