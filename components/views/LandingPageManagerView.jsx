@@ -118,7 +118,7 @@ export function LandingPageManagerView() {
     contactPhone: "0761-555-0123",
     supportEmail: "support@carikostkita.id",
     address: "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
-    githubUrl: "https://github.com/g-423/KosKita",
+    githubUrl: "https://github.com/WalZetass-kar/CariKostKita",
     instagram: "https://instagram.com/carikostkita",
     facebook: "https://facebook.com/carikostkita",
     tiktok: "https://tiktok.com/@carikostkita",

@@ -424,7 +424,7 @@ function SystemTab() {
       bannerType: s.bannerType ?? s.banner_type ?? prev.bannerType ?? "promo",
       heroImageUrl: s.heroImageUrl ?? s.hero_image_url ?? prev.heroImageUrl ?? "",
       logoUrl: s.logoUrl ?? s.logo_url ?? prev.logoUrl ?? "",
-      githubUrl: s.githubUrl ?? s.github_url ?? prev.githubUrl ?? "https://github.com/g-423/KosKita",
+      githubUrl: s.githubUrl ?? s.github_url ?? prev.githubUrl ?? "https://github.com/WalZetass-kar/CariKostKita",
     }));
   };
 
