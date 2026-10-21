@@ -26,6 +26,26 @@
   "adEvents": [],
   "audit": [
     {
+      "id": "aud-4fca1f9ea4",
+      "adminId": "6",
+      "adminName": "Super Admin",
+      "activity": "Mengubah pengaturan sistem & landing page",
+      "target": "Pengaturan: Landing Page",
+      "object": "Pengaturan",
+      "time": "2026-10-19T00:38:33.987Z",
+      "status": "Sukses"
+    },
+    {
+      "id": "aud-1a14d66429",
+      "adminId": "6",
+      "adminName": "Super Admin",
+      "activity": "Mengubah pengaturan sistem & landing page",
+      "target": "Pengaturan: Landing Page",
+      "object": "Pengaturan",
+      "time": "2026-10-16T02:59:20.303Z",
+      "status": "Sukses"
+    },
+    {
       "id": "aud-00b7c00e4a",
       "adminId": "6",
       "adminName": "Super Admin Official",
@@ -151,8 +171,11 @@
     "instagram": "https://instagram.com/carikostkita",
     "facebook": "https://facebook.com/carikostkita",
     "tiktok": "https://tiktok.com/@carikostkita",
+    "youtube": "",
+    "linkedin": "",
     "site_title": "CariKostKita - Cari Kost Terpercaya di Pekanbaru",
     "site_description": "Platform pencarian kost terverifikasi dengan info harga, lokasi, dan fasilitas akurat.",
+    "meta_keywords": "cari kost pekanbaru, kost UIR, kost UNRI, kost Bukit Raya, APK CariKostKita",
     "target_city": "Pekanbaru",
     "apk_size": "8.2 MB",
     "min_android": "Android 8.0+",
@@ -164,70 +187,51 @@
     "banner_type": "promo",
     "hero_image_url": "",
     "logo_url": "",
-    "github_url": "https://github.com/g-423/KosKita",
-    "appName": "CariKostKita Official",
-    "whatsapp": "6281270008899",
-    "apkUrl": "/releases/CariKostKita-v1.0.1.apk",
-    "versionName": "v1.0.0-beta",
-    "releaseNotes": "Rilis beta publik CariKostKita untuk mahasiswa dan warga Pekanbaru.",
-    "supportEmail": "support@carikostkita.id",
-    "contactPhone": "0761-555-0123",
-    "address": "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
-    "siteTitle": "CariKostKita - Cari Kost Terpercaya di Pekanbaru",
-    "siteDescription": "Platform pencarian kost terverifikasi dengan info harga, lokasi, dan fasilitas akurat.",
-    "targetCity": "Pekanbaru",
-    "apkSize": "8.2 MB",
-    "minAndroid": "Android 8.0+",
-    "heroBadge1": "Lokasi dekat kampus & area strategis",
-    "heroBadge2": "Detail kost & foto kamar lengkap",
-    "bannerActive": false,
-    "bannerText": "?? Promo Rilis Beta: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!",
-    "bannerLink": "#pemilik",
-    "bannerType": "promo",
-    "heroImageUrl": "",
-    "logoUrl": "",
-    "githubUrl": "https://github.com/g-423/KosKita",
-    "brand_color": "#6D0808",
-    "brandColor": "#6D0808",
+    "footer_logo_url": "",
+    "app_icon_url": "",
     "favicon_url": "",
-    "faviconUrl": "",
     "og_image_url": "",
-    "ogImageUrl": "",
-    "meta_keywords": "cari kost pekanbaru, kost UIR, kost UNRI, kost Bukit Raya, APK CariKostKita",
-    "metaKeywords": "cari kost pekanbaru, kost UIR, kost UNRI, kost Bukit Raya, APK CariKostKita",
+    "popup_active": false,
+    "popup_title": "",
+    "popup_content": "",
+    "popup_image_url": "",
+    "popup_button_label": "",
+    "popup_button_url": "",
+    "github_url": "https://github.com/g-423/KosKita",
+    "brand_color": "#6D0808",
     "nav_links": [
       {
         "id": "nav-1",
-        "label": "Beranda",
         "href": "#beranda",
+        "label": "Beranda",
         "order": 1,
         "is_active": true
       },
       {
         "id": "nav-2",
-        "label": "Fitur",
         "href": "#fitur",
+        "label": "Fitur",
         "order": 2,
         "is_active": true
       },
       {
         "id": "nav-3",
-        "label": "Cara Install",
         "href": "#install",
+        "label": "Cara Install",
         "order": 3,
         "is_active": true
       },
       {
         "id": "nav-4",
-        "label": "Untuk Pemilik Kost",
         "href": "#pemilik",
+        "label": "Untuk Pemilik Kost",
         "order": 4,
         "is_active": true
       },
       {
         "id": "nav-5",
-        "label": "FAQ",
         "href": "#faq",
+        "label": "FAQ",
         "order": 5,
         "is_active": true
       }
@@ -235,456 +239,476 @@
     "trust_items": [
       {
         "id": "trust-1",
-        "icon": "shield",
-        "title": "Berkas resmi & terverifikasi",
         "desc": "Dirilis dari repositori resmi proyek tanpa adware atau pihak ketiga.",
+        "icon": "shield",
         "order": 1,
+        "title": "Berkas resmi & terverifikasi",
         "is_active": true
       },
       {
         "id": "trust-2",
-        "icon": "bolt",
-        "title": "Ringan & hemat kuota",
         "desc": "Ukuran berkas sangat ringkas agar cepat diunduh tanpa membebani memori ponsel.",
+        "icon": "bolt",
         "order": 2,
+        "title": "Ringan & hemat kuota",
         "is_active": true
       },
       {
         "id": "trust-3",
-        "icon": "lock",
-        "title": "Izin yang masuk akal",
         "desc": "Hanya izin lokasi untuk peta navigasi kost dan galeri foto bagi pemilik kost.",
+        "icon": "lock",
         "order": 3,
+        "title": "Izin yang masuk akal",
         "is_active": true
       }
     ],
     "feature_items": [
       {
         "id": "feat-1",
-        "icon": "search",
-        "title": "Pencarian Mudah",
         "desc": "Temukan kost sesuai lokasi kampus, rentang harga, dan fasilitas yang kamu butuhkan.",
+        "icon": "search",
         "order": 1,
+        "title": "Pencarian Mudah",
         "is_active": true
       },
       {
         "id": "feat-2",
-        "icon": "file-lines",
-        "title": "Informasi Lengkap",
         "desc": "Lihat detail kamar, foto asli terverifikasi, fasilitas lengkap, serta kontak langsung pemilik tanpa perantara.",
+        "icon": "file-lines",
         "order": 2,
+        "title": "Informasi Lengkap",
         "is_active": true
       },
       {
         "id": "feat-3",
-        "icon": "location-dot",
-        "title": "Lokasi Strategis",
         "desc": "Pilihan kost terverifikasi di area strategis yang dekat dengan kampus dan pusat aktivitas.",
+        "icon": "location-dot",
         "order": 3,
+        "title": "Lokasi Strategis",
         "is_active": true
       },
       {
         "id": "feat-4",
-        "icon": "sliders",
-        "title": "Tampilan Sederhana",
         "desc": "Desain antarmuka bersih, ringan, dan sangat mudah digunakan oleh siapa saja.",
+        "icon": "sliders",
         "order": 4,
+        "title": "Tampilan Sederhana",
         "is_active": true
       }
     ],
     "install_steps": [
       {
         "id": "step-1",
-        "step_number": "1",
-        "title": "Download APK",
         "desc": "Klik tombol unduh untuk mendapatkan berkas aplikasi resmi.",
         "order": 1,
-        "is_active": true
+        "title": "Download APK",
+        "is_active": true,
+        "step_number": "1"
       },
       {
         "id": "step-2",
-        "step_number": "2",
-        "title": "Konfirmasi Dialog",
         "desc": "Pilih \"Tetap Download\" jika muncul peringatan browser.",
         "order": 2,
-        "is_active": true
+        "title": "Konfirmasi Dialog",
+        "is_active": true,
+        "step_number": "2"
       },
       {
         "id": "step-3",
-        "step_number": "3",
-        "title": "Izinkan Sumber",
         "desc": "Buka berkas unduhan dan aktifkan izin instalasi dari sumber ini.",
         "order": 3,
-        "is_active": true
+        "title": "Izinkan Sumber",
+        "is_active": true,
+        "step_number": "3"
       },
       {
         "id": "step-4",
-        "step_number": "4",
-        "title": "Selesai!",
         "desc": "Buka aplikasi dan mulai mencari kost idamanmu.",
         "order": 4,
-        "is_active": true
+        "title": "Selesai!",
+        "is_active": true,
+        "step_number": "4"
       }
     ],
     "owner_steps": [
       {
         "id": "ostep-1",
-        "title": "Unduh dan pasang aplikasi CariKostKita.",
         "order": 1,
+        "title": "Unduh dan pasang aplikasi CariKostKita.",
         "is_active": true
       },
       {
         "id": "ostep-2",
-        "title": "Buka Profil, lalu pilih \"Daftar sebagai Pemilik Kost\".",
         "order": 2,
+        "title": "Buka Profil, lalu pilih \"Daftar sebagai Pemilik Kost\".",
         "is_active": true
       },
       {
         "id": "ostep-3",
-        "title": "Isi identitas, alamat kost, fasilitas, dan foto kamar dengan lengkap.",
         "order": 3,
+        "title": "Isi identitas, alamat kost, fasilitas, dan foto kamar dengan lengkap.",
         "is_active": true
       },
       {
         "id": "ostep-4",
-        "title": "Tim verifikasi meninjau pengajuan Anda dalam kurun waktu 1x24 jam.",
         "order": 4,
+        "title": "Tim verifikasi meninjau pengajuan Anda dalam kurun waktu 1x24 jam.",
         "is_active": true
       },
       {
         "id": "ostep-5",
-        "title": "Setelah disetujui, listing kost Anda langsung tayang dan dashboard pemilik dapat digunakan.",
         "order": 5,
+        "title": "Setelah disetujui, listing kost Anda langsung tayang dan dashboard pemilik dapat digunakan.",
         "is_active": true
       }
     ],
     "faq_items": [
       {
         "id": "faq-1",
-        "question": "Mengapa aplikasi belum ada di Google Play Store?",
-        "answer": "Aplikasi sedang dalam tahap pra-rilis publik. Berkas APK dibagikan langsung agar para pencari kost bisa langsung menikmati kemudahan mencari kost sebelum tersedia di Play Store.",
         "order": 1,
+        "answer": "Aplikasi sedang dalam tahap pra-rilis publik. Berkas APK dibagikan langsung agar para pencari kost bisa langsung menikmati kemudahan mencari kost sebelum tersedia di Play Store.",
+        "question": "Mengapa aplikasi belum ada di Google Play Store?",
         "is_active": true
       },
       {
         "id": "faq-2",
-        "question": "Apakah aman menginstal file APK ini?",
-        "answer": "Sangat aman. Berkas APK dikompilasi langsung dari repositori resmi proyek tanpa injeksi kode pihak ketiga. Android akan menampilkan dialog standar yang aman untuk disetujui.",
         "order": 2,
+        "answer": "Sangat aman. Berkas APK dikompilasi langsung dari repositori resmi proyek tanpa injeksi kode pihak ketiga. Android akan menampilkan dialog standar yang aman untuk disetujui.",
+        "question": "Apakah aman menginstal file APK ini?",
         "is_active": true
       },
       {
         "id": "faq-3",
-        "question": "Versi Android apa yang didukung?",
-        "answer": "Mendukung Android 8.0+ hingga versi Android yang lebih baru dengan ukuran hemat kuota.",
         "order": 3,
+        "answer": "Mendukung Android 8.0+ hingga versi Android yang lebih baru dengan ukuran hemat kuota.",
+        "question": "Versi Android apa yang didukung?",
         "is_active": true
       },
       {
         "id": "faq-4",
-        "question": "Apakah mencari kost dikenakan biaya?",
-        "answer": "Tidak. Layanan pencarian kost 100% gratis untuk para pencari kost tanpa biaya langganan, biaya admin, maupun komisi perantara.",
         "order": 4,
+        "answer": "Tidak. Layanan pencarian kost 100% gratis untuk para pencari kost tanpa biaya langganan, biaya admin, maupun komisi perantara.",
+        "question": "Apakah mencari kost dikenakan biaya?",
         "is_active": true
       },
       {
         "id": "faq-5",
-        "question": "Bagaimana jika data kost tidak sesuai?",
-        "answer": "Gunakan fitur lapor di aplikasi atau hubungi kami langsung via WhatsApp atau email bantuan. Tim verifikasi kami akan segera menindaklanjuti.",
         "order": 5,
+        "answer": "Gunakan fitur lapor di aplikasi atau hubungi kami langsung via WhatsApp atau email bantuan. Tim verifikasi kami akan segera menindaklanjuti.",
+        "question": "Bagaimana jika data kost tidak sesuai?",
         "is_active": true
       },
       {
         "id": "faq-6",
-        "question": "Apakah pemilik kost bisa langsung mengunggah?",
-        "answer": "Bisa! Setiap pengajuan kost akan ditinjau oleh tim kurasi kami dalam 1x24 jam untuk mencegah penipuan dan memastikan listing valid.",
         "order": 6,
+        "answer": "Bisa! Setiap pengajuan kost akan ditinjau oleh tim kurasi kami dalam 1x24 jam untuk mencegah penipuan dan memastikan listing valid.",
+        "question": "Apakah pemilik kost bisa langsung mengunggah?",
         "is_active": true
       }
     ],
     "hero_headline": "Temukan Kost Nyaman & Terpercaya di Pekanbaru",
-    "heroHeadline": "Temukan Kost Nyaman & Terpercaya di Pekanbaru",
     "hero_subheadline": "CariKostKita hadir untuk memudahkan kamu menemukan kost terbaik di Pekanbaru. Dengan tampilan yang simpel, cepat, dan lengkap, semua kebutuhan kost ada di genggaman.",
-    "heroSubheadline": "CariKostKita hadir untuk memudahkan kamu menemukan kost terbaik di Pekanbaru. Dengan tampilan yang simpel, cepat, dan lengkap, semua kebutuhan kost ada di genggaman.",
     "hero_cta_primary_label": "Download APK",
-    "heroCtaPrimaryLabel": "Download APK",
     "hero_cta_secondary_label": "Lihat Fitur",
-    "heroCtaSecondaryLabel": "Lihat Fitur",
     "hero_cta_secondary_link": "#fitur",
-    "heroCtaSecondaryLink": "#fitur",
     "hero_ad_free_text": "Bebas Iklan",
-    "heroAdFreeText": "Bebas Iklan",
     "hero_trust_badge_1": "Mudah Digunakan",
-    "heroTrustBadge1": "Mudah Digunakan",
     "hero_trust_badge_2": "Data Terpercaya",
-    "heroTrustBadge2": "Data Terpercaya",
     "hero_trust_badge_3": "Update Rutin",
-    "heroTrustBadge3": "Update Rutin",
     "owner_title": "Anda punya kost di Pekanbaru?",
-    "ownerTitle": "Anda punya kost di Pekanbaru?",
     "owner_intro": "Daftarkan kost Anda di CariKostKita agar lebih mudah ditemukan calon penyewa mahasiswa dan pekerja tanpa komisi perantara.",
-    "ownerIntro": "Daftarkan kost Anda di CariKostKita agar lebih mudah ditemukan calon penyewa mahasiswa dan pekerja tanpa komisi perantara.",
     "owner_wa_label": "Daftar via WhatsApp",
-    "ownerWaLabel": "Daftar via WhatsApp",
     "about_title": "Dibangun untuk Kebutuhan Pencari Kost",
-    "aboutTitle": "Dibangun untuk Kebutuhan Pencari Kost",
     "about_story": "CariKostKita adalah aplikasi yang dikembangkan untuk membantu masyarakat, terutama anak rantau dan mahasiswa, dalam mencari kost dengan lebih mudah, cepat, dan terpercaya.",
-    "aboutStory": "CariKostKita adalah aplikasi yang dikembangkan untuk membantu masyarakat, terutama anak rantau dan mahasiswa, dalam mencari kost dengan lebih mudah, cepat, dan terpercaya.",
     "feedback_active": true,
-    "feedbackActive": true,
     "feedback_title": "Bantu kami menyempurnakan CariKostKita",
-    "feedbackTitle": "Bantu kami menyempurnakan CariKostKita",
     "feedback_desc": "Menemukan bug atau punya usulan fitur untuk CariKostKita? Sampaikan masukan Anda langsung ke admin WhatsApp kami.",
-    "feedbackDesc": "Menemukan bug atau punya usulan fitur untuk CariKostKita? Sampaikan masukan Anda langsung ke admin WhatsApp kami.",
     "feedback_button_label": "Kirim Masukan via WhatsApp",
-    "feedbackButtonLabel": "Kirim Masukan via WhatsApp",
     "final_cta_eyebrow": "JANGAN TUNGGU LAGI!",
-    "finalCtaEyebrow": "JANGAN TUNGGU LAGI!",
     "final_cta_title": "Yuk, Temukan Kost Terbaikmu Sekarang!",
-    "finalCtaTitle": "Yuk, Temukan Kost Terbaikmu Sekarang!",
     "final_cta_desc": "Download CariKostKita sekarang dan mulai pencarian kost impianmu.",
-    "finalCtaDesc": "Download CariKostKita sekarang dan mulai pencarian kost impianmu.",
     "final_cta_button_label": "Download APK Sekarang",
-    "finalCtaButtonLabel": "Download APK Sekarang",
     "footer_tagline": "Kost terbaik, untuk masa depanmu.",
-    "footerTagline": "Kost terbaik, untuk masa depanmu.",
     "footer_copyright": "© 2026 CariKostKita. All rights reserved.",
-    "footerCopyright": "© 2026 CariKostKita. All rights reserved.",
+    "security_modal_active": true,
     "security_modal_title": "Panduan Dialog Download Android",
-    "securityModalTitle": "Panduan Dialog Download Android",
     "security_modal_desc": "Saat mengunduh berkas APK di luar Google Play Store, peramban (Chrome) akan menampilkan pesan standar keamanan:",
-    "securityModalDesc": "Saat mengunduh berkas APK di luar Google Play Store, peramban (Chrome) akan menampilkan pesan standar keamanan:",
     "security_modal_note": "Berkas APK CariKostKita 100% aman dan diverifikasi langsung dari repositori resmi proyek.",
-    "securityModalNote": "Berkas APK CariKostKita 100% aman dan diverifikasi langsung dari repositori resmi proyek.",
     "legal_privacy": "Kebijakan Privasi CariKostKita: Kami menghargai privasi Anda dan hanya menggunakan data untuk keperluan operasional layanan pencarian kost.",
-    "legalPrivacy": "Kebijakan Privasi CariKostKita: Kami menghargai privasi Anda dan hanya menggunakan data untuk keperluan operasional layanan pencarian kost.",
     "legal_terms": "Syarat & Ketentuan CariKostKita: Layanan ini disediakan secara gratis untuk mempermudah pencarian kost di Pekanbaru.",
-    "legalTerms": "Syarat & Ketentuan CariKostKita: Layanan ini disediakan secara gratis untuk mempermudah pencarian kost di Pekanbaru.",
+    "apkUrl": "/releases/CariKostKita-v1.0.1.apk",
+    "address": "Jl. Soekarno Hatta No. 1, Pekanbaru, Riau",
+    "apkSize": "8.2 MB",
+    "appName": "CariKostKita Official",
+    "logoUrl": "",
+    "faqItems": [
+      {
+        "id": "faq-1",
+        "order": 1,
+        "answer": "Aplikasi sedang dalam tahap pra-rilis publik. Berkas APK dibagikan langsung agar para pencari kost bisa langsung menikmati kemudahan mencari kost sebelum tersedia di Play Store.",
+        "question": "Mengapa aplikasi belum ada di Google Play Store?",
+        "is_active": true
+      },
+      {
+        "id": "faq-2",
+        "order": 2,
+        "answer": "Sangat aman. Berkas APK dikompilasi langsung dari repositori resmi proyek tanpa injeksi kode pihak ketiga. Android akan menampilkan dialog standar yang aman untuk disetujui.",
+        "question": "Apakah aman menginstal file APK ini?",
+        "is_active": true
+      },
+      {
+        "id": "faq-3",
+        "order": 3,
+        "answer": "Mendukung Android 8.0+ hingga versi Android yang lebih baru dengan ukuran hemat kuota.",
+        "question": "Versi Android apa yang didukung?",
+        "is_active": true
+      },
+      {
+        "id": "faq-4",
+        "order": 4,
+        "answer": "Tidak. Layanan pencarian kost 100% gratis untuk para pencari kost tanpa biaya langganan, biaya admin, maupun komisi perantara.",
+        "question": "Apakah mencari kost dikenakan biaya?",
+        "is_active": true
+      },
+      {
+        "id": "faq-5",
+        "order": 5,
+        "answer": "Gunakan fitur lapor di aplikasi atau hubungi kami langsung via WhatsApp atau email bantuan. Tim verifikasi kami akan segera menindaklanjuti.",
+        "question": "Bagaimana jika data kost tidak sesuai?",
+        "is_active": true
+      },
+      {
+        "id": "faq-6",
+        "order": 6,
+        "answer": "Bisa! Setiap pengajuan kost akan ditinjau oleh tim kurasi kami dalam 1x24 jam untuk mencegah penipuan dan memastikan listing valid.",
+        "question": "Apakah pemilik kost bisa langsung mengunggah?",
+        "is_active": true
+      }
+    ],
     "navLinks": [
       {
         "id": "nav-1",
-        "label": "Beranda",
         "href": "#beranda",
+        "label": "Beranda",
         "order": 1,
         "is_active": true
       },
       {
         "id": "nav-2",
-        "label": "Fitur",
         "href": "#fitur",
+        "label": "Fitur",
         "order": 2,
         "is_active": true
       },
       {
         "id": "nav-3",
-        "label": "Cara Install",
         "href": "#install",
+        "label": "Cara Install",
         "order": 3,
         "is_active": true
       },
       {
         "id": "nav-4",
-        "label": "Untuk Pemilik Kost",
         "href": "#pemilik",
+        "label": "Untuk Pemilik Kost",
         "order": 4,
         "is_active": true
       },
       {
         "id": "nav-5",
-        "label": "FAQ",
         "href": "#faq",
+        "label": "FAQ",
         "order": 5,
         "is_active": true
       }
     ],
-    "trustItems": [
-      {
-        "id": "trust-1",
-        "icon": "shield",
-        "title": "Berkas resmi & terverifikasi",
-        "desc": "Dirilis dari repositori resmi proyek tanpa adware atau pihak ketiga.",
-        "order": 1,
-        "is_active": true
-      },
-      {
-        "id": "trust-2",
-        "icon": "bolt",
-        "title": "Ringan & hemat kuota",
-        "desc": "Ukuran berkas sangat ringkas agar cepat diunduh tanpa membebani memori ponsel.",
-        "order": 2,
-        "is_active": true
-      },
-      {
-        "id": "trust-3",
-        "icon": "lock",
-        "title": "Izin yang masuk akal",
-        "desc": "Hanya izin lokasi untuk peta navigasi kost dan galeri foto bagi pemilik kost.",
-        "order": 3,
-        "is_active": true
-      }
-    ],
-    "featureItems": [
-      {
-        "id": "feat-1",
-        "icon": "search",
-        "title": "Pencarian Mudah",
-        "desc": "Temukan kost sesuai lokasi kampus, rentang harga, dan fasilitas yang kamu butuhkan.",
-        "order": 1,
-        "is_active": true
-      },
-      {
-        "id": "feat-2",
-        "icon": "file-lines",
-        "title": "Informasi Lengkap",
-        "desc": "Lihat detail kamar, foto asli terverifikasi, fasilitas lengkap, serta kontak langsung pemilik tanpa perantara.",
-        "order": 2,
-        "is_active": true
-      },
-      {
-        "id": "feat-3",
-        "icon": "location-dot",
-        "title": "Lokasi Strategis",
-        "desc": "Pilihan kost terverifikasi di area strategis yang dekat dengan kampus dan pusat aktivitas.",
-        "order": 3,
-        "is_active": true
-      },
-      {
-        "id": "feat-4",
-        "icon": "sliders",
-        "title": "Tampilan Sederhana",
-        "desc": "Desain antarmuka bersih, ringan, dan sangat mudah digunakan oleh siapa saja.",
-        "order": 4,
-        "is_active": true
-      }
-    ],
-    "installSteps": [
-      {
-        "id": "step-1",
-        "step_number": "1",
-        "title": "Download APK",
-        "desc": "Klik tombol unduh untuk mendapatkan berkas aplikasi resmi.",
-        "order": 1,
-        "is_active": true
-      },
-      {
-        "id": "step-2",
-        "step_number": "2",
-        "title": "Konfirmasi Dialog",
-        "desc": "Pilih \"Tetap Download\" jika muncul peringatan browser.",
-        "order": 2,
-        "is_active": true
-      },
-      {
-        "id": "step-3",
-        "step_number": "3",
-        "title": "Izinkan Sumber",
-        "desc": "Buka berkas unduhan dan aktifkan izin instalasi dari sumber ini.",
-        "order": 3,
-        "is_active": true
-      },
-      {
-        "id": "step-4",
-        "step_number": "4",
-        "title": "Selesai!",
-        "desc": "Buka aplikasi dan mulai mencari kost idamanmu.",
-        "order": 4,
-        "is_active": true
-      }
-    ],
+    "revision": 0,
+    "whatsapp": "6281270008899",
+    "githubUrl": "https://github.com/g-423/KosKita",
+    "siteTitle": "CariKostKita - Cari Kost Terpercaya di Pekanbaru",
+    "aboutStory": "CariKostKita adalah aplikasi yang dikembangkan untuk membantu masyarakat, terutama anak rantau dan mahasiswa, dalam mencari kost dengan lebih mudah, cepat, dan terpercaya.",
+    "aboutTitle": "Dibangun untuk Kebutuhan Pencari Kost",
+    "appIconUrl": "",
+    "bannerLink": "#pemilik",
+    "bannerText": "?? Promo Rilis Beta: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!",
+    "bannerType": "promo",
+    "brandColor": "#6D0808",
+    "faviconUrl": "",
+    "heroBadge1": "Lokasi dekat kampus & area strategis",
+    "heroBadge2": "Detail kost & foto kamar lengkap",
+    "legalTerms": "Syarat & Ketentuan CariKostKita: Layanan ini disediakan secara gratis untuk mempermudah pencarian kost di Pekanbaru.",
+    "minAndroid": "Android 8.0+",
+    "ogImageUrl": "",
+    "ownerIntro": "Daftarkan kost Anda di CariKostKita agar lebih mudah ditemukan calon penyewa mahasiswa dan pekerja tanpa komisi perantara.",
     "ownerSteps": [
       {
         "id": "ostep-1",
-        "title": "Unduh dan pasang aplikasi CariKostKita.",
         "order": 1,
+        "title": "Unduh dan pasang aplikasi CariKostKita.",
         "is_active": true
       },
       {
         "id": "ostep-2",
-        "title": "Buka Profil, lalu pilih \"Daftar sebagai Pemilik Kost\".",
         "order": 2,
+        "title": "Buka Profil, lalu pilih \"Daftar sebagai Pemilik Kost\".",
         "is_active": true
       },
       {
         "id": "ostep-3",
-        "title": "Isi identitas, alamat kost, fasilitas, dan foto kamar dengan lengkap.",
         "order": 3,
+        "title": "Isi identitas, alamat kost, fasilitas, dan foto kamar dengan lengkap.",
         "is_active": true
       },
       {
         "id": "ostep-4",
-        "title": "Tim verifikasi meninjau pengajuan Anda dalam kurun waktu 1x24 jam.",
         "order": 4,
+        "title": "Tim verifikasi meninjau pengajuan Anda dalam kurun waktu 1x24 jam.",
         "is_active": true
       },
       {
         "id": "ostep-5",
+        "order": 5,
         "title": "Setelah disetujui, listing kost Anda langsung tayang dan dashboard pemilik dapat digunakan.",
-        "order": 5,
         "is_active": true
       }
     ],
-    "faqItems": [
-      {
-        "id": "faq-1",
-        "question": "Mengapa aplikasi belum ada di Google Play Store?",
-        "answer": "Aplikasi sedang dalam tahap pra-rilis publik. Berkas APK dibagikan langsung agar para pencari kost bisa langsung menikmati kemudahan mencari kost sebelum tersedia di Play Store.",
-        "order": 1,
-        "is_active": true
-      },
-      {
-        "id": "faq-2",
-        "question": "Apakah aman menginstal file APK ini?",
-        "answer": "Sangat aman. Berkas APK dikompilasi langsung dari repositori resmi proyek tanpa injeksi kode pihak ketiga. Android akan menampilkan dialog standar yang aman untuk disetujui.",
-        "order": 2,
-        "is_active": true
-      },
-      {
-        "id": "faq-3",
-        "question": "Versi Android apa yang didukung?",
-        "answer": "Mendukung Android 8.0+ hingga versi Android yang lebih baru dengan ukuran hemat kuota.",
-        "order": 3,
-        "is_active": true
-      },
-      {
-        "id": "faq-4",
-        "question": "Apakah mencari kost dikenakan biaya?",
-        "answer": "Tidak. Layanan pencarian kost 100% gratis untuk para pencari kost tanpa biaya langganan, biaya admin, maupun komisi perantara.",
-        "order": 4,
-        "is_active": true
-      },
-      {
-        "id": "faq-5",
-        "question": "Bagaimana jika data kost tidak sesuai?",
-        "answer": "Gunakan fitur lapor di aplikasi atau hubungi kami langsung via WhatsApp atau email bantuan. Tim verifikasi kami akan segera menindaklanjuti.",
-        "order": 5,
-        "is_active": true
-      },
-      {
-        "id": "faq-6",
-        "question": "Apakah pemilik kost bisa langsung mengunggah?",
-        "answer": "Bisa! Setiap pengajuan kost akan ditinjau oleh tim kurasi kami dalam 1x24 jam untuk mencegah penipuan dan memastikan listing valid.",
-        "order": 6,
-        "is_active": true
-      }
-    ],
-    "footer_logo_url": "",
-    "footerLogoUrl": "",
-    "app_icon_url": "",
-    "appIconUrl": "",
-    "popup_active": false,
-    "popupActive": false,
-    "popup_title": "",
+    "ownerTitle": "Anda punya kost di Pekanbaru?",
     "popupTitle": "",
-    "popup_content": "",
+    "targetCity": "Pekanbaru",
+    "trustItems": [
+      {
+        "id": "trust-1",
+        "desc": "Dirilis dari repositori resmi proyek tanpa adware atau pihak ketiga.",
+        "icon": "shield",
+        "order": 1,
+        "title": "Berkas resmi & terverifikasi",
+        "is_active": true
+      },
+      {
+        "id": "trust-2",
+        "desc": "Ukuran berkas sangat ringkas agar cepat diunduh tanpa membebani memori ponsel.",
+        "icon": "bolt",
+        "order": 2,
+        "title": "Ringan & hemat kuota",
+        "is_active": true
+      },
+      {
+        "id": "trust-3",
+        "desc": "Hanya izin lokasi untuk peta navigasi kost dan galeri foto bagi pemilik kost.",
+        "icon": "lock",
+        "order": 3,
+        "title": "Izin yang masuk akal",
+        "is_active": true
+      }
+    ],
+    "updated_at": "",
+    "popupActive": false,
+    "versionName": "v1.0.0-beta",
+    "bannerActive": false,
+    "contactPhone": "0761-555-0123",
+    "featureItems": [
+      {
+        "id": "feat-1",
+        "desc": "Temukan kost sesuai lokasi kampus, rentang harga, dan fasilitas yang kamu butuhkan.",
+        "icon": "search",
+        "order": 1,
+        "title": "Pencarian Mudah",
+        "is_active": true
+      },
+      {
+        "id": "feat-2",
+        "desc": "Lihat detail kamar, foto asli terverifikasi, fasilitas lengkap, serta kontak langsung pemilik tanpa perantara.",
+        "icon": "file-lines",
+        "order": 2,
+        "title": "Informasi Lengkap",
+        "is_active": true
+      },
+      {
+        "id": "feat-3",
+        "desc": "Pilihan kost terverifikasi di area strategis yang dekat dengan kampus dan pusat aktivitas.",
+        "icon": "location-dot",
+        "order": 3,
+        "title": "Lokasi Strategis",
+        "is_active": true
+      },
+      {
+        "id": "feat-4",
+        "desc": "Desain antarmuka bersih, ringan, dan sangat mudah digunakan oleh siapa saja.",
+        "icon": "sliders",
+        "order": 4,
+        "title": "Tampilan Sederhana",
+        "is_active": true
+      }
+    ],
+    "feedbackDesc": "Menemukan bug atau punya usulan fitur untuk CariKostKita? Sampaikan masukan Anda langsung ke admin WhatsApp kami.",
+    "finalCtaDesc": "Download CariKostKita sekarang dan mulai pencarian kost impianmu.",
+    "heroHeadline": "Temukan Kost Nyaman & Terpercaya di Pekanbaru",
+    "heroImageUrl": "",
+    "installSteps": [
+      {
+        "id": "step-1",
+        "desc": "Klik tombol unduh untuk mendapatkan berkas aplikasi resmi.",
+        "order": 1,
+        "title": "Download APK",
+        "is_active": true,
+        "step_number": "1"
+      },
+      {
+        "id": "step-2",
+        "desc": "Pilih \"Tetap Download\" jika muncul peringatan browser.",
+        "order": 2,
+        "title": "Konfirmasi Dialog",
+        "is_active": true,
+        "step_number": "2"
+      },
+      {
+        "id": "step-3",
+        "desc": "Buka berkas unduhan dan aktifkan izin instalasi dari sumber ini.",
+        "order": 3,
+        "title": "Izinkan Sumber",
+        "is_active": true,
+        "step_number": "3"
+      },
+      {
+        "id": "step-4",
+        "desc": "Buka aplikasi dan mulai mencari kost idamanmu.",
+        "order": 4,
+        "title": "Selesai!",
+        "is_active": true,
+        "step_number": "4"
+      }
+    ],
+    "legalPrivacy": "Kebijakan Privasi CariKostKita: Kami menghargai privasi Anda dan hanya menggunakan data untuk keperluan operasional layanan pencarian kost.",
+    "metaKeywords": "cari kost pekanbaru, kost UIR, kost UNRI, kost Bukit Raya, APK CariKostKita",
+    "ownerWaLabel": "Daftar via WhatsApp",
     "popupContent": "",
-    "popup_image_url": "",
+    "releaseNotes": "Rilis beta publik CariKostKita untuk mahasiswa dan warga Pekanbaru.",
+    "supportEmail": "support@carikostkita.id",
+    "feedbackTitle": "Bantu kami menyempurnakan CariKostKita",
+    "finalCtaTitle": "Yuk, Temukan Kost Terbaikmu Sekarang!",
+    "footerLogoUrl": "",
+    "footerTagline": "Kost terbaik, untuk masa depanmu.",
     "popupImageUrl": "",
-    "popup_button_label": "",
-    "popupButtonLabel": "",
-    "popup_button_url": "",
+    "feedbackActive": true,
+    "heroAdFreeText": "Bebas Iklan",
     "popupButtonUrl": "",
-    "security_modal_active": true,
-    "securityModalActive": true
+    "finalCtaEyebrow": "JANGAN TUNGGU LAGI!",
+    "footerCopyright": "© 2026 CariKostKita. All rights reserved.",
+    "heroSubheadline": "CariKostKita hadir untuk memudahkan kamu menemukan kost terbaik di Pekanbaru. Dengan tampilan yang simpel, cepat, dan lengkap, semua kebutuhan kost ada di genggaman.",
+    "heroTrustBadge1": "Mudah Digunakan",
+    "heroTrustBadge2": "Data Terpercaya",
+    "heroTrustBadge3": "Update Rutin",
+    "siteDescription": "Platform pencarian kost terverifikasi dengan info harga, lokasi, dan fasilitas akurat.",
+    "popupButtonLabel": "",
+    "securityModalDesc": "Saat mengunduh berkas APK di luar Google Play Store, peramban (Chrome) akan menampilkan pesan standar keamanan:",
+    "securityModalNote": "Berkas APK CariKostKita 100% aman dan diverifikasi langsung dari repositori resmi proyek.",
+    "securityModalTitle": "Panduan Dialog Download Android",
+    "feedbackButtonLabel": "Kirim Masukan via WhatsApp",
+    "finalCtaButtonLabel": "Download APK Sekarang",
+    "heroCtaPrimaryLabel": "Download APK",
+    "securityModalActive": true,
+    "heroCtaSecondaryLink": "#fitur",
+    "heroCtaSecondaryLabel": "Lihat Fitur"
   },
   "loginAttempts": {},
   "readNotifications": []

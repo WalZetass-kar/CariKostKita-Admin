@@ -384,20 +384,18 @@ export function KostView() {
               title="Pilih semua data di halaman ini"
               className="h-4 w-4 rounded accent-maroon"
             />,
-            "Nama Kost",
-            "Wilayah",
+            "Properti & Lokasi",
             "Harga",
             "Pemilik",
             "Status",
             "Tanggal",
-            "Aksi",
+            { title: "Aksi", align: "text-center", className: "w-28" },
           ]}
-          minWidth={940}
         >
           {pager.slice.length ? (
             pager.slice.map((k) => (
               <tr key={k.id} className={selectedIds.includes(k.id) ? "bg-maroon/5" : undefined}>
-                <Td>
+                <Td className="w-10 text-center">
                   <input
                     type="checkbox"
                     checked={selectedIds.includes(k.id)}
@@ -406,16 +404,21 @@ export function KostView() {
                   />
                 </Td>
                 <Td>
-                  <strong>{k.name}</strong>
-                  <span className="block text-xs text-muted truncate max-w-xs">{k.address}</span>
+                  <strong className="block text-ink">{k.name}</strong>
+                  <span className="block text-xs text-muted truncate max-w-sm">
+                    {k.area ? `${k.area} · ` : ""}{k.address}
+                  </span>
                 </Td>
-                <Td>{k.area}</Td>
-                <Td>{formatCurrency(k.price)}</Td>
+                <Td>
+                  <span className="font-semibold tabular-nums text-ink text-sm">
+                    {formatCurrency(k.price)}
+                  </span>
+                </Td>
                 <Td>
                   <button
                     type="button"
                     onClick={() => { setView("owners"); }}
-                    className="text-left hover:underline"
+                    className="text-left font-medium text-ink hover:underline text-xs sm:text-sm block"
                   >
                     {k.ownerName}
                   </button>
@@ -423,8 +426,8 @@ export function KostView() {
                     <span className="block text-[11px] font-bold text-warn-fg">Belum Verified</span>
                   )}
                 </Td>
-                <Td><Badge status={k.status} /></Td>
-                <Td>{formatDate(k.createdAt)}</Td>
+                <Td><Badge status={k.status} size="sm" /></Td>
+                <Td><span className="text-xs text-muted whitespace-nowrap">{formatDate(k.createdAt)}</span></Td>
                 <Td>
                   <div className="flex items-center gap-1">
                     <IconButton label="Detail Lengkap" tone="info" onClick={() => setDetail(k)}>

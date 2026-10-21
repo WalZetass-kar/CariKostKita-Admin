@@ -341,20 +341,16 @@ export function OwnersView() {
               onChange={toggleSelectAllPage}
               aria-label="Pilih semua baris halaman ini"
             />,
-            "Nama Pemilik",
-            "Email",
-            "Telepon",
-            "Verifikasi",
-            "Status Akun",
+            "Pemilik & Kontak",
+            "Status & Verifikasi",
             "Kost",
             "Diajukan",
-            "Aksi",
+            { title: "Aksi", align: "text-center", className: "w-28" },
           ]}
-          minWidth={1050}
         >
           {pager.slice.length ? pager.slice.map((o) => (
             <tr key={o.id} className={selectedIds.includes(o.id) ? "bg-maroon/5 dark:bg-maroon/15" : ""}>
-              <Td className="w-10">
+              <Td className="w-10 text-center">
                 <input
                   type="checkbox"
                   className="rounded border-line"
@@ -365,46 +361,48 @@ export function OwnersView() {
               </Td>
               <Td>
                 <div className="flex items-center gap-2.5">
-                  <Avatar name={o.name} src={o.photo} size={34} />
+                  <Avatar name={o.name} src={o.photo} size={36} />
                   <div className="min-w-0">
                     <strong className="block truncate text-ink">{o.name}</strong>
-                    <span className="text-xs text-muted font-mono">{o.id}</span>
+                    <div className="text-xs text-muted truncate">
+                      <span>{o.email || "—"}</span>
+                      {o.phone && <span className="font-mono"> · {o.phone}</span>}
+                    </div>
+                    <span className="text-[11px] text-muted font-mono">ID {o.id}</span>
                   </div>
                 </div>
               </Td>
-              <Td className="text-sm">{o.email}</Td>
-              <Td className="text-sm">{o.phone}</Td>
               <Td>
-                <Badge status={o.verificationStatus} label={OWNER_VERIFICATION_LABEL[o.verificationStatus]} />
-              </Td>
-              <Td>
-                {o.archived ? (
-                  <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" />
-                ) : (
-                  <Badge status={o.accountActive ? "Aktif" : "Nonaktif"} />
-                )}
+                <div className="flex flex-col gap-1 items-start">
+                  <Badge status={o.verificationStatus} label={OWNER_VERIFICATION_LABEL[o.verificationStatus]} size="sm" />
+                  {o.archived ? (
+                    <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" size="sm" />
+                  ) : (
+                    <Badge status={o.accountActive ? "Aktif" : "Nonaktif"} size="sm" />
+                  )}
+                </div>
               </Td>
               <Td>
                 <span className="inline-flex items-center gap-1 font-bold text-xs bg-track px-2 py-0.5 rounded-full">
                   <Building2 size={13} className="text-muted" /> {o.kostCount}
                 </span>
               </Td>
-              <Td className="text-xs">{formatDate(o.submittedAt)}</Td>
-              <Td>
-                <div className="flex gap-1.5 items-center">
-                  <IconButton label="Lihat Detail" tone="info" onClick={() => setDetail(o)}><Eye size={17} /></IconButton>
-                  <IconButton label="Edit Data" tone="info" onClick={() => setEditOwner(o)}><Pencil size={17} /></IconButton>
+              <Td className="text-xs text-muted whitespace-nowrap">{formatDate(o.submittedAt)}</Td>
+              <Td className="text-center">
+                <div className="flex gap-1 items-center justify-center">
+                  <IconButton label="Lihat Detail" tone="info" onClick={() => setDetail(o)}><Eye size={16} /></IconButton>
+                  <IconButton label="Edit Data" tone="info" onClick={() => setEditOwner(o)}><Pencil size={16} /></IconButton>
                   {rowActions(o).map(([label, Icon, type, tone]) => (
-                    <IconButton key={label} label={label} tone={tone} onClick={() => setConfirm({ type, owner: o })}><Icon size={17} /></IconButton>
+                    <IconButton key={label} label={label} tone={tone} onClick={() => setConfirm({ type, owner: o })}><Icon size={16} /></IconButton>
                   ))}
                   {o.archived ? (
                     <>
                       <IconButton label="Pulihkan Akun" tone="success" onClick={() => setConfirm({ type: "restore", owner: o })}>
-                        <RotateCcw size={17} />
+                        <RotateCcw size={16} />
                       </IconButton>
                       {isSuperAdmin && (
                         <IconButton label="Hapus Permanen" tone="danger" onClick={() => { setAlsoKosts(true); setConfirm({ type: "permanentDelete", owner: o }); }}>
-                          <Trash2 size={17} />
+                          <Trash2 size={16} />
                         </IconButton>
                       )}
                     </>

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { BadgeCheck, Clock3, FileCheck2, RefreshCw, XCircle } from "lucide-react";
 import { api } from "@/lib/api";
-import { Badge, EmptyState, ErrorState, Panel, PanelTitle, PrimaryButton, SkeletonTable, TextArea, useToast } from "../ui";
+import { Badge, EmptyState, ErrorState, GhostButton, Modal, Panel, PanelTitle, PrimaryButton, DangerButton, SkeletonTable, TextArea, useToast } from "../ui";
 
 const STATUS_TABS = [
   ["PENDING", "Menunggu"],
@@ -134,19 +134,53 @@ export function OwnerVerificationQueueView() {
       )}
 
       {decision && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/45 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setDecision(null); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="verification-decision-title" className="w-full max-w-lg rounded-2xl border border-line bg-paper p-5 shadow-2xl">
-            <h2 id="verification-decision-title" className="text-lg font-semibold text-ink">
-              {decision.status === "APPROVED" ? "Setujui pengajuan?" : decision.status === "REJECTED" ? "Tolak pengajuan?" : "Minta revisi dokumen?"}
-            </h2>
-            <p className="mt-1 text-sm text-muted">{decision.status === "APPROVED" ? "Akun akan diberi status pemilik dan verifikasi disetujui." : "Berikan alasan yang jelas agar pemohon memahami tindak lanjutnya."}</p>
-            {decision.status !== "APPROVED" && <TextArea label="Catatan untuk pemohon" rows={4} value={note} onChange={(event) => setNote(event.target.value)} maxLength={1000} required />}
-            <div className="mt-5 flex flex-col-reverse sm:flex-row justify-end gap-2">
-              <button disabled={saving} onClick={() => setDecision(null)} className="rounded-lg border border-line px-4 py-2 text-sm text-ink w-full sm:w-auto">Batal</button>
-              <PrimaryButton loading={saving} onClick={submitDecision} className="w-full sm:w-auto justify-center">{decision.status === "APPROVED" ? "Konfirmasi persetujuan" : "Simpan keputusan"}</PrimaryButton>
+        <Modal
+          open={Boolean(decision)}
+          onClose={saving ? undefined : () => setDecision(null)}
+          title={
+            decision.status === "APPROVED"
+              ? "Setujui Verifikasi Pemilik"
+              : decision.status === "REJECTED"
+              ? "Tolak Verifikasi Pemilik"
+              : "Minta Revisi Dokumen Pemilik"
+          }
+          maxWidth="max-w-lg"
+          footer={
+            <>
+              <GhostButton disabled={saving} onClick={() => setDecision(null)}>
+                Batal
+              </GhostButton>
+              {decision.status === "REJECTED" ? (
+                <DangerButton loading={saving} onClick={submitDecision}>
+                  Tolak Pengajuan
+                </DangerButton>
+              ) : (
+                <PrimaryButton loading={saving} onClick={submitDecision}>
+                  {decision.status === "APPROVED" ? "Konfirmasi Persetujuan" : "Kirim Permintaan Revisi"}
+                </PrimaryButton>
+              )}
+            </>
+          }
+        >
+          <p className="text-sm leading-relaxed text-muted">
+            {decision.status === "APPROVED"
+              ? "Akun akan diverifikasi resmi sebagai pemilik kost dan listing kost miliknya dapat segera dipublikasikan."
+              : "Berikan catatan atau instruksi yang jelas kepada pemohon mengenai kelengkapan dokumen yang diperlukan."}
+          </p>
+          {decision.status !== "APPROVED" && (
+            <div className="mt-4">
+              <TextArea
+                label="Catatan untuk pemohon"
+                rows={4}
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                maxLength={1000}
+                required
+                hint="Catatan ini akan ditampilkan kepada pemilik di aplikasi Android CariKostKita."
+              />
             </div>
-          </section>
-        </div>
+          )}
+        </Modal>
       )}
     </div>
   );

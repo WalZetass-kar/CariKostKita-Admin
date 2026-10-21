@@ -155,24 +155,28 @@ export function ReportsView() {
 
       {mode === "list" ? (
         <Panel>
-          <DataTable headers={["ID Laporan", "Kost Dilaporkan", "Pelapor", "Jenis Laporan", "Tanggal", "Status", "Aksi"]} minWidth={900}>
+          <DataTable headers={["Laporan & Kost", "Pelapor", "Jenis Laporan", "Tanggal", "Status", { title: "Aksi", align: "text-center", className: "w-20" }]}>
             {pager.slice.length ? pager.slice.map((r) => (
               <tr key={r.id}>
-                <Td><strong className="font-mono text-ink">{r.id}</strong></Td>
-                <Td><strong className="text-ink">{r.kostName}</strong></Td>
-                <Td>{r.reporterName}</Td>
-                <Td><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-track">{r.type}</span></Td>
-                <Td className="text-xs">{formatDate(r.createdAt)}</Td>
-                <Td><Badge status={r.status} /></Td>
                 <Td>
-                  <IconButton label="Detail & tindak lanjut" tone="info" onClick={() => setOpenId(r.id)}>
-                    <Eye size={17} />
-                  </IconButton>
+                  <strong className="block text-ink">{r.kostName}</strong>
+                  <span className="text-xs text-muted font-mono">{r.id}</span>
+                </Td>
+                <Td><span className="text-sm text-ink">{r.reporterName}</span></Td>
+                <Td><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-track">{r.type}</span></Td>
+                <Td className="text-xs text-muted whitespace-nowrap">{formatDate(r.createdAt)}</Td>
+                <Td><Badge status={r.status} size="sm" /></Td>
+                <Td className="text-center">
+                  <div className="flex justify-center">
+                    <IconButton label="Detail & tindak lanjut" tone="info" onClick={() => setOpenId(r.id)}>
+                      <Eye size={16} />
+                    </IconButton>
+                  </div>
                 </Td>
               </tr>
             )) : (
               <tr>
-                <Td colSpan={7}>
+                <Td colSpan={6}>
                   <EmptyState title="Laporan tidak ditemukan" message="Ubah filter atau kata kunci pencarian." onReset={hasActiveFilters ? resetFilters : undefined} />
                 </Td>
               </tr>

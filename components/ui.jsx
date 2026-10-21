@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, isValidElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, Check, CheckCheck, CheckCircle2, ChevronLeft, ChevronRight, Clock, Clock3, Download, ExternalLink, FileSpreadsheet, FileText, Inbox, Loader2, RefreshCw, RotateCcw, Search, SlidersHorizontal, X, XCircle, Image as ImageIcon, Upload, Building2, BriefcaseBusiness, Users, Flag, Megaphone, Bell, MapPin } from "lucide-react";
 import { exportRows } from "@/lib/exporter";
 import { api, readImage } from "@/lib/api";
@@ -24,9 +24,12 @@ const statusTone = {
   Ditolak: "bad", Nonaktif: "bad", Rejected: "bad", Gagal: "bad", Diarsipkan: "bad",
 };
 
-export function Badge({ status, label, tone }) {
+export function Badge({ status, label, tone, size = "md" }) {
   const t = tone || statusTone[status] || "ok";
-  return <span className={`inline-flex min-h-7 items-center whitespace-nowrap rounded-full px-3 text-xs font-extrabold ${toneMap[t]}`}>{label || status}</span>;
+  const sizeClasses = size === "sm"
+    ? "min-h-5 px-2 text-[10px] leading-none"
+    : "min-h-6 sm:min-h-6.5 px-2.5 sm:px-3 text-[11px] sm:text-xs leading-none";
+  return <span className={`inline-flex items-center justify-center whitespace-nowrap rounded-full font-extrabold ${sizeClasses} ${toneMap[t]}`}>{label || status}</span>;
 }
 
 /* ---------- Tombol ---------- */
@@ -36,7 +39,7 @@ export function Spinner({ size = 16 }) {
   return <Loader2 size={size} className="animate-spin-slow" aria-hidden="true" />;
 }
 
-export function IconButton({ children, label, onClick, disabled, className = "", type = "button", tone = "neutral" }) {
+export function IconButton({ children, icon: Icon, label, onClick, disabled, className = "", type = "button", tone = "neutral", size = 16 }) {
   const toneClasses = {
     neutral: "border-line bg-paper text-muted hover:text-ink hover:border-muted",
     info: "border-info-bg bg-paper text-blue hover:bg-info-bg hover:text-blue dark:text-info-fg",
@@ -47,8 +50,15 @@ export function IconButton({ children, label, onClick, disabled, className = "",
   }[tone] || "border-line bg-paper text-muted hover:text-ink";
 
   return (
-    <button type={type} aria-label={label} title={label} onClick={onClick} disabled={disabled} className={`${btnBase} h-10 w-10 shrink-0 border ${toneClasses} ${className}`}>
-      {children}
+    <button
+      type={type}
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${btnBase} h-9 w-9 shrink-0 border ${toneClasses} ${className}`}
+    >
+      {Icon ? <Icon size={size} aria-hidden="true" /> : children}
     </button>
   );
 }
@@ -94,25 +104,37 @@ export function PanelTitle({ eyebrow, title }) {
   );
 }
 
-export function DataTable({ headers, children, minWidth = 760 }) {
+export function DataTable({ headers, children, minWidth, className = "" }) {
   return (
-    <div className="w-full overflow-x-auto touch-pan-x [-webkit-overflow-scrolling:touch]">
-      <table className="w-full border-collapse" style={{ minWidth }}>
+    <div className={`w-full overflow-x-auto touch-pan-x [-webkit-overflow-scrolling:touch] ${className}`}>
+      <table className="w-full border-collapse" style={minWidth ? { minWidth } : undefined}>
         <thead>
-          <tr>
-            {headers.map((h) => (
-              <th key={h} className="border-b border-line px-3 py-3 text-left text-xs font-extrabold uppercase text-muted">{h}</th>
-            ))}
+          <tr className="bg-field/40">
+            {headers.map((h, idx) => {
+              const isConfigObj = typeof h === "object" && h !== null && !isValidElement(h);
+              const title = isConfigObj ? h.title : h;
+              const align = isConfigObj && h.align ? h.align : "text-left";
+              const cls = isConfigObj && h.className ? h.className : "";
+              return (
+                <th
+                  key={idx}
+                  className={`border-b border-line px-3.5 py-3 text-xs font-extrabold uppercase tracking-wider text-muted ${align} ${cls}`}
+                >
+                  {title}
+                </th>
+              );
+            })}
           </tr>
         </thead>
-        <tbody>{children}</tbody>
+        <tbody className="divide-y divide-line/70">{children}</tbody>
       </table>
     </div>
   );
 }
 
-export function Td({ children, colSpan, className = "" }) {
-  return <td colSpan={colSpan} className={`border-b border-line px-3 py-3 align-middle text-sm ${className}`}>{children}</td>;
+export function Td({ children, colSpan, className = "", align }) {
+  const alignClass = align ? `text-${align}` : "";
+  return <td colSpan={colSpan} className={`border-b border-line px-3.5 py-3 align-middle text-sm ${alignClass} ${className}`}>{children}</td>;
 }
 
 export function Avatar({ name, src, size = 44, className = "" }) {

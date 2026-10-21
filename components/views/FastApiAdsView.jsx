@@ -83,7 +83,7 @@ export function FastApiAdsView() {
             </GhostButton>
           </div>
         </div>
-        <form onSubmit={search} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_210px_auto]">
+        <form onSubmit={search} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_210px_auto] items-end">
           <label className="relative block">
             <span className="sr-only">Cari judul iklan</span>
             <Search
@@ -114,7 +114,7 @@ export function FastApiAdsView() {
             ]}
           />
           <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center">
-            <Search size={16} /> Cari
+            <Search size={16} /> <span>Cari</span>
           </PrimaryButton>
         </form>
       </Panel>
@@ -141,7 +141,7 @@ export function FastApiAdsView() {
               <Plus size={14} /> Tambah Iklan
             </PrimaryButton>
           </div>
-          <DataTable headers={["Iklan", "Periode", "Status", "Impresi", "Klik", "Target", "Aksi"]} minWidth={880}>
+          <DataTable headers={["Iklan", "Periode", "Status", "Performa", "Target", { title: "Aksi", align: "text-center", className: "w-20" }]}>
             {ads.map((ad) => (
               <tr key={ad.id} className="hover:bg-track/60 transition-colors">
                 <Td>
@@ -172,14 +172,15 @@ export function FastApiAdsView() {
                   <Badge status={ad.is_active ? "Aktif" : "Nonaktif"} />
                 </Td>
                 <Td>
-                  <span className="tabular-nums text-xs sm:text-sm text-ink font-semibold">
-                    {Number(ad.impressions || 0).toLocaleString("id-ID")}
-                  </span>
-                </Td>
-                <Td>
-                  <span className="tabular-nums text-xs sm:text-sm text-ink font-semibold">
-                    {Number(ad.clicks || 0).toLocaleString("id-ID")}
-                  </span>
+                  <div className="text-xs space-y-0.5">
+                    <div className="font-semibold text-ink tabular-nums">
+                      {Number(ad.impressions || 0).toLocaleString("id-ID")}{" "}
+                      <span className="font-normal text-[11px] text-muted">tayang</span>
+                    </div>
+                    <div className="tabular-nums text-muted text-[11px]">
+                      {Number(ad.clicks || 0).toLocaleString("id-ID")} klik
+                    </div>
+                  </div>
                 </Td>
                 <Td>
                   {ad.target_url ? (
@@ -196,24 +197,26 @@ export function FastApiAdsView() {
                     <span className="text-xs text-muted">—</span>
                   )}
                 </Td>
-                <Td>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      openAdForm?.({
-                        id: ad.id,
-                        title: ad.title,
-                        description: ad.description,
-                        image: ad.image_url,
-                        link: ad.target_url,
-                        status: ad.is_active ? "Aktif" : "Nonaktif",
-                      })
-                    }
-                    className="inline-flex min-h-8 items-center gap-1 rounded-lg border border-line px-2.5 text-xs font-bold hover:bg-track active:scale-95 transition"
-                  >
-                    <Pencil size={12} />
-                    <span>Edit</span>
-                  </button>
+                <Td className="w-20 text-center">
+                  <div className="flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openAdForm?.({
+                          id: ad.id,
+                          title: ad.title,
+                          description: ad.description,
+                          image: ad.image_url,
+                          link: ad.target_url,
+                          status: ad.is_active ? "Aktif" : "Nonaktif",
+                        })
+                      }
+                      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line px-2.5 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    >
+                      <Pencil size={13} />
+                      <span>Edit</span>
+                    </button>
+                  </div>
                 </Td>
               </tr>
             ))}

@@ -911,22 +911,20 @@ function AdminsTab() {
           </PrimaryButton>
         </div>
 
-        <DataTable headers={["Admin", "Username / Email", "Role Akses", "Status", "Dibuat", "Aksi"]} minWidth={750}>
+        <DataTable headers={["Admin Pengelola", "Role Akses", "Status", "Dibuat", { title: "Aksi", align: "text-center", className: "w-24" }]}>
           {adminList.map((adm) => (
             <tr key={adm.id}>
               <Td>
                 <div className="flex items-center gap-2.5">
-                  <Avatar name={adm.name} size={32} />
-                  <div>
-                    <strong className="block text-ink">{adm.name}</strong>
-                    <span className="text-xs text-muted font-mono">{adm.phone || "-"}</span>
+                  <Avatar name={adm.name} size={36} />
+                  <div className="min-w-0">
+                    <strong className="block truncate text-ink">{adm.name}</strong>
+                    <div className="text-xs text-muted truncate">
+                      <span className="font-mono font-semibold text-ink">@{adm.username}</span>
+                      {adm.email && <span> · {adm.email}</span>}
+                    </div>
+                    {adm.phone && <span className="text-[11px] text-muted font-mono block">{adm.phone}</span>}
                   </div>
-                </div>
-              </Td>
-              <Td>
-                <div>
-                  <span className="font-mono text-xs font-bold text-ink">@{adm.username}</span>
-                  <span className="block text-xs text-muted">{adm.email}</span>
                 </div>
               </Td>
               <Td>
@@ -942,12 +940,13 @@ function AdminsTab() {
                       ? "warning"
                       : "neutral"
                   }
+                  size="sm"
                 />
               </Td>
               <Td>
-                <Badge status={adm.active ? "Aktif" : "Nonaktif"} />
+                <Badge status={adm.active ? "Aktif" : "Nonaktif"} size="sm" />
               </Td>
-              <Td className="text-xs">{formatDate(adm.createdAt)}</Td>
+              <Td className="text-xs text-muted whitespace-nowrap">{formatDate(adm.createdAt)}</Td>
               <Td>
                 <div className="flex items-center gap-1.5">
                   <IconButton label="Edit Data Admin" tone="info" onClick={() => openEdit(adm)}>

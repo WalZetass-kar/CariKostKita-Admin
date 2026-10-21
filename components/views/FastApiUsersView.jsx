@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, Check, Plus, RefreshCw, Search, ShieldCheck, UserPlus, Users } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApp } from "../AppContext";
-import { Avatar, Badge, DataTable, EmptyState, ErrorState, GhostButton, Panel, PanelTitle, PrimaryButton, SelectField, SkeletonTable, Td, TextArea, useToast } from "../ui";
+import { Avatar, Badge, DataTable, EmptyState, ErrorState, GhostButton, Modal, Panel, PanelTitle, PrimaryButton, SelectField, SkeletonTable, Td, TextArea, useToast } from "../ui";
 
 const PAGE_SIZE = 25;
 const roleLabel = (role) => ({ developer: "Super Admin", admin: "Admin", moderator: "Moderator", owner: "Pemilik", user: "Pencari" }[role] || role || "—");
@@ -109,7 +109,7 @@ export function FastApiUsersView() {
             </GhostButton>
           </div>
         </div>
-        <form onSubmit={submitSearch} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_190px_170px_auto]">
+        <form onSubmit={submitSearch} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_190px_170px_auto] items-end">
           <label className="relative block">
             <span className="sr-only">Cari nama pengguna</span>
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
@@ -117,7 +117,7 @@ export function FastApiUsersView() {
           </label>
           <SelectField label="Role" className="sm:gap-1" value={role} onChange={(event) => { setRole(event.target.value); setPage(1); }} options={[["", "Semua role"], ["user", "Pencari"], ["owner", "Pemilik"], ["moderator", "Moderator"], ["admin", "Admin"], ["developer", "Super Admin"]]} />
           <SelectField label="Status akun" className="sm:gap-1" value={active} onChange={(event) => { setActive(event.target.value); setPage(1); }} options={[["", "Semua status"], ["true", "Aktif"], ["false", "Nonaktif"]]} />
-          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center"><Search size={16} /> Cari</PrimaryButton>
+          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center"><Search size={16} /> <span>Cari</span></PrimaryButton>
         </form>
       </Panel>
 
@@ -136,24 +136,49 @@ export function FastApiUsersView() {
           </div>
           {/* Tampilan Desktop: DataTable (hidden on mobile, visible on lg) */}
           <div className="hidden lg:block">
-            <DataTable headers={["Pengguna", "Kontak", "Role", "Verifikasi", "Status", "Terdaftar", "Aksi"]} minWidth={960}>
+            <DataTable headers={["Pengguna & Kontak", "Role", "Verifikasi", "Status", "Terdaftar", { title: "Aksi", align: "text-center", className: "w-44" }]}>
               {users.map((user) => {
                 const staff = ["developer", "admin", "moderator"].includes(user.role);
                 const manageable = !staff && String(user.id) !== String(admin?.id);
                 const isRoleTarget = ["user", "moderator"].includes(user.role);
                 return (
-                  <tr key={user.id} className="hover:bg-track/60">
-                    <Td><div className="flex min-w-52 items-center gap-3"><Avatar name={user.name || user.email} src={user.avatar_url} size={38} /><div className="min-w-0"><p className="truncate font-bold text-ink">{user.name || "Tanpa nama"}</p><p className="truncate text-xs text-muted">ID {user.id}</p></div></div></Td>
-                    <Td><div className="min-w-40"><p className="max-w-48 truncate text-ink">{user.email || "—"}</p><p className="text-xs text-muted">{user.no_hp || "Tanpa nomor telepon"}</p></div></Td>
-                    <Td><Badge status={roleLabel(user.role)} tone={staff ? "info" : "neutral"} /></Td>
-                    <Td><span className="text-sm text-ink">{user.verification_status || "—"}</span>{user.catatan_revisi && <p className="max-w-40 truncate text-xs text-muted" title={user.catatan_revisi}>{user.catatan_revisi}</p>}</Td>
-                    <Td><Badge status={statusLabel(user.is_active)} /></Td>
-                    <Td><span className="whitespace-nowrap text-sm text-muted">{dateLabel(user.created_at)}</span></Td>
-                    <Td><div className="flex items-center gap-2">
-                      {manageable && <button type="button" onClick={() => openAction(user, "status")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-ink hover:bg-track"><Activity size={14} /> {user.is_active ? "Nonaktifkan" : "Aktifkan"}</button>}
-                      {isSuperAdmin && manageable && isRoleTarget && <button type="button" onClick={() => openAction(user, "role")} className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-xs font-bold text-accent hover:bg-track"><ShieldCheck size={14} /> {user.role === "moderator" ? "Cabut moderator" : "Jadikan moderator"}</button>}
-                      {!manageable && <span className="text-xs text-muted">Dilindungi</span>}
-                    </div></Td>
+                  <tr key={user.id} className="hover:bg-track/60 transition-colors">
+                    <Td>
+                      <div className="flex items-center gap-3">
+                        <Avatar name={user.name || user.email} src={user.avatar_url} size={36} />
+                        <div className="min-w-0">
+                          <p className="truncate font-bold text-ink">{user.name || "Tanpa nama"}</p>
+                          <p className="truncate text-xs text-muted">{user.email || "—"}{user.no_hp ? ` · ${user.no_hp}` : ""} · ID #{user.id}</p>
+                        </div>
+                      </div>
+                    </Td>
+                    <Td><Badge status={roleLabel(user.role)} tone={staff ? "info" : "neutral"} size="sm" /></Td>
+                    <Td><span className="text-xs sm:text-sm text-ink">{user.verification_status || "—"}</span>{user.catatan_revisi && <p className="max-w-40 truncate text-xs text-muted" title={user.catatan_revisi}>{user.catatan_revisi}</p>}</Td>
+                    <Td><Badge status={statusLabel(user.is_active)} size="sm" /></Td>
+                    <Td><span className="whitespace-nowrap text-xs text-muted">{dateLabel(user.created_at)}</span></Td>
+                    <Td className="w-44 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {manageable && (
+                          <button
+                            type="button"
+                            onClick={() => openAction(user, "status")}
+                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-2.5 text-xs font-bold text-ink hover:bg-track transition"
+                          >
+                            <Activity size={13} /> <span>{user.is_active ? "Nonaktifkan" : "Aktifkan"}</span>
+                          </button>
+                        )}
+                        {isSuperAdmin && manageable && isRoleTarget && (
+                          <button
+                            type="button"
+                            onClick={() => openAction(user, "role")}
+                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-accent/40 bg-accent/5 px-2.5 text-xs font-bold text-accent hover:bg-accent/15 transition"
+                          >
+                            <ShieldCheck size={13} /> <span>{user.role === "moderator" ? "Cabut mod" : "+Mod"}</span>
+                          </button>
+                        )}
+                        {!manageable && <span className="text-xs text-muted italic">Dilindungi</span>}
+                      </div>
+                    </Td>
                   </tr>
                 );
               })}
@@ -238,14 +263,38 @@ export function FastApiUsersView() {
       )}
 
       {selected && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/45 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setSelected(null); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="user-moderation-title" className="w-full max-w-lg rounded-2xl border border-line bg-paper p-5 shadow-2xl">
-            <h2 id="user-moderation-title" className="text-lg font-extrabold text-ink">Konfirmasi perubahan akun</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">{selected.type === "status" ? `Status ${selected.user.name || selected.user.email} akan menjadi ${selected.user.is_active ? "nonaktif" : "aktif"}.` : `Role ${selected.user.name || selected.user.email} akan menjadi ${selected.user.role === "moderator" ? "pencari kost" : "moderator"}.`}</p>
-            <div className="mt-4"><TextArea label="Alasan audit (opsional)" rows={3} value={reason} onChange={(event) => setReason(event.target.value)} maxLength={1000} hint="Alasan disimpan bersama catatan tindakan admin." /></div>
-            <div className="mt-5 flex flex-wrap justify-end gap-2"><button disabled={saving} onClick={() => setSelected(null)} className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold text-ink">Batal</button><PrimaryButton loading={saving} onClick={saveAction}><Check size={16} /> Simpan melalui FastAPI</PrimaryButton></div>
-          </section>
-        </div>
+        <Modal
+          open={Boolean(selected)}
+          onClose={saving ? undefined : () => setSelected(null)}
+          title="Konfirmasi Perubahan Akun"
+          maxWidth="max-w-lg"
+          footer={
+            <>
+              <GhostButton disabled={saving} onClick={() => setSelected(null)}>
+                Batal
+              </GhostButton>
+              <PrimaryButton loading={saving} onClick={saveAction}>
+                <Check size={16} /> <span>Simpan melalui FastAPI</span>
+              </PrimaryButton>
+            </>
+          }
+        >
+          <p className="text-sm leading-relaxed text-muted">
+            {selected.type === "status"
+              ? `Status akun ${selected.user.name || selected.user.email} akan diubah menjadi ${selected.user.is_active ? "Nonaktif" : "Aktif"}.`
+              : `Role akun ${selected.user.name || selected.user.email} akan diubah menjadi ${selected.user.role === "moderator" ? "Pencari Kost" : "Moderator"}.`}
+          </p>
+          <div className="mt-4">
+            <TextArea
+              label="Alasan audit (opsional)"
+              rows={3}
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              maxLength={1000}
+              hint="Alasan akan disimpan ke dalam riwayat log audit admin."
+            />
+          </div>
+        </Modal>
       )}
     </div>
   );

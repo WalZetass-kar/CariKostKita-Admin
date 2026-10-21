@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bell, BriefcaseBusiness, Building2, ChartNoAxesCombined, ChevronDown,
   Flag, History, LayoutDashboard, LogOut, Megaphone, Menu, Search, Settings,
-  Users, X, Shield, Sparkles, BadgeCheck, Globe
+  Users, X, Shield, Sparkles, BadgeCheck, Globe, FileSpreadsheet
 } from "lucide-react";
 import { ApiError, api } from "@/lib/api";
 import { AppProvider } from "./AppContext";
@@ -15,6 +15,7 @@ import {
 import { ROLE_LABELS, ROLE_MENUS } from "@/lib/constants";
 import { FastApiOverviewView } from "./views/FastApiOverviewView";
 import { FastApiKostsView } from "./views/FastApiKostsView";
+import { FastApiBulkImportView } from "./views/FastApiBulkImportView";
 import { FastApiOwnersView } from "./views/FastApiOwnersView";
 import { OwnerVerificationQueueView } from "./views/OwnerVerificationQueueView";
 import { FastApiUsersView } from "./views/FastApiUsersView";
@@ -31,6 +32,7 @@ import { UserFormModal } from "./views/UsersView";
 const navItems = [
   ["fastapi_overview", "Ringkasan", LayoutDashboard],
   ["fastapi_kosts", "Manajemen Kost", Building2],
+  ["fastapi_bulk_import", "Import Data Kos", FileSpreadsheet],
   ["fastapi_owners", "Pemilik Kost", BriefcaseBusiness],
   ["verification", "Antrean Verifikasi", BadgeCheck],
   ["fastapi_users", "Pengguna", Users],
@@ -45,6 +47,7 @@ const navItems = [
 const viewMeta = {
   fastapi_overview: ["Platform", "Ringkasan & Statistik"],
   fastapi_kosts: ["Properti", "Manajemen Kost"],
+  fastapi_bulk_import: ["Properti", "Import Data Kos"],
   fastapi_owners: ["Mitra", "Pemilik Kost"],
   verification: ["Moderasi", "Antrean Verifikasi Pemilik"],
   fastapi_users: ["Pengguna", "Manajemen Pengguna"],
@@ -68,6 +71,7 @@ const viewMeta = {
 const views = {
   fastapi_overview: FastApiOverviewView,
   fastapi_kosts: FastApiKostsView,
+  fastapi_bulk_import: FastApiBulkImportView,
   fastapi_owners: FastApiOwnersView,
   verification: OwnerVerificationQueueView,
   fastapi_users: FastApiUsersView,
@@ -269,6 +273,7 @@ function Shell({ initialAdmin }) {
       admin,
       act,
       setView,
+      setActiveView: setView,
       search,
       setSearch,
       openKostForm: (k = {}) => setKostForm(k),

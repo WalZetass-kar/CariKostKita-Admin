@@ -362,28 +362,28 @@ export function AdsView() {
           </FilterBar>
 
           <Panel>
-            <DataTable headers={["Iklan", "Tipe", "Platform", "Periode", "Status", "CTR", "Aksi"]} minWidth={980}>
+            <DataTable headers={["Iklan & Format", "Periode", "Status", "Performa & CTR", { title: "Aksi", align: "text-center", className: "w-28" }]}>
               {pager.slice.length ? pager.slice.map((a) => (
                 <tr key={a.id}>
                   <Td>
                     <div className="flex items-center gap-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={a.image} alt="" className="h-12 w-20 shrink-0 rounded-md object-cover border border-line" />
-                      <div>
-                        <strong className="block text-ink">{a.title}</strong>
-                        <span className="block text-xs text-muted">{a.position}</span>
+                      <img src={a.image} alt="" className="h-11 w-16 shrink-0 rounded-md object-cover border border-line" />
+                      <div className="min-w-0">
+                        <strong className="block truncate text-ink">{a.title}</strong>
+                        <span className="block text-xs text-muted truncate">
+                          {a.type} · {a.platform} · {a.position}
+                        </span>
                       </div>
                     </div>
                   </Td>
-                  <Td>{a.type}</Td>
-                  <Td><span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-track">{a.platform}</span></Td>
-                  <Td className="text-xs">{formatDate(a.start)} - {formatDate(a.end)}</Td>
+                  <Td><span className="text-xs text-muted whitespace-nowrap">{formatDate(a.start)} - {formatDate(a.end)}</span></Td>
                   <Td>
                     {a.archived ? (
-                      <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" />
+                      <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" size="sm" />
                     ) : (
                       <>
-                        <Badge status={a.effective} />
+                        <Badge status={a.effective} size="sm" />
                         {a.effective === "Selesai" && a.status === "Aktif" && (
                           <span className="block text-[11px] text-muted">Periode berakhir</span>
                         )}
@@ -391,13 +391,15 @@ export function AdsView() {
                     )}
                   </Td>
                   <Td>
-                    <span className="font-bold text-ink">{ctr(a)}%</span>
-                    <span className="block text-xs text-muted">{formatNumber(a.impressions)} imp / {formatNumber(a.clicks)} clk</span>
+                    <div className="text-xs space-y-0.5">
+                      <div className="font-bold text-ink tabular-nums">{ctr(a)}% CTR</div>
+                      <div className="text-muted tabular-nums text-[11px]">{formatNumber(a.impressions)} imp / {formatNumber(a.clicks)} clk</div>
+                    </div>
                   </Td>
-                  <Td>
-                    <div className="flex gap-1.5 items-center">
-                      <IconButton label="Preview Detail" tone="info" onClick={() => setPreview(a)}><Eye size={17} /></IconButton>
-                      <IconButton label="Edit" tone="info" onClick={() => setForm(a)}><Pencil size={17} /></IconButton>
+                  <Td className="text-center">
+                    <div className="flex gap-1 items-center justify-center">
+                      <IconButton label="Preview Detail" tone="info" onClick={() => setPreview(a)}><Eye size={16} /></IconButton>
+                      <IconButton label="Edit" tone="info" onClick={() => setForm(a)}><Pencil size={16} /></IconButton>
                       {!a.archived && (
                         <IconButton
                           label={a.status === "Aktif" ? "Nonaktifkan" : "Aktifkan"}
@@ -661,7 +663,7 @@ function AdStats() {
           ]}
         />
         <div className="mt-4">
-          <DataTable headers={["Iklan", "Platform", "Impression", "Click", "CTR", "Status"]} minWidth={640}>
+          <DataTable headers={["Iklan", "Platform", "Impression", "Click", "CTR", "Status"]}>
             {a.comparison.map((x) => (
               <tr key={x.id}>
                 <Td><strong>{x.title}</strong></Td>

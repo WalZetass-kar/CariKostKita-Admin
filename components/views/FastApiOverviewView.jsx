@@ -94,7 +94,7 @@ export function FastApiOverviewView() {
             <button
               type="button"
               onClick={() => openKostForm?.({})}
-              className="group flex flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-maroon hover:bg-paper hover:shadow-sm active:scale-[0.98]"
+              className="group flex min-h-[105px] flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-maroon hover:bg-paper hover:shadow-sm active:scale-[0.98]"
             >
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-maroon text-[#EEEAD7] shadow-xs group-hover:scale-105 transition-transform">
@@ -116,7 +116,7 @@ export function FastApiOverviewView() {
             <button
               type="button"
               onClick={() => (openAdForm ? openAdForm({}) : setView?.("fastapi_ads"))}
-              className="group flex flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-[#a8782f] hover:bg-paper hover:shadow-sm active:scale-[0.98]"
+              className="group flex min-h-[105px] flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-[#a8782f] hover:bg-paper hover:shadow-sm active:scale-[0.98]"
             >
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#a8782f] text-white shadow-xs group-hover:scale-105 transition-transform">
@@ -138,7 +138,7 @@ export function FastApiOverviewView() {
             <button
               type="button"
               onClick={() => (openUserForm ? openUserForm({}) : setView?.("fastapi_users"))}
-              className="group flex flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-accent hover:bg-paper hover:shadow-sm active:scale-[0.98]"
+              className="group flex min-h-[105px] flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-accent hover:bg-paper hover:shadow-sm active:scale-[0.98]"
             >
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-clay text-white shadow-xs group-hover:scale-105 transition-transform">
@@ -160,7 +160,7 @@ export function FastApiOverviewView() {
             <button
               type="button"
               onClick={() => setView?.("verification")}
-              className="group flex flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-blue hover:bg-paper hover:shadow-sm active:scale-[0.98]"
+              className="group flex min-h-[105px] flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-blue hover:bg-paper hover:shadow-sm active:scale-[0.98]"
             >
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-blue text-white shadow-xs group-hover:scale-105 transition-transform">
@@ -184,7 +184,7 @@ export function FastApiOverviewView() {
             <button
               type="button"
               onClick={() => setView?.("fastapi_reports")}
-              className="group flex flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-bad-fg hover:bg-paper hover:shadow-sm active:scale-[0.98]"
+              className="group flex min-h-[105px] flex-col justify-between rounded-xl border border-line bg-field p-3 text-left transition hover:border-bad-fg hover:bg-paper hover:shadow-sm active:scale-[0.98]"
             >
               <div className="flex items-center justify-between w-full mb-2">
                 <span className="grid h-8 w-8 place-items-center rounded-lg bg-bad-fg text-[#EEEAD7] shadow-xs group-hover:scale-105 transition-transform">
@@ -222,8 +222,8 @@ export function FastApiOverviewView() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[10px] sm:text-xs font-bold uppercase tracking-wider text-muted">{label}</p>
-                  <p className="mt-0.5 text-2xl font-black leading-tight text-ink sm:text-3xl">
-                    {data[group]?.[key] ?? "—"}
+                  <p className="mt-0.5 text-2xl font-black leading-tight text-ink sm:text-3xl tabular-nums">
+                    {typeof data[group]?.[key] === "number" ? Number(data[group][key]).toLocaleString("id-ID") : (data[group]?.[key] ?? "—")}
                   </p>
                   <p className="mt-1 hidden truncate text-[11px] text-muted sm:block">{hint}</p>
                 </div>

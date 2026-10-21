@@ -383,18 +383,15 @@ export function UsersView() {
               onChange={toggleSelectAllPage}
               aria-label="Pilih semua baris halaman ini"
             />,
-            "Pengguna",
-            "Email",
-            "Telepon",
+            "Pengguna & Kontak",
             "Terdaftar",
             "Status",
-            "Aksi",
+            { title: "Aksi", align: "text-center", className: "w-28" },
           ]}
-          minWidth={900}
         >
           {pager.slice.length ? pager.slice.map((u) => (
             <tr key={u.id} className={selectedIds.includes(u.id) ? "bg-maroon/5 dark:bg-maroon/15" : ""}>
-              <Td className="w-10">
+              <Td className="w-10 text-center">
                 <input
                   type="checkbox"
                   className="rounded border-line"
@@ -405,30 +402,32 @@ export function UsersView() {
               </Td>
               <Td>
                 <div className="flex items-center gap-2.5">
-                  <Avatar name={u.name} src={u.photo} size={34} />
+                  <Avatar name={u.name} src={u.photo} size={36} />
                   <div className="min-w-0">
                     <strong className="block truncate text-ink">{u.name}</strong>
-                    <span className="text-xs text-muted font-mono">{u.id}</span>
+                    <div className="text-xs text-muted truncate">
+                      <span>{u.email || "—"}</span>
+                      {u.phone && <span className="font-mono"> · {u.phone}</span>}
+                    </div>
+                    <span className="text-[11px] text-muted font-mono">ID {u.id}</span>
                   </div>
                 </div>
               </Td>
-              <Td className="text-sm">{u.email}</Td>
-              <Td className="text-sm">{u.phone || "-"}</Td>
-              <Td className="text-xs">{formatDate(u.createdAt)}</Td>
+              <Td className="text-xs text-muted whitespace-nowrap">{formatDate(u.createdAt)}</Td>
               <Td>
                 {u.archived ? (
-                  <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" />
+                  <Badge status="Diarsipkan" tone="danger" label="Diarsipkan" size="sm" />
                 ) : (
-                  <Badge status={u.status} />
+                  <Badge status={u.status} size="sm" />
                 )}
               </Td>
-              <Td>
-                <div className="flex gap-1.5 items-center">
+              <Td className="text-center">
+                <div className="flex gap-1 items-center justify-center">
                   <IconButton label="Detail Pengguna" tone="info" onClick={() => setDetail(u)}>
-                    <Eye size={17} />
+                    <Eye size={16} />
                   </IconButton>
                   <IconButton label="Edit Pengguna" tone="info" onClick={() => setEditUser(u)}>
-                    <Pencil size={17} />
+                    <Pencil size={16} />
                   </IconButton>
                   {!u.archived && (
                     <IconButton

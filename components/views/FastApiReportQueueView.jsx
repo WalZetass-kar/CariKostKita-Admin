@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CheckCircle2, Clock3, Flag, RefreshCw, XCircle } from "lucide-react";
 import { api } from "@/lib/api";
-import { Badge, EmptyState, ErrorState, Panel, PanelTitle, PrimaryButton, SkeletonTable, TextArea, useToast } from "../ui";
+import { Badge, DangerButton, EmptyState, ErrorState, GhostButton, Modal, Panel, PanelTitle, PrimaryButton, SkeletonTable, TextArea, useToast } from "../ui";
 
 const TABS = [["BARU", "Baru"], ["DITINJAU", "Ditinjau"], ["SELESAI", "Selesai"], ["DITOLAK", "Ditolak"]];
 const formatDateTime = (value) => value
@@ -160,17 +160,42 @@ export function FastApiReportQueueView() {
       )}
 
       {action && (
-        <div className="fixed inset-0 z-[80] grid place-items-center bg-black/45 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget && !saving) setAction(null); }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="report-action-title" className="w-full max-w-lg rounded-2xl border border-line bg-paper p-5 shadow-2xl">
-            <h2 id="report-action-title" className="text-lg font-extrabold text-ink">Konfirmasi keputusan laporan</h2>
-            <p className="mt-1 text-sm text-muted">Laporan #{action.report.id} akan diubah menjadi {TABS.find(([key]) => key === action.status)?.[1]}.</p>
-            <TextArea label="Catatan tindakan (opsional)" rows={4} value={note} onChange={(event) => setNote(event.target.value)} maxLength={1000} />
-            <div className="mt-5 flex flex-col-reverse sm:flex-row justify-end gap-2">
-              <button disabled={saving} onClick={() => setAction(null)} className="rounded-lg border border-line px-4 py-2 text-sm text-ink w-full sm:w-auto">Batal</button>
-              <PrimaryButton loading={saving} onClick={submit} className="w-full sm:w-auto justify-center">Simpan keputusan</PrimaryButton>
-            </div>
-          </section>
-        </div>
+        <Modal
+          open={Boolean(action)}
+          onClose={saving ? undefined : () => setAction(null)}
+          title="Konfirmasi Keputusan Laporan"
+          maxWidth="max-w-lg"
+          footer={
+            <>
+              <GhostButton disabled={saving} onClick={() => setAction(null)}>
+                Batal
+              </GhostButton>
+              {action.status === "DITOLAK" ? (
+                <DangerButton loading={saving} onClick={submit}>
+                  Tolak Laporan
+                </DangerButton>
+              ) : (
+                <PrimaryButton loading={saving} onClick={submit}>
+                  Simpan Keputusan
+                </PrimaryButton>
+              )}
+            </>
+          }
+        >
+          <p className="text-sm leading-relaxed text-muted">
+            Status Laporan #{action.report.id} ({action.report.kost_name || `Kost #${action.report.kost_id}`}) akan diubah menjadi <strong className="text-ink">{TABS.find(([key]) => key === action.status)?.[1] || action.status}</strong>.
+          </p>
+          <div className="mt-4">
+            <TextArea
+              label="Catatan tindakan moderasi (opsional)"
+              rows={4}
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              maxLength={1000}
+              hint="Catatan ini disimpan ke riwayat audit moderasi laporan."
+            />
+          </div>
+        </Modal>
       )}
     </div>
   );

@@ -160,7 +160,7 @@ canvas {
 .skeleton {
   background: linear-gradient(90deg, var(--track) 25%, var(--line) 37%, var(--track) 63%);
   background-size: 800px 100%;
-  animation: shimmer 1.4s infinite linear;
+  animation: shimmer 0.85s infinite linear;
   border-radius: 8px;
 }
 
