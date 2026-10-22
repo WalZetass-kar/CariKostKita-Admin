@@ -39,7 +39,7 @@ import { formatCurrency } from "@/lib/format";
 
 const COLUMN_GUIDE_ROWS = [
   { letter: "A", name: "nama_kost", required: true, format: "Teks (Contoh: Kos Melati Indah Panam)", description: "Nama kos yang dicari pencari" },
-  { letter: "B", name: "tipe_kost", required: true, format: "PUTRA / PUTRI / CAMPUR", description: "Kategori gender penghuni kamar" },
+  { letter: "B", name: "tipe_kost", required: false, format: "PUTRA / PUTRI / CAMPUR (Default: CAMPUR)", description: "Kategori gender penghuni kamar. Kosong atau tidak dikenal otomatis diisi CAMPUR dan tetap diimpor." },
   { letter: "C", name: "alamat", required: true, format: "Teks alamat jalan fisik", description: "Contoh: Jl. Bina Krida No. 18, Panam" },
   { letter: "D", name: "provinsi", required: false, format: "Teks (Default: Riau)", description: "Nama provinsi wilayah properti" },
   { letter: "E", name: "kota", required: false, format: "Teks (Default: Kota Pekanbaru)", description: "Nama kota / kabupaten" },
@@ -565,6 +565,35 @@ export function FastApiBulkImportView() {
                   </div>
                 ))}
               </div>
+            </Panel>
+          )}
+
+          {/* Warnings: tidak memblokir impor */}
+          {(previewData.warnings?.length > 0 || previewData.defaulted_tipe_count > 0) && (
+            <Panel className="p-4 border-l-4 border-amber-500/50">
+              <h4 className="text-xs font-bold text-ink flex items-center gap-1.5 mb-2">
+                <AlertTriangle size={15} className="text-amber-600" />
+                <span>
+                  Peringatan Otomatis ({previewData.warnings?.length || 0} baris)
+                </span>
+              </h4>
+              {previewData.defaulted_tipe_count > 0 && (
+                <p className="text-xs text-muted mb-2">
+                  <strong>{previewData.defaulted_tipe_count}</strong> baris tanpa tipe kost yang jelas
+                  diisi otomatis <strong>CAMPUR</strong> dan tetap diimpor.
+                </p>
+              )}
+              {previewData.warnings?.length > 0 && (
+                <div className="max-h-32 overflow-y-auto space-y-1 text-xs text-muted pr-2">
+                  {previewData.warnings.slice(0, 50).map((warn, i) => (
+                    <div key={i} className="flex items-center justify-between py-1 border-b border-line/40">
+                      <span>
+                        <strong>Baris {warn.row}:</strong> {warn.message}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </Panel>
           )}
 
