@@ -394,7 +394,7 @@ export function FastApiBulkImportView() {
                   {fileName ? fileName : "Klik atau seret file spreadsheet ke sini"}
                 </p>
                 <p className="text-xs text-muted mt-1">
-                  Format didukung: <strong>.XLSX (Excel)</strong> atau <strong>.CSV (UTF-8)</strong> &bull; Maks. 10 MB &bull; Maks. 500 baris
+                  Format didukung: <strong>.XLSX (Excel)</strong> atau <strong>.CSV (UTF-8)</strong> &bull; Maks. 10 MB &bull; Maks. 1.000 baris per file
                 </p>
               </div>
 
