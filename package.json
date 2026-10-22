@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "verify:contrast": "node scripts/verify-contrast.mjs",
+    "verify:encoding": "node scripts/scan-mojibake.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

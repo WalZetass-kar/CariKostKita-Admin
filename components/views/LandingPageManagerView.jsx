@@ -39,7 +39,9 @@ import {
 } from "lucide-react";
 import { useApp } from "../AppContext";
 import { api, readImage } from "@/lib/api";
+import { evaluateBrandColor } from "@/lib/color-contrast";
 import { broadcastSettingsUpdated } from "@/lib/realtime";
+import BrandColorField from "../BrandColorField";
 import {
   Badge,
   ConfirmDialog,
@@ -247,6 +249,26 @@ export function LandingPageManagerView() {
         toast("Tidak ada perubahan yang perlu disimpan.");
         setSaving(false);
         return;
+      }
+      // Warna brand harus lolos kontras WCAG; server juga akan menolaknya,
+      // tapi dicek di sini supaya admin dapat pesan yang jelas.
+      const brandDiff = diff.brandColor ?? diff.brand_color;
+      if (brandDiff !== undefined) {
+        const evaluation = evaluateBrandColor(brandDiff);
+        if (!evaluation.valid) {
+          toast("Format warna brand tidak valid. Gunakan hex 3 atau 6 digit, contoh #6D0808.");
+          setSaving(false);
+          return;
+        }
+        if (!evaluation.allPass) {
+          const worst = evaluation.worst;
+          toast(
+            `Warna brand ditolak: kontras ${worst.ratio.toFixed(2)}:1 pada "${worst.label}" ` +
+              `(minimal 4.5:1). Pakai warna aman terdekat dari palet.`
+          );
+          setSaving(false);
+          return;
+        }
       }
       const res = await api("settings/landing", {
         method: "PATCH",
@@ -479,24 +501,11 @@ export function LandingPageManagerView() {
               hint="Otomatis menyatu di seluruh teks website"
               required
             />
-            <div>
-              <label className="block text-xs font-bold text-ink mb-1.5">Warna Aksen Brand (Primary Color)</label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="color"
-                  value={settings.brandColor || "#6D0808"}
-                  onChange={(e) => handleChange("brandColor", e.target.value)}
-                  className="h-10 w-12 rounded border border-line cursor-pointer p-0.5 bg-paper"
-                />
-                <input
-                  type="text"
-                  value={settings.brandColor || "#6D0808"}
-                  onChange={(e) => handleChange("brandColor", e.target.value)}
-                  className="flex-1 min-h-10 rounded-lg border border-line bg-paper px-3 text-sm font-mono text-ink"
-                  placeholder="#6D0808"
-                />
-              </div>
-              <p className="text-[11px] text-muted mt-1">Warna ini diterapkan dinamis pada tombol CTA, lencana, dan aksen navigasi.</p>
+            <div className="sm:col-span-2">
+              <BrandColorField
+                value={settings.brandColor || "#6D0808"}
+                onChange={(next) => handleChange("brandColor", next)}
+              />
             </div>
             <div className="sm:col-span-2 space-y-4 pt-3 border-t border-line">
               <h4 className="font-extrabold text-sm text-ink uppercase tracking-wider flex items-center gap-2">
