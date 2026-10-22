@@ -179,6 +179,18 @@ const routes = [
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memuat direktori iklan FastAPI."));
     return payload;
   }, ["super_admin", "admin"]],
+  ["GET", "contract", async ({ session }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/contract`, {
+      headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new HttpError(res.status, apiErrorMessage(payload, "Kontrak API tidak dapat dibaca."));
+    }
+    return payload;
+  }, ["super_admin", "admin", "moderator"]],
   ["GET", "fastapi-kosts", async ({ session }, { url }) => {
     const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
     const query = new URLSearchParams();

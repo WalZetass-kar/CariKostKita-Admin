@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { ApiError, api } from "@/lib/api";
 import { AppProvider } from "./AppContext";
+import { ContractBadge } from "./ContractBadge";
 import {
   Avatar, Badge, ConfirmDialog, ErrorState, GlobalSearchModal, IconButton,
   NotificationCenterDropdown, SkeletonDashboard, SkeletonTable, ToastProvider, useToast
@@ -456,6 +457,8 @@ function Shell({ initialAdmin }) {
           </div>
 
           <div className="flex items-center gap-1.5">
+            <ContractBadge />
+
             <IconButton label="Pencarian Global" onClick={() => setSearchModalOpen(true)} className="!h-9 !w-9">
               <Search size={16} />
             </IconButton>
@@ -531,6 +534,8 @@ function Shell({ initialAdmin }) {
 
             {/* DESKTOP TOP ACTIONS (Hidden on mobile karena sudah ada di mobile topbar) */}
             <div className="hidden lg:flex items-center justify-end gap-3">
+              <ContractBadge />
+
               <button
                 type="button"
                 onClick={() => setSearchModalOpen(true)}
