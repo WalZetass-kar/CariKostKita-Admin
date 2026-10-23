@@ -22,6 +22,14 @@ export async function POST(request) {
       return NextResponse.json({ error: "Format berkas harus berekstensi .apk" }, { status: 400 });
     }
 
+    // Versi opsional dari pemanggil, dipakai untuk alias berkas berversi.
+    // Sebelumnya nama alias ini dipatok pada satu versi lama sehingga
+    // setiap unggahan baru tetap menyisakan berkas dengan versi usang.
+    const requestedVersion = String(formData.get("version") || "")
+      .trim()
+      .replace(/[^0-9A-Za-z._-]/g, "")
+      .replace(/^[vV]/, "");
+
     const bytes = Buffer.from(await file.arrayBuffer());
     if (bytes.length === 0) {
       return NextResponse.json({ error: "Berkas APK kosong." }, { status: 400 });
@@ -53,7 +61,12 @@ export async function POST(request) {
             fs.mkdirSync(dir, { recursive: true });
           }
           fs.writeFileSync(path.join(dir, safeFileName), bytes);
-          fs.writeFileSync(path.join(dir, "CariKostKita-v1.0.1.apk"), bytes);
+          if (requestedVersion) {
+            fs.writeFileSync(
+              path.join(dir, `CariKostKita-v${requestedVersion}-release.apk`),
+              bytes
+            );
+          }
           fs.writeFileSync(path.join(dir, "CariKostKita.apk"), bytes);
         }
       } catch (err) {

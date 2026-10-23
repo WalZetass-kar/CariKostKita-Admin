@@ -85,9 +85,10 @@ export function LandingPageManagerView() {
     siteTitle: "",
     siteDescription: "",
     metaKeywords: "",
-    apkUrl: "/releases/CariKostKita-v1.0.1.apk",
-    versionName: "v1.0.1",
-    apkSize: "6.9 MB",
+    apkUrl:
+      "https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk",
+    versionName: "v1.1.2",
+    apkSize: "3.3 MB",
     minAndroid: "Android 8.0+",
     releaseNotes: "",
     // Banner
@@ -1028,7 +1029,7 @@ export function LandingPageManagerView() {
                 label="URL Download APK"
                 value={settings.apkUrl || ""}
                 onChange={(e) => handleChange("apkUrl", e.target.value)}
-                placeholder="/releases/CariKostKita-v1.0.1.apk"
+                placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk"
               />
               <Field
                 label="Label Tombol Kedua (CTA 2)"
@@ -1049,13 +1050,13 @@ export function LandingPageManagerView() {
               label="Spesifikasi: Versi Rilis"
               value={settings.versionName || ""}
               onChange={(e) => handleChange("versionName", e.target.value)}
-              placeholder="v1.0.1"
+              placeholder="v1.1.2"
             />
             <Field
               label="Spesifikasi: Ukuran File APK"
               value={settings.apkSize || ""}
               onChange={(e) => handleChange("apkSize", e.target.value)}
-              placeholder="6.9 MB"
+              placeholder="3.3 MB"
             />
             <Field
               label="Spesifikasi: Minimum OS Android"
@@ -1132,10 +1133,10 @@ export function LandingPageManagerView() {
             <div>
               <h3 className="font-extrabold text-base text-ink mb-1 flex items-center gap-2">
                 <ShieldCheck size={18} className="text-accent" />
-                <span>Kartu Kepercayaan Pra-Rilis</span>
+                <span>Kartu Kepercayaan Aplikasi</span>
               </h3>
               <p className="text-xs text-muted">
-                Tiga atau lebih pilar keunggulan pra-rilis (resmi terverifikasi, hemat kuota, izin masuk akal, dsb).
+                Tiga atau lebih pilar keunggulan aplikasi (resmi terverifikasi, hemat kuota, izin masuk akal, dsb).
               </p>
             </div>
             <GhostButton

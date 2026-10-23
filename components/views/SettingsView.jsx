@@ -361,6 +361,7 @@ function SystemTab() {
     whatsapp: "",
     apkUrl: "",
     versionName: "",
+    versionCode: "",
     releaseNotes: "",
     supportEmail: "",
     contactPhone: "",
@@ -404,12 +405,13 @@ function SystemTab() {
       whatsapp: s.whatsapp ?? s.contact_whatsapp ?? prev.whatsapp ?? "",
       apkUrl: s.apkUrl ?? s.apk_url ?? prev.apkUrl ?? "",
       versionName: s.versionName ?? s.version_name ?? prev.versionName ?? "",
+      versionCode: s.versionCode ?? s.version_code ?? prev.versionCode ?? "",
       releaseNotes: s.releaseNotes ?? s.release_notes ?? prev.releaseNotes ?? "",
       supportEmail: s.supportEmail ?? s.support_email ?? prev.supportEmail ?? "",
       contactPhone: s.contactPhone ?? s.contact_phone ?? prev.contactPhone ?? "",
       address: s.address ?? s.office_address ?? prev.address ?? "",
       targetCity: s.targetCity ?? s.target_city ?? prev.targetCity ?? "Pekanbaru",
-      apkSize: s.apkSize ?? s.apk_size ?? prev.apkSize ?? "6.9 MB",
+      apkSize: s.apkSize ?? s.apk_size ?? prev.apkSize ?? "3.3 MB",
       minAndroid: s.minAndroid ?? s.min_android ?? prev.minAndroid ?? "Android 8.0+",
       heroBadge1: s.heroBadge1 ?? s.hero_badge_1 ?? prev.heroBadge1 ?? "",
       heroBadge2: s.heroBadge2 ?? s.hero_badge_2 ?? prev.heroBadge2 ?? "",
@@ -589,14 +591,23 @@ function SystemTab() {
               label="Versi Aplikasi"
               {...b("versionName")}
               error={errors.versionName}
-              placeholder="v1.0.1"
-              hint="Contoh: v1.0.0-beta atau v1.0.1"
+              placeholder="v1.1.2"
+              hint="Contoh: v1.1.2"
+            />
+            <Field
+              label="Version Code (build)"
+              type="number"
+              min="1"
+              {...b("versionCode")}
+              error={errors.versionCode}
+              placeholder="4"
+              hint="Harus naik setiap rilis dan sama dengan versionCode di build.gradle."
             />
             <Field
               label="Ukuran File APK"
               {...b("apkSize")}
               error={errors.apkSize}
-              placeholder="6.9 MB"
+              placeholder="3.3 MB"
               hint="Ditampilkan di badge spesifikasi dan panduan unduh"
             />
             <Field
