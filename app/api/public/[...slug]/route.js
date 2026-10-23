@@ -10,7 +10,7 @@ import * as svc from "@/lib/service";
  *  POST /api/public/ads/:id/event                     {type:"impression"|"click", platform}
  *  GET  /api/public/settings                          info website/kontak
  *  GET  /api/public/kosts                             kost berstatus Aktif
- *  POST /api/public/owners/register                   pendaftaran pemilik (status Pending)
+ *  POST /api/public/owners/register                   pendaftaran pemilik (bukti properti, status Pending)
  *  GET  /api/public/owners/:id/eligibility            apakah pemilik boleh menambah kost
  *  POST /api/public/owners/:id/kosts                  pemilik menambah kost (hanya jika Verified)
  *  POST /api/public/reports                           pengguna melapor kost

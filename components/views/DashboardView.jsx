@@ -41,7 +41,7 @@ export function DashboardView() {
         tone: "danger",
         count: pendingOwners,
         label: "Pemilik Menunggu Verifikasi",
-        desc: "Verifikasi KTP dan keabsahan usaha pemilik",
+        desc: "Verifikasi properti dan keabsahan usaha pemilik",
         view: "owners",
         icon: BriefcaseBusiness,
       });

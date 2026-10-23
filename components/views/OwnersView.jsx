@@ -33,7 +33,6 @@ import {
   Pagination,
   Panel,
   PrimaryButton,
-  SelectField,
   Td,
   TextArea,
   selectCls,
@@ -54,8 +53,7 @@ export function OwnerEditModal({ owner, onClose }) {
     name: owner?.name || "",
     email: owner?.email || "",
     phone: owner?.phone || "",
-    idType: owner?.idType || "KTP",
-    idNumber: owner?.idNumber || "",
+    propertyName: owner?.propertyName || "",
     address: owner?.address || "",
     businessInfo: owner?.businessInfo || "",
   });
@@ -69,8 +67,7 @@ export function OwnerEditModal({ owner, onClose }) {
       name: owner.name,
       email: owner.email,
       phone: owner.phone,
-      idType: owner.idType || "KTP",
-      idNumber: owner.idNumber || "",
+      propertyName: owner.propertyName || "",
       address: owner.address || "",
       businessInfo: owner.businessInfo || "",
     });
@@ -101,11 +98,11 @@ export function OwnerEditModal({ owner, onClose }) {
         <Field label="Nama Lengkap" {...form.bind("name")} error={errors.name} required />
         <Field label="Email" type="email" {...form.bind("email")} error={errors.email} required />
         <Field label="Nomor Telepon" {...form.bind("phone")} error={errors.phone} required />
-        <div className="grid grid-cols-3 gap-2">
-          <SelectField label="Tipe ID" {...form.bind("idType")} options={["KTP", "SIM", "Paspor"]} />
-          <Field label="Nomor Identitas (NIK)" className="col-span-2" {...form.bind("idNumber")} error={errors.idNumber} required />
-        </div>
-        <TextArea label="Alamat" className="sm:col-span-2" {...form.bind("address")} error={errors.address} />
+        <Field label="Nama Properti" {...form.bind("propertyName")} error={errors.propertyName} />
+        <p className="sm:col-span-2 rounded-lg bg-track/60 p-3 text-xs text-muted">
+          Verifikasi pemilik memakai bukti properti (foto tampak depan, kode lokasi, kamar), bukan KTP atau surat pribadi.
+        </p>
+        <TextArea label="Alamat Properti" className="sm:col-span-2" {...form.bind("address")} error={errors.address} />
         <TextArea label="Informasi Bisnis / Usaha" className="sm:col-span-2" {...form.bind("businessInfo")} error={errors.businessInfo} />
         <div className="flex justify-end gap-2 sm:col-span-2 pt-2 border-t border-line">
           <GhostButton onClick={onClose} disabled={saving}>Batal</GhostButton>
@@ -165,7 +162,7 @@ export function OwnersView() {
           ? o.accountActive && !o.archived
           : !o.accountActive && !o.archived;
       const matchDates = inRange(o.submittedAt, from, to);
-      const matchQuery = !q || [o.name, o.email, o.phone, o.idNumber].some((v) => String(v).toLowerCase().includes(q));
+      const matchQuery = !q || [o.name, o.email, o.phone, o.propertyName, o.address].some((v) => String(v).toLowerCase().includes(q));
       return matchVerif && matchAccount && matchDates && matchQuery;
     });
   }, [data?.owners, tab, account, from, to, search]);
@@ -200,7 +197,7 @@ export function OwnersView() {
     { label: "Nama", value: (o) => o.name },
     { label: "Email", value: (o) => o.email },
     { label: "Telepon", value: (o) => o.phone },
-    { label: "Identitas", value: (o) => `${o.idType} ${o.idNumber}` },
+    { label: "Properti", value: (o) => o.propertyName || "-" },
     { label: "Status Verifikasi", value: (o) => o.verificationStatus },
     { label: "Status Akun", value: (o) => (o.archived ? "Diarsipkan" : o.accountActive ? "Aktif" : "Nonaktif") },
     { label: "Jumlah Kost", value: (o) => o.kostCount },
@@ -300,7 +297,7 @@ export function OwnersView() {
       <FilterBar
         search={search}
         onSearchChange={setSearch}
-        searchPlaceholder="Cari nama, email, telepon, NIK..."
+        searchPlaceholder="Cari nama, email, telepon, properti..."
         extraFilters={
           <>
             <label className="flex items-center gap-1.5 text-xs font-bold text-muted">
@@ -490,8 +487,9 @@ export function OwnersView() {
               <DetailGrid items={[
                 ["Email", current.email],
                 ["Telepon", current.phone],
-                [`Identitas (${current.idType || "KTP"})`, current.idNumber],
-                ["Alamat", current.address || "-"],
+                ["Nama Properti", current.propertyName || "-"],
+                ["Kode Verifikasi", current.verificationCode || "-"],
+                ["Alamat Properti", current.address || "-"],
                 ["Informasi Bisnis", current.businessInfo || "-", true],
                 ["Tanggal Pengajuan", formatDate(current.submittedAt)],
                 ["Terdaftar Sejak", formatDate(current.createdAt)],
@@ -500,15 +498,29 @@ export function OwnersView() {
               ]} />
             </div>
 
-            {/* Foto Identitas */}
+            {/* Bukti Properti */}
             <div className="space-y-2">
-              <h4 className="text-xs font-extrabold uppercase text-muted tracking-wider">Dokumen Identitas (KTP/SIM)</h4>
-              {current.idPhoto ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={current.idPhoto} alt="Dokumen identitas" className="max-h-56 rounded-lg border border-line object-cover" />
+              <h4 className="text-xs font-extrabold uppercase text-muted tracking-wider">Bukti Properti</h4>
+              {(current.propertyPhoto || current.roomPhoto) ? (
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {current.propertyPhoto && (
+                    <figure className="space-y-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={current.propertyPhoto} alt="Foto tampak depan properti" className="max-h-56 w-full rounded-lg border border-line object-cover" />
+                      <figcaption className="text-xs text-muted">Tampak depan properti</figcaption>
+                    </figure>
+                  )}
+                  {current.roomPhoto && (
+                    <figure className="space-y-1">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={current.roomPhoto} alt="Foto kamar atau area umum" className="max-h-56 w-full rounded-lg border border-line object-cover" />
+                      <figcaption className="text-xs text-muted">Kamar / area umum</figcaption>
+                    </figure>
+                  )}
+                </div>
               ) : (
                 <div className="rounded-lg bg-track p-3 text-sm text-muted">
-                  Foto dokumen identitas belum diunggah pemilik. Verifikasi nomor identitas NIK di atas.
+                  Belum ada bukti properti. Verifikasi lewat kode lokasi dan kunjungan pemilik.
                 </div>
               )}
             </div>

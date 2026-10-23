@@ -174,7 +174,7 @@ export function FastApiOverviewView() {
               </div>
               <div>
                 <strong className="block text-xs sm:text-sm font-extrabold text-ink leading-tight">Verifikasi Mitra</strong>
-                <span className="mt-0.5 block text-[10px] sm:text-[11px] text-muted">Review identitas KTP</span>
+                <span className="mt-0.5 block text-[10px] sm:text-[11px] text-muted">Review bukti properti</span>
               </div>
             </button>
           )}

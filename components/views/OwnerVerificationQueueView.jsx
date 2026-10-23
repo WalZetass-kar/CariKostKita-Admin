@@ -70,7 +70,8 @@ export function OwnerVerificationQueueView() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <PanelTitle eyebrow="Moderasi" title="Antrean Verifikasi Pemilik" />
-            <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan proses permohonan verifikasi identitas pemilik kost secara real-time.</p>
+            <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan proses permohonan verifikasi properti pemilik kost secara real-time.</p>
+            <p className="mt-1 max-w-2xl text-xs text-muted">Bukti yang diperiksa: foto tampak depan properti, kode lokasi, dan foto kamar. Tidak ada KTP.</p>
           </div>
           <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
             <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
@@ -108,7 +109,7 @@ export function OwnerVerificationQueueView() {
                     
                     <div className="rounded-lg border border-line bg-track/50 p-3">
                       <p className="mb-1 text-[11px] font-extrabold uppercase tracking-wide text-muted">Catatan pengajuan</p>
-                      <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-ink">{application.submission_note || "Tidak ada catatan."}</p>
+                      <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-ink">{(application.submission_note || "Tidak ada catatan.").replace(/^\[verifikasi-properti\]\s*/, "")}</p>
                     </div>
                     {application.review_note && <p className="text-xs text-muted"><span className="font-bold text-ink">Catatan keputusan:</span> {application.review_note}</p>}
                   </div>
