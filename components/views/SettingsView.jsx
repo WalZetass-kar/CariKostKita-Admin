@@ -583,7 +583,7 @@ function SystemTab() {
               className="sm:col-span-2"
               {...b("apkUrl")}
               error={errors.apkUrl}
-              placeholder="https://.../CariKostKita.apk atau /releases/app.apk"
+              placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk"
               hint="Dapat berupa URL eksternal (GitHub Release / CDN) atau path file yang diunggah (/releases/...)."
               required
             />

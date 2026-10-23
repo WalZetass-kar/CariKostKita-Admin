@@ -67,7 +67,6 @@ export async function POST(request) {
               bytes
             );
           }
-          fs.writeFileSync(path.join(dir, "CariKostKita.apk"), bytes);
         }
       } catch (err) {
         // continue to other paths
