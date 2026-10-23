@@ -583,7 +583,7 @@ function SystemTab() {
               className="sm:col-span-2"
               {...b("apkUrl")}
               error={errors.apkUrl}
-              placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk"
+              placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.3/CariKostKita-v1.1.3-release.apk"
               hint="Dapat berupa URL eksternal (GitHub Release / CDN) atau path file yang diunggah (/releases/...)."
               required
             />
@@ -591,8 +591,8 @@ function SystemTab() {
               label="Versi Aplikasi"
               {...b("versionName")}
               error={errors.versionName}
-              placeholder="v1.1.2"
-              hint="Contoh: v1.1.2"
+              placeholder="v1.1.3"
+              hint="Contoh: v1.1.3"
             />
             <Field
               label="Version Code (build)"
@@ -600,7 +600,7 @@ function SystemTab() {
               min="1"
               {...b("versionCode")}
               error={errors.versionCode}
-              placeholder="4"
+              placeholder="5"
               hint="Harus naik setiap rilis dan sama dengan versionCode di build.gradle."
             />
             <Field
@@ -662,7 +662,7 @@ function SystemTab() {
               className="sm:col-span-2"
               {...b("bannerText")}
               error={errors.bannerText}
-              placeholder="🎉 Promo Rilis Beta: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!"
+              placeholder="Promo Rilis Resmi: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!"
               hint="Pesan utama yang ditampilkan di banner atas"
             />
             <Field

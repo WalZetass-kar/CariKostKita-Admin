@@ -86,8 +86,8 @@ export function LandingPageManagerView() {
     siteDescription: "",
     metaKeywords: "",
     apkUrl:
-      "https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk",
-    versionName: "v1.1.2",
+      "https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.3/CariKostKita-v1.1.3-release.apk",
+    versionName: "v1.1.3",
     apkSize: "3.3 MB",
     minAndroid: "Android 8.0+",
     releaseNotes: "",
@@ -898,7 +898,7 @@ export function LandingPageManagerView() {
                 className="sm:col-span-2"
                 value={settings.bannerText || ""}
                 onChange={(e) => handleChange("bannerText", e.target.value)}
-                placeholder="🎉 Promo Rilis Beta: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!"
+                placeholder="Promo Rilis Resmi: Listing Kost Gratis untuk Pemilik Kost di Pekanbaru!"
               />
               <Field
                 label="Tautan Tombol Banner"
@@ -1029,7 +1029,7 @@ export function LandingPageManagerView() {
                 label="URL Download APK"
                 value={settings.apkUrl || ""}
                 onChange={(e) => handleChange("apkUrl", e.target.value)}
-                placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.2/CariKostKita-v1.1.2-release.apk"
+                placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.3/CariKostKita-v1.1.3-release.apk"
               />
               <Field
                 label="Label Tombol Kedua (CTA 2)"
@@ -1050,7 +1050,7 @@ export function LandingPageManagerView() {
               label="Spesifikasi: Versi Rilis"
               value={settings.versionName || ""}
               onChange={(e) => handleChange("versionName", e.target.value)}
-              placeholder="v1.1.2"
+              placeholder="v1.1.3"
             />
             <Field
               label="Spesifikasi: Ukuran File APK"
