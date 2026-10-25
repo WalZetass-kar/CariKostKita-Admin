@@ -1,77 +1,110 @@
 import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 import { requireAdmin } from "@/lib/auth";
-import fs from "fs";
-import path from "path";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// Vercel Functions accept request bodies up to 4.5 MB. The browser resizes
+// raster images before uploading, so normal CMS assets stay well below this.
+const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
+const NO_STORE = { "Cache-Control": "no-store, max-age=0" };
+const MIME_BY_EXTENSION = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+};
+
+const json = (payload, status = 200) =>
+  NextResponse.json(payload, { status, headers: NO_STORE });
 
 export async function POST(request) {
   try {
     const auth = await requireAdmin(["super_admin", "admin", "marketing"]);
     if (!auth) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return json({ error: "Unauthorized" }, 401);
     }
 
     const formData = await request.formData();
     const file = formData.get("file");
 
     if (!file || typeof file === "string") {
-      return NextResponse.json({ error: "Berkas gambar tidak ditemukan." }, { status: 400 });
+      return json({ error: "Berkas gambar tidak ditemukan." }, 400);
     }
 
-    const originalName = file.name || "image.png";
+    const originalName = String(file.name || "image.png");
     const extMatch = originalName.match(/\.(png|jpg|jpeg|webp|svg)$/i);
     if (!extMatch) {
-      return NextResponse.json({ error: "Format gambar harus .png, .jpg, .jpeg, .webp, atau .svg" }, { status: 400 });
+      return json(
+        { error: "Format gambar harus .png, .jpg, .jpeg, .webp, atau .svg" },
+        400
+      );
     }
 
     const bytes = Buffer.from(await file.arrayBuffer());
-    if (bytes.length === 0 || bytes.length > 10 * 1024 * 1024) {
-      return NextResponse.json({ error: "Ukuran gambar tidak boleh melebihi 10 MB." }, { status: 400 });
+    if (bytes.length === 0) {
+      return json({ error: "Berkas gambar kosong." }, 400);
+    }
+    if (bytes.length > MAX_IMAGE_BYTES) {
+      return json(
+        {
+          error:
+            "Ukuran gambar maksimal 4 MB setelah dikompres. " +
+            "Pilih gambar yang lebih kecil lalu coba lagi.",
+          code: "IMAGE_TOO_LARGE",
+        },
+        413
+      );
     }
 
-    const sanitizedBase = originalName
-      .replace(/[^a-zA-Z0-9._-]/g, "_")
-      .replace(/\.[^.]+$/, "");
-    const safeFileName = `${sanitizedBase}-${Date.now()}${extMatch[0].toLowerCase()}`;
-
-    // Target directories: support running from Admin-Gue or parent directory
-    const cwd = process.cwd();
-    const candidateDirs = [
-      path.resolve(cwd, "../Landing Page/public/uploads"),
-      path.resolve(cwd, "public/uploads"),
-      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Landing Page/public/uploads",
-      "D:/projek java dan web/CariKostKita_FastAPI_Docs/Admin-Gue/public/uploads",
-    ];
-
-    // Attempt local disk save if possible (for local development)
-    for (const dir of candidateDirs) {
-      try {
-        const parent = path.dirname(dir);
-        if (fs.existsSync(/* turbopackIgnore: true */ parent)) {
-          if (!fs.existsSync(/* turbopackIgnore: true */ dir)) {
-            fs.mkdirSync(dir, { recursive: true });
-          }
-          fs.writeFileSync(path.join(dir, safeFileName), bytes);
-        }
-      } catch (err) {
-        // continue to other paths
-      }
+    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!token) {
+      console.error("Image upload rejected: BLOB_READ_WRITE_TOKEN is not configured");
+      return json(
+        {
+          error:
+            "Penyimpanan berkas belum dikonfigurasi. Hubungkan Vercel Blob " +
+            "ke proyek Admin lalu coba lagi.",
+          code: "BLOB_NOT_CONFIGURED",
+        },
+        503
+      );
     }
 
-    // Generate Base64 Data URL for universal cross-domain persistence across Vercel deployments
-    const mime = file.type || (extMatch[1].toLowerCase() === "svg" ? "image/svg+xml" : `image/${extMatch[1].toLowerCase() === "jpg" ? "jpeg" : extMatch[1].toLowerCase()}`);
-    const dataUrl = `data:${mime};base64,${bytes.toString("base64")}`;
+    const extension = extMatch[1].toLowerCase();
+    const sanitizedBase =
+      originalName
+        .replace(/[^a-zA-Z0-9._-]/g, "_")
+        .replace(/\.[^.]+$/, "")
+        .replace(/^_+|_+$/g, "") || "image";
+    const stamp = new Date()
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\..+$/, "");
+    const safeFileName = `${sanitizedBase}.${extension}`;
+    const pathname = `uploads/${stamp}/${safeFileName}`;
 
-    return NextResponse.json({
+    const blob = await put(pathname, bytes, {
+      access: "public",
+      contentType: MIME_BY_EXTENSION[extension] || file.type || "application/octet-stream",
+      addRandomSuffix: false,
+      cacheControlMaxAge: 60 * 60 * 24 * 365,
+      token,
+    });
+
+    return json({
       success: true,
-      url: dataUrl,
-      localUrl: `/uploads/${safeFileName}`,
+      url: blob.url,
       fileName: safeFileName,
+      storage: "vercel-blob",
     });
   } catch (error) {
     console.error("Image upload error:", error);
-    return NextResponse.json(
+    return json(
       { error: error.message || "Gagal mengunggah berkas gambar." },
-      { status: error.status || 500 }
+      Number.isInteger(error.status) ? error.status : 500
     );
   }
 }

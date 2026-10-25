@@ -24,7 +24,7 @@ import {
   Link as LinkIcon,
 } from "lucide-react";
 import { useApp } from "../AppContext";
-import { api } from "@/lib/api";
+import { api, prepareImageFile } from "@/lib/api";
 import {
   Avatar,
   Badge,
@@ -463,17 +463,20 @@ function SystemTab() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("version", form.values.versionName || "");
       const res = await fetch("/api/admin/upload-apk", {
         method: "POST",
         body: formData,
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (!res.ok || json.error) {
         throw new Error(json.error || "Gagal mengunggah berkas APK.");
       }
       form.set("apkUrl", json.url);
       if (json.size) form.set("apkSize", json.size);
-      setUploadApkMsg(`Berkas ${json.fileName} (${json.size}) berhasil diunggah.`);
+      setUploadApkMsg(
+        `Berkas ${json.fileName} (${json.size}) berhasil diunggah. Klik Simpan Perubahan untuk menerbitkannya di Landing Page.`
+      );
     } catch (err) {
       setUploadApkErr(err.message || "Gagal mengunggah berkas APK.");
     } finally {
@@ -489,18 +492,19 @@ function SystemTab() {
     setUploadHeroErr("");
     setUploadHeroMsg("");
     try {
+      const uploadFile = await prepareImageFile(file, 1600);
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", uploadFile, uploadFile.name || file.name);
       const res = await fetch("/api/admin/upload-image", {
         method: "POST",
         body: formData,
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (!res.ok || json.error) {
         throw new Error(json.error || "Gagal mengunggah gambar showcase.");
       }
       form.set("heroImageUrl", json.url);
-      setUploadHeroMsg(`Gambar showcase berhasil diunggah: ${json.url}`);
+      setUploadHeroMsg(`Gambar showcase berhasil diunggah. Klik Simpan Perubahan untuk menerbitkannya di Landing Page.`);
     } catch (err) {
       setUploadHeroErr(err.message || "Gagal mengunggah gambar showcase.");
     } finally {
@@ -562,7 +566,7 @@ function SystemTab() {
             )}
           </div>
           <p className="text-xs text-muted mb-3">
-            Unggah file APK langsung dari komputer atau masukkan link download APK. Tombol <em>&ldquo;Download APK&rdquo;</em> di Landing Page akan otomatis mengunduh dari tautan ini.
+            Unggah file APK langsung dari komputer (maksimal 4 MB) atau masukkan link download APK. Tombol <em>&ldquo;Download APK&rdquo;</em> di Landing Page akan otomatis mengunduh dari tautan ini setelah Anda menekan <strong>Simpan</strong>.
           </p>
 
           {uploadApkMsg && (
@@ -584,7 +588,7 @@ function SystemTab() {
               {...b("apkUrl")}
               error={errors.apkUrl}
               placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.3/CariKostKita-v1.1.3-release.apk"
-              hint="Dapat berupa URL eksternal (GitHub Release / CDN) atau path file yang diunggah (/releases/...)."
+              hint="Dapat berupa URL hasil unggahan (Vercel Blob), GitHub Release, atau CDN. Jangan gunakan data Base64."
               required
             />
             <Field

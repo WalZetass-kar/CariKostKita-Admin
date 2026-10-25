@@ -38,7 +38,7 @@ import {
   Lock,
 } from "lucide-react";
 import { useApp } from "../AppContext";
-import { api, readImage } from "@/lib/api";
+import { api, prepareImageFile } from "@/lib/api";
 import { evaluateBrandColor } from "@/lib/color-contrast";
 import { broadcastSettingsUpdated } from "@/lib/realtime";
 import BrandColorField from "../BrandColorField";
@@ -366,30 +366,30 @@ export function LandingPageManagerView() {
     else setUploadingImg(true);
 
     try {
-      if (!isApk && file.type && file.type.startsWith("image/")) {
-        let dataUrl;
-        if (file.type === "image/svg+xml") {
-          const reader = new FileReader();
-          dataUrl = await new Promise((resolve, reject) => {
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        } else {
-          dataUrl = await readImage(file, 1200);
-        }
-        handleChange(fieldName, dataUrl);
-        toast("Gambar berhasil dipilih dan siap disimpan!");
+      // Images are resized in the browser, then uploaded to object storage.
+      // The CMS stores only the resulting short URL, never a Base64 data URL
+      // (which could exceed the durable settings payload limit).
+      const uploadFile = isApk
+        ? file
+        : await prepareImageFile(file, fieldName === "heroImageUrl" ? 1600 : 1200);
+      const formData = new FormData();
+      formData.append("file", uploadFile, uploadFile.name || file.name);
+      if (isApk) formData.append("version", settings.versionName || "");
+
+      const endpoint = isApk ? "/api/admin/upload-apk" : "/api/admin/upload-image";
+      const res = await fetch(endpoint, { method: "POST", body: formData });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.error) {
+        throw new Error(json.error || "Gagal mengunggah berkas.");
+      }
+      handleChange(fieldName, json.url);
+      if (isApk) {
+        if (json.size) handleChange("apkSize", json.size);
+        toast(
+          "APK berhasil diunggah. Klik Simpan Perubahan untuk menerbitkannya di Landing Page."
+        );
       } else {
-        const formData = new FormData();
-        formData.append("file", file);
-        const endpoint = isApk ? "/api/admin/upload-apk" : "/api/admin/upload-image";
-        const res = await fetch(endpoint, { method: "POST", body: formData });
-        const json = await res.json();
-        if (!res.ok || json.error) throw new Error(json.error || "Gagal mengunggah berkas.");
-        handleChange(fieldName, json.url);
-        if (isApk && json.size) handleChange("apkSize", json.size);
-        toast(`Berkas berhasil diunggah: ${json.url}`);
+        toast("Gambar berhasil diunggah dan siap disimpan.");
       }
     } catch (err) {
       toast(err.message || "Gagal upload.", "error");
@@ -1031,6 +1031,37 @@ export function LandingPageManagerView() {
                 onChange={(e) => handleChange("apkUrl", e.target.value)}
                 placeholder="https://github.com/WalZetass-kar/CariKostKita/releases/download/v1.1.3/CariKostKita-v1.1.3-release.apk"
               />
+              <div className="sm:col-span-2 rounded-xl border border-dashed border-accent/40 bg-accent/5 p-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-sm font-extrabold text-ink">
+                      <FileArchive size={17} className="text-accent shrink-0" />
+                      <span>Unggah Berkas APK Langsung</span>
+                    </p>
+                    <p className="mt-1 text-xs text-muted">
+                      Berkas disimpan di penyimpanan objek dan URL-nya otomatis mengisi kolom di atas.
+                      Maksimal 4 MB. Setelah unggah, klik <strong>Simpan Perubahan</strong> agar
+                      tombol Download APK di Landing Page memakai berkas ini.
+                    </p>
+                    {settings.apkUrl && (
+                      <p className="mt-1 truncate font-mono text-[11px] text-muted" title={settings.apkUrl}>
+                        {settings.apkUrl}
+                      </p>
+                    )}
+                  </div>
+                  <label className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-accent/40 bg-accent/10 px-3.5 py-2 text-xs font-bold text-accent transition hover:bg-accent/20 sm:w-auto cursor-pointer">
+                    <Upload size={14} className={uploadingApk ? "animate-spin" : ""} />
+                    <span>{uploadingApk ? "Mengunggah..." : "Pilih File APK"}</span>
+                    <input
+                      type="file"
+                      accept=".apk,application/vnd.android.package-archive"
+                      className="hidden"
+                      onChange={(e) => handleFileUpload(e, "apkUrl", true)}
+                      disabled={uploadingApk}
+                    />
+                  </label>
+                </div>
+              </div>
               <Field
                 label="Label Tombol Kedua (CTA 2)"
                 value={settings.heroCtaSecondaryLabel || "Lihat Fitur"}
