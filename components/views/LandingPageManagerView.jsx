@@ -69,6 +69,7 @@ export function LandingPageManagerView() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [saveError, setSaveError] = useState("");
   const [activeTab, setActiveTab] = useState("Branding & SEO");
 
   // Form State
@@ -243,6 +244,7 @@ export function LandingPageManagerView() {
 
   const saveSettings = async () => {
     setSaving(true);
+    setSaveError("");
     setSaveReport(null);
     try {
       const diff = buildDiff();
@@ -292,7 +294,8 @@ export function LandingPageManagerView() {
       const updated_at = res?.updated_at ?? saved?.updated_at ?? null;
       const changedKeys = res?.changed_keys ?? saved?.changed_keys ?? Object.keys(diff);
       const persistence = res?.persistence ?? null;
-      setSaveReport({ revision, updated_at, changedKeys, persistence });
+      const inlineImages = res?.inline_images_migrated ?? [];
+      setSaveReport({ revision, updated_at, changedKeys, persistence, inlineImages });
       broadcastSettingsUpdated({ revision, updated_at, changedKeys }).then((delivered) => {
         if (!delivered) {
           console.info(
@@ -304,7 +307,9 @@ export function LandingPageManagerView() {
       });
       toast("Semua perubahan Landing Page berhasil disimpan!");
     } catch (err) {
-      toast(err.message || "Gagal menyimpan perubahan.", "error");
+      const message = err.message || "Gagal menyimpan perubahan.";
+      setSaveError(message);
+      toast(message, "error");
     } finally {
       setSaving(false);
     }
@@ -412,6 +417,14 @@ export function LandingPageManagerView() {
     return <ErrorState message={error} onRetry={() => window.location.reload()} />;
   }
 
+  const legacyInlineImageFields = Array.from(
+    new Set(
+      Object.entries(settings)
+        .filter(([, value]) => typeof value === "string" && value.startsWith("data:image/"))
+        .map(([key]) => key)
+    )
+  );
+
   return (
     <div className="space-y-4">
       {/* Header bar */}
@@ -424,7 +437,7 @@ export function LandingPageManagerView() {
         </div>
         <div className="flex items-center gap-2.5">
           <a
-            href="https://carikostkita-landing.vercel.app"
+            href="https://www.carikostkita.my.id"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-line bg-paper text-xs font-bold text-ink hover:border-muted transition"
@@ -440,9 +453,20 @@ export function LandingPageManagerView() {
         </div>
       </Panel>
 
-      {error && (
+      {saveError && (
         <div className="rounded-lg border border-danger/40 bg-danger/5 px-4 py-3 text-sm text-danger">
-          {error}
+          {saveError}
+        </div>
+      )}
+
+      {legacyInlineImageFields.length > 0 && (
+        <div className="rounded-lg border border-warn-fg/40 bg-warn-bg/40 px-4 py-3 text-xs text-ink">
+          <p className="font-bold">Gambar lama masih tersimpan sebagai Base64.</p>
+          <p className="mt-1 text-muted">
+            Klik <strong>Simpan Perubahan</strong> sekali. Dashboard akan memindahkan{" "}
+            <span className="font-mono">{legacyInlineImageFields.join(", ")}</span> ke penyimpanan
+            objek secara otomatis sebelum menyimpan teks lainnya.
+          </p>
         </div>
       )}
 
@@ -457,8 +481,14 @@ export function LandingPageManagerView() {
               {(saveReport.changedKeys || []).join(", ") || "—"}
             </span>
           </p>
+          {(saveReport.inlineImages || []).length > 0 && (
+            <p className="text-accent">
+              Gambar Base64 dipindahkan ke penyimpanan objek:{" "}
+              <span className="font-mono">{saveReport.inlineImages.join(", ")}</span>
+            </p>
+          )}
           {saveReport.persistence && saveReport.persistence.revision_durable === false && (
-            <p className="text-warning">
+            <p className="text-warn-fg">
               Penyimpanan berjalan, tetapi revisi belum dipatok di database. Jalankan ulang
               migration <span className="font-mono">supabase_landing_settings_persistence.sql</span>.
             </p>

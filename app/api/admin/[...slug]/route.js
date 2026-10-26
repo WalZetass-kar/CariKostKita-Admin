@@ -1,6 +1,10 @@
 import { handle, ok, readBody } from "@/lib/http";
 import { HttpError, publicAdmin, requireAdmin } from "@/lib/auth";
 import { getDb, mutate } from "@/lib/db";
+import {
+  InlineSettingsImageError,
+  materializeInlineSettingsImages,
+} from "@/lib/inline-settings-images.mjs";
 import * as svc from "@/lib/service";
 
 const apiErrorMessage = (payload, fallback) => {
@@ -110,12 +114,46 @@ async function getSystemSettingsHandler({ session }) {
 async function patchSystemSettingsHandler(auth, { body }) {
   const { session } = auth;
   const apiUrl = fastApiBase();
+
+  // A dashboard tab opened before the Blob-upload rollout may still hold
+  // Base64 images in local state. Move them to object storage here so the
+  // durable store only ever receives short URLs. This also repairs those
+  // legacy values on the next save instead of failing the whole edit with 413.
+  let settingsBody = body;
+  let migratedInlineImages = [];
+  try {
+    const migrated = await materializeInlineSettingsImages(body);
+    settingsBody = migrated.payload;
+    migratedInlineImages = migrated.migratedFields;
+  } catch (err) {
+    if (err instanceof InlineSettingsImageError) {
+      console.error(
+        "Inline settings image migration failed:",
+        err.code,
+        err.fields,
+        err.message
+      );
+      throw new HttpError(err.status || 503, err.message, err.fields);
+    }
+    console.error("Inline settings image migration failed:", err);
+    throw new HttpError(
+      500,
+      "Gagal memindahkan gambar lama ke penyimpanan objek. Muat ulang Dashboard lalu coba lagi."
+    );
+  }
+  if (migratedInlineImages.length) {
+    console.info(
+      "Migrated legacy inline CMS images to Blob:",
+      migratedInlineImages.join(", ")
+    );
+  }
+
   let res;
   try {
     res = await fetch(`${apiUrl}/api/v1/admin/settings`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(settingsBody),
       cache: "no-store",
     });
   } catch (err) {
@@ -139,7 +177,7 @@ async function patchSystemSettingsHandler(auth, { body }) {
     );
   }
   const remotePayload = payload.data || {};
-  const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, body) }));
+  const local = await write(auth, (db) => ({ system: svc.updateSystem(db, auth.admin, settingsBody) }));
   // The confirmed database state wins over the local mirror.
   const savedSystem = { ...(local.system || {}), ...remotePayload };
   mutate((db) => {
@@ -154,6 +192,7 @@ async function patchSystemSettingsHandler(auth, { body }) {
     revision: payload.revision ?? savedSystem.revision ?? 0,
     updated_at: payload.updated_at ?? savedSystem.updated_at ?? null,
     changed_keys: payload.changed_keys ?? [],
+    inline_images_migrated: migratedInlineImages,
     persistence: payload.persistence ?? null,
     realtime: payload.realtime ?? null,
   };

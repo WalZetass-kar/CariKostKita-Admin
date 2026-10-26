@@ -50,6 +50,7 @@ import {
 } from "../ui";
 import { ROLES, ROLE_LABELS } from "@/lib/constants";
 import { formatDate } from "@/lib/format";
+import { broadcastSettingsUpdated } from "@/lib/realtime";
 
 export function SettingsView() {
   const { admin } = useApp();
@@ -89,6 +90,21 @@ function useSave(path, method = "PATCH") {
     setErrors({});
     try {
       const res = await act(path, { method, body });
+      // SettingsView used to save without notifying open Landing tabs. Keep the
+      // same realtime invalidation contract as LandingPageManagerView so an
+      // already-open landing page does not wait for the polling safety net.
+      if (res && (path === "settings/system" || path === "settings/landing")) {
+        const revision = Number(res.revision ?? res.system?.revision ?? 0) || 0;
+        const updatedAt = res.updated_at ?? res.system?.updated_at ?? null;
+        const changedKeys = Array.isArray(res.changed_keys)
+          ? res.changed_keys
+          : Object.keys(body || {});
+        void broadcastSettingsUpdated({
+          revision,
+          updated_at: updatedAt,
+          changedKeys,
+        });
+      }
       toast(success);
       return res;
     } catch (e) {
