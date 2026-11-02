@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "verify:contrast": "node scripts/verify-contrast.mjs",
@@ -25,5 +25,8 @@
   "devDependencies": {
     "@tailwindcss/postcss": "latest",
     "tailwindcss": "latest"
+  },
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.33.0"
   }
 }
