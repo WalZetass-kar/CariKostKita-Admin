@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ExternalLink, Image as ImageIcon, Pencil, Plus, RefreshCw, Search } from "lucide-react";
+import { ExternalLink, Image as ImageIcon, Pencil, Plus, Power, RefreshCw, Search, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { useApp } from "../AppContext";
 import {
   Badge,
+  ConfirmDialog,
   DataTable,
   EmptyState,
   ErrorState,
@@ -16,6 +17,7 @@ import {
   SelectField,
   SkeletonTable,
   Td,
+  useToast,
 } from "../ui";
 
 const PAGE_SIZE = 25;
@@ -24,6 +26,7 @@ const dateLabel = (value) =>
 
 export function FastApiAdsView() {
   const { openAdForm } = useApp();
+  const toast = useToast();
   const [ads, setAds] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -32,6 +35,8 @@ export function FastApiAdsView() {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [togglingId, setTogglingId] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -60,6 +65,34 @@ export function FastApiAdsView() {
     event.preventDefault();
     setPage(1);
     setQuery(queryInput.trim().slice(0, 100));
+  };
+
+  const handleToggleActive = async (ad) => {
+    setTogglingId(ad.id);
+    try {
+      await api(`ads/${ad.id}/toggle`, {
+        method: "POST",
+        body: { active: !ad.is_active },
+      });
+      toast(`Iklan "${ad.title}" ${!ad.is_active ? "diaktifkan" : "dinonaktifkan"}.`);
+      await load();
+    } catch (err) {
+      toast(err.message || "Gagal mengubah status iklan.", "error");
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleDeleteAd = async () => {
+    if (!confirmDelete) return;
+    try {
+      await api(`ads/${confirmDelete.id}`, { method: "DELETE" });
+      toast(`Iklan "${confirmDelete.title}" berhasil dihapus.`);
+      setConfirmDelete(null);
+      await load();
+    } catch (err) {
+      toast(err.message || "Gagal menghapus iklan.", "error");
+    }
   };
 
   return (
@@ -141,7 +174,7 @@ export function FastApiAdsView() {
               <Plus size={14} /> Tambah Iklan
             </PrimaryButton>
           </div>
-          <DataTable headers={["Iklan", "Periode", "Status", "Performa", "Target", { title: "Aksi", align: "text-center", className: "w-20" }]}>
+          <DataTable headers={["Iklan", "Periode", "Status", "Performa", "Target", { title: "Aksi", align: "text-center", className: "w-36" }]}>
             {ads.map((ad) => (
               <tr key={ad.id} className="hover:bg-track/60 transition-colors">
                 <Td>
@@ -159,7 +192,7 @@ export function FastApiAdsView() {
                     )}
                     <div className="min-w-0">
                       <p className="truncate font-bold text-ink">{ad.title || "Tanpa judul"}</p>
-                      <p className="truncate text-xs text-muted">ID {ad.id}</p>
+                      <p className="truncate text-xs text-muted">ID #{ad.id}</p>
                     </div>
                   </div>
                 </Td>
@@ -197,10 +230,27 @@ export function FastApiAdsView() {
                     <span className="text-xs text-muted">—</span>
                   )}
                 </Td>
-                <Td className="w-20 text-center">
-                  <div className="flex items-center justify-center">
+                <Td className="w-36 text-center">
+                  <div className="flex items-center justify-center gap-1.5">
+                    {/* Quick Toggle Status */}
                     <button
                       type="button"
+                      title={ad.is_active ? "Nonaktifkan Iklan" : "Aktifkan Iklan"}
+                      disabled={togglingId === ad.id}
+                      onClick={() => handleToggleActive(ad)}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${
+                        ad.is_active
+                          ? "border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+                          : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                      }`}
+                    >
+                      <Power size={14} className={togglingId === ad.id ? "animate-spin" : ""} />
+                    </button>
+
+                    {/* Edit Form */}
+                    <button
+                      type="button"
+                      title="Edit Iklan"
                       onClick={() =>
                         openAdForm?.({
                           id: ad.id,
@@ -212,10 +262,20 @@ export function FastApiAdsView() {
                           onSaved: load,
                         })
                       }
-                      className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line px-2.5 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                      className="inline-flex h-8 items-center gap-1 rounded-lg border border-line px-2 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
                     >
                       <Pencil size={13} />
-                      <span>Edit</span>
+                      <span className="hidden sm:inline">Edit</span>
+                    </button>
+
+                    {/* Hapus Iklan */}
+                    <button
+                      type="button"
+                      title="Hapus Iklan"
+                      onClick={() => setConfirmDelete(ad)}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 text-red-600 hover:bg-red-500/10 active:scale-95 transition"
+                    >
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </Td>
@@ -247,6 +307,17 @@ export function FastApiAdsView() {
           </div>
         </Panel>
       )}
+
+      {/* Modal Konfirmasi Hapus Iklan */}
+      <ConfirmDialog
+        open={Boolean(confirmDelete)}
+        title="Hapus Iklan"
+        tone="danger"
+        message={`Apakah Anda yakin ingin menghapus iklan "${confirmDelete?.title || ""}"? Data tayang dan impresi kampanye ini akan dihapus dari server.`}
+        confirmLabel="Ya, Hapus Iklan"
+        onConfirm={handleDeleteAd}
+        onClose={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

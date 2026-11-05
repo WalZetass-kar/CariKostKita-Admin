@@ -525,6 +525,41 @@ const routes = [
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menyimpan perubahan pengguna via FastAPI."));
     return payload;
   }, ["super_admin", "admin"]],
+  ["PATCH", "fastapi-users/:id/details", async ({ session }, { body, params }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/users/${encodeURIComponent(params.id)}/details`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal memperbarui profil pengguna via FastAPI."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["POST", "fastapi-users/:id/reset-password", async ({ session }, { body, params }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/users/${encodeURIComponent(params.id)}/reset-password`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(body),
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal mereset kata sandi via FastAPI."));
+    return payload;
+  }, ["super_admin", "admin"]],
+  ["DELETE", "fastapi-users/:id", async ({ session }, { params }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/users/${encodeURIComponent(params.id)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menghapus pengguna via FastAPI."));
+    return payload;
+  }, ["super_admin", "admin"]],
   ["GET", "fastapi-reports", async ({ session }, { url }) => {
     const apiUrl = fastApiBase();
     const query = new URLSearchParams(url.searchParams);
@@ -828,16 +863,25 @@ const routes = [
     });
   }, ["super_admin", "marketing"]],
   ["PATCH", "ads/:id", async (auth, { body, params }) => {
+    const isActive =
+      typeof body.is_active === "boolean"
+        ? body.is_active
+        : typeof body.active === "boolean"
+        ? body.active
+        : body.status !== undefined
+        ? body.status === "Aktif" || body.status === true
+        : undefined;
+
     const adPayload = {
       title: body.title,
       image_url: body.image || body.image_url,
-      target_url: body.targetUrl || body.target_url,
+      target_url: body.link || body.targetUrl || body.target_url,
       platform: body.platform,
       ad_type: body.type || body.ad_type,
       position: body.position,
-      start_date: body.startDate || body.start_date,
-      end_date: body.endDate || body.end_date,
-      is_active: body.active ?? body.is_active,
+      start_date: body.start || body.startDate || body.start_date,
+      end_date: body.end || body.endDate || body.end_date,
+      is_active: isActive,
     };
     return write(auth, (db) => ({ ad: svc.updateAd(db, auth.admin, params.id, body) }), {
       method: "PATCH",
@@ -845,21 +889,21 @@ const routes = [
       body: adPayload,
       isFastApi: true,
     });
-  }, ["super_admin", "marketing"]],
+  }, ["super_admin", "admin", "marketing"]],
   ["DELETE", "ads/:id", async (auth, { params }) => write(auth, (db) => svc.deleteAd(db, auth.admin, params.id), {
     method: "DELETE",
     path: `/api/v1/admin/ads/${params.id}`,
     isFastApi: true,
-  }), ["super_admin", "marketing"]],
+  }), ["super_admin", "admin", "marketing"]],
   ["POST", "ads/:id/toggle", async (auth, { body, params }) => write(auth, (db) => ({ ad: svc.toggleAd(db, auth.admin, params.id) }), {
     method: "PATCH",
     path: `/api/v1/admin/ads/${params.id}`,
     body: { is_active: body?.active ?? true },
     isFastApi: true,
-  }), ["super_admin", "marketing"]],
-  ["POST", "ads/:id/archive", async (auth, { params }) => write(auth, (db) => ({ ad: svc.archiveAd(db, auth.admin, params.id) })), ["super_admin", "marketing"]],
-  ["POST", "ads/:id/restore", async (auth, { params }) => write(auth, (db) => ({ ad: svc.restoreAd(db, auth.admin, params.id) })), ["super_admin", "marketing"]],
-  ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin"]],
+  }), ["super_admin", "admin", "marketing"]],
+  ["POST", "ads/:id/archive", async (auth, { params }) => write(auth, (db) => ({ ad: svc.archiveAd(db, auth.admin, params.id) })), ["super_admin", "admin", "marketing"]],
+  ["POST", "ads/:id/restore", async (auth, { params }) => write(auth, (db) => ({ ad: svc.restoreAd(db, auth.admin, params.id) })), ["super_admin", "admin", "marketing"]],
+  ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin", "admin"]],
 
   ["PATCH", "settings/notifications", async (auth, { body }) => write(auth, (db) => ({ notifications: svc.updateNotifications(db, auth.admin, body) }))],
   // The settings routes are served by FastAPI, which only recognises the

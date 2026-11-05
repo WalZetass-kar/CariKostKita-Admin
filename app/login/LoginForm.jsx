@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, LogIn, User, ShieldCheck } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { AlertCircle, CheckCircle2, Eye, EyeOff, Lock, LogIn, RefreshCw, ShieldCheck, User } from "lucide-react";
 import { Spinner } from "@/components/ui";
 
 export default function LoginForm() {
@@ -11,11 +11,33 @@ export default function LoginForm() {
 function Inner() {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaImg, setCaptchaImg] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [honeypot, setHoneypot] = useState("");
   const [show, setShow] = useState(false);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
+
+  const loadCaptcha = useCallback(async () => {
+    setCaptchaLoading(true);
+    try {
+      const res = await fetch("/api/auth/captcha?t=" + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        setCaptchaImg(data.captchaImage);
+        setCaptchaToken(data.captchaToken);
+        setCaptchaAnswer("");
+      }
+    } catch {
+      // Captcha load failure
+    } finally {
+      setCaptchaLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const p = new URLSearchParams(window.location.search);
@@ -23,7 +45,9 @@ function Inner() {
     if (p.get("loggedout")) setNotice("Anda telah keluar dari Admin Panel.");
     const t = localStorage.getItem("ckk.theme");
     if (t === "dark") document.documentElement.classList.add("dark");
-  }, []);
+
+    loadCaptcha();
+  }, [loadCaptcha]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -31,6 +55,7 @@ function Inner() {
     if (!identifier.trim()) next.identifier = "Email atau username wajib diisi.";
     if (!password) next.password = "Password wajib diisi.";
     else if (password.length < 6) next.password = "Password minimal 6 karakter.";
+    if (!captchaAnswer.trim()) next.captcha = "Jawab soal keamanan di bawah.";
     setErrors(next);
     setMessage("");
     if (Object.keys(next).length) return;
@@ -40,7 +65,13 @@ function Inner() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier, password }),
+        body: JSON.stringify({
+          identifier,
+          password,
+          captchaAnswer,
+          captchaToken,
+          website: honeypot, // Anti-bot honeypot
+        }),
         credentials: "same-origin",
       });
       const json = await res.json().catch(() => ({}));
@@ -48,12 +79,15 @@ function Inner() {
         setErrors(json.fields || {});
         setMessage(json.error || json.message || json.detail?.detail || json.detail || "Email atau kata sandi salah. Pastikan akun memiliki akses admin.");
         setLoading(false);
+        // Otomatis refresh captcha jika percobaan login gagal
+        loadCaptcha();
         return;
       }
       window.location.replace("/"); // replace: halaman login tidak tersisa di history
     } catch {
       setMessage("Tidak dapat terhubung ke server. Periksa koneksi Anda.");
       setLoading(false);
+      loadCaptcha();
     }
   };
 
@@ -89,12 +123,24 @@ function Inner() {
           </div>
           <div className="border-t border-[#EEEAD726] pt-4">
             <p className="text-xs text-[#EEEAD799]">
-              Sistem diamankan dengan audit logging otomatis untuk setiap aktivitas administratif.
+              Dilindungi oleh enkripsi modern, proteksi bot Captcha, dan audit logging otomatis.
             </p>
           </div>
         </aside>
 
         <form onSubmit={submit} noValidate className="grid content-center gap-5 p-6 sm:p-10">
+          {/* Honeypot field for bot trapping */}
+          <div style={{ display: "none" }} aria-hidden="true">
+            <input
+              type="text"
+              name="website"
+              tabIndex={-1}
+              autoComplete="off"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+            />
+          </div>
+
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase tracking-wider text-maroon">Admin Portal</span>
@@ -162,12 +208,51 @@ function Inner() {
             {errors.password && <span role="alert" className="text-xs font-bold text-bad-fg">{errors.password}</span>}
           </label>
 
-          {message && (
-            <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-600/10 border border-red-500/30 p-3 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">
-              <AlertCircle size={18} className="shrink-0 text-red-600 dark:text-red-400" />
-              <span>{message}</span>
+          {/* Captcha Security Challenge */}
+          <div className="rounded-xl border border-line bg-track/40 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
+                Verifikasi Keamanan (Captcha)
+              </span>
+              <button
+                type="button"
+                onClick={loadCaptcha}
+                disabled={captchaLoading}
+                className="inline-flex items-center gap-1 text-[11px] font-bold text-accent hover:underline disabled:opacity-50"
+              >
+                <RefreshCw size={12} className={captchaLoading ? "animate-spin" : ""} />
+                <span>Ganti Soal</span>
+              </button>
             </div>
-          )}
+
+            <div className="flex items-center gap-2.5">
+              <div className="shrink-0 h-11 w-40 rounded-lg border border-line overflow-hidden bg-white grid place-items-center">
+                {captchaImg ? (
+                  <img src={captchaImg} alt="Captcha" className="h-full w-full object-contain" />
+                ) : (
+                  <span className="text-xs text-muted animate-pulse">Memuat...</span>
+                )}
+              </div>
+              <input
+                id="captchaAnswer"
+                name="captchaAnswer"
+                type="text"
+                autoComplete="off"
+                maxLength={6}
+                value={captchaAnswer}
+                onChange={(e) => setCaptchaAnswer(e.target.value)}
+                placeholder="Jawaban ="
+                className={`h-11 flex-1 rounded-lg border bg-field px-3 text-sm font-bold text-center text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-brand/30 ${
+                  errors.captcha ? "border-bad-fg" : "border-line"
+                }`}
+              />
+            </div>
+            {errors.captcha && (
+              <span role="alert" className="block text-xs font-bold text-bad-fg">
+                {errors.captcha}
+              </span>
+            )}
+          </div>
 
           <button
             type="submit"
