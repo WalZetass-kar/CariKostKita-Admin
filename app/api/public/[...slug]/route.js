@@ -40,7 +40,7 @@ async function dispatch(request, context) {
     case "GET landing":
     case "GET settings": {
       const localSystem = getDb().system || {};
-      const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+      const apiUrl = (process.env.CARIKOSTKITA_API_URL || process.env.NEXT_PUBLIC_CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id").replace(/\/$/, "");
       let remoteSettings = {};
       try {
         const res = await fetch(`${apiUrl}/api/v1/public/settings`, { cache: "no-store" });
@@ -58,7 +58,7 @@ async function dispatch(request, context) {
     case "GET realtime-config": {
       // Browser-safe Realtime wiring (channel, event, and the public anon
       // Supabase credentials when the backend can prove they are anon-only).
-      const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+      const apiUrl = (process.env.CARIKOSTKITA_API_URL || process.env.NEXT_PUBLIC_CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id").replace(/\/$/, "");
       let config = {};
       try {
         const res = await fetch(`${apiUrl}/api/v1/public/settings/realtime`, { cache: "no-store" });

@@ -61,7 +61,6 @@ export function SettingsView() {
     "Keamanan",
     "Notifikasi",
     "Tampilan",
-    "Sistem",
     ...(isSuperAdmin ? ["Kelola Admin"] : []),
   ];
 
@@ -74,7 +73,6 @@ export function SettingsView() {
       {tab === "Keamanan" && <SecurityTab />}
       {tab === "Notifikasi" && <NotificationTab />}
       {tab === "Tampilan" && <AppearanceTab />}
-      {tab === "Sistem" && <SystemTab />}
       {tab === "Kelola Admin" && isSuperAdmin && <AdminsTab />}
     </div>
   );

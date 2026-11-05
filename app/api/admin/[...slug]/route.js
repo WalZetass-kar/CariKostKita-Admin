@@ -19,12 +19,12 @@ const apiErrorMessage = (payload, fallback) => {
 // ketika env CARIKOSTKITA_API_URL belum diisi. Pengembangan lokal menimpanya
 // lewat .env (CARIKOSTKITA_API_URL=http://127.0.0.1:8000).
 const fastApiBase = () =>
-  (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+  (process.env.CARIKOSTKITA_API_URL || process.env.NEXT_PUBLIC_CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id").replace(/\/$/, "");
 
 // Base URL gateway lama (Laravel). Route legacy memakai prefix /api/v1.
 // Default production juga, demi alasan yang sama seperti di atas.
 const legacyApiBase = () =>
-  (process.env.NEXT_PUBLIC_API_URL || "https://carikostkitafastapi.vercel.app/api/v1").replace(/\/$/, "");
+  (process.env.NEXT_PUBLIC_API_URL || process.env.CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id/api/v1").replace(/\/$/, "");
 
 let dataCache = { value: null, expiresAt: 0, token: null };
 let overviewCache = { value: null, expiresAt: 0, token: null };
@@ -204,7 +204,7 @@ async function patchSystemSettingsHandler(auth, { body }) {
  */
 const routes = [
   ["GET", "fastapi-ads", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams();
     for (const key of ["q", "is_active", "page", "page_size"]) {
       const value = url.searchParams.get(key);
@@ -231,7 +231,7 @@ const routes = [
     return payload;
   }, ["super_admin", "admin", "moderator"]],
   ["GET", "fastapi-kosts", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams();
     for (const key of ["q", "verification_status", "status", "page", "page_size"]) {
       const value = url.searchParams.get(key);
@@ -428,7 +428,7 @@ const routes = [
     };
   }, ["super_admin", "admin"]],
   ["GET", "fastapi-users", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams();
     for (const key of ["q", "role", "is_active", "page", "page_size"]) {
       const value = url.searchParams.get(key);
@@ -510,7 +510,7 @@ const routes = [
     return { ...(await write(auth, (db) => ({ profile: svc.updateProfile(db, admin, { ...body, photo: avatarUrl }) }))), source: "legacy" };
   }, ["super_admin", "admin", "moderator"]],
   ["PATCH", "fastapi-users/:id", async ({ session }, { body, params }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/users/${encodeURIComponent(params.id)}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
@@ -522,7 +522,7 @@ const routes = [
     return payload;
   }, ["super_admin", "admin"]],
   ["GET", "fastapi-reports", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams(url.searchParams);
     const res = await fetch(`${apiUrl}/api/v1/admin/reports?${query}`, {
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
@@ -533,7 +533,7 @@ const routes = [
     return payload;
   }, ["super_admin", "admin", "moderator"]],
   ["GET", "fastapi-activity-logs", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams(url.searchParams);
     const res = await fetch(`${apiUrl}/api/v1/admin/activity-logs?${query}`, {
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
@@ -544,7 +544,7 @@ const routes = [
     return payload;
   }, ["super_admin"]],
   ["PATCH", "fastapi-reports/:id", async ({ session }, { body, params }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/reports/${encodeURIComponent(params.id)}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
@@ -556,7 +556,7 @@ const routes = [
     return payload;
   }, ["super_admin", "admin", "moderator"]],
   ["POST", "settings/password", async ({ session }, { body }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/auth/password`, {
       method: "POST",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },
@@ -712,7 +712,7 @@ const routes = [
   ["GET", "stats", async (_c, { url }) => ({ stats: svc.computeStats(getDb(), url.searchParams.get("period") || "bulanan") }), ["super_admin", "admin", "marketing"]],
   ["GET", "sessions", async ({ admin, session }) => ({ sessions: svc.listSessions(getDb(), admin, session.token) })],
   ["GET", "global-search", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams();
     const keyword = url.searchParams.get("q");
     if (keyword) query.set("q", keyword);
@@ -903,7 +903,7 @@ const routes = [
   ["POST", "notifications/read-all", async (auth) => write(auth, (db) => svc.markAllNotificationsRead(db, auth.admin))],
 
   ["POST", "sessions/revoke-others", async ({ session }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/auth/sessions/revoke-others`, {
       method: "POST",
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
