@@ -46,7 +46,7 @@ function Inner() {
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
         setErrors(json.fields || {});
-        setMessage(json.error || "Login gagal. Coba lagi.");
+        setMessage(json.error || json.message || json.detail?.detail || json.detail || "Email atau kata sandi salah. Pastikan akun memiliki akses admin.");
         setLoading(false);
         return;
       }
@@ -161,6 +161,13 @@ function Inner() {
             </span>
             {errors.password && <span role="alert" className="text-xs font-bold text-bad-fg">{errors.password}</span>}
           </label>
+
+          {message && (
+            <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-600/10 border border-red-500/30 p-3 text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">
+              <AlertCircle size={18} className="shrink-0 text-red-600 dark:text-red-400" />
+              <span>{message}</span>
+            </div>
+          )}
 
           <button
             type="submit"

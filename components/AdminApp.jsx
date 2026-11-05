@@ -441,29 +441,31 @@ function Shell({ initialAdmin }) {
           </div>
         </aside>
 
-        {/* MOBILE TOPBAR - Satu-satunya pengontrol sidebar di mobile */}
-        <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-line bg-paper px-4 lg:hidden">
-          <div className="flex items-center gap-2.5">
+        {/* MOBILE TOPBAR - Pengontrol navigasi mobile terproteksi */}
+        <div className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-line bg-paper px-3 sm:px-4 lg:hidden">
+          <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
               aria-label="Buka navigasi sidebar"
               onClick={toggleSidebar}
-              className="rounded-lg p-2 text-accent hover:bg-track transition"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-line bg-paper text-ink shadow-xs hover:bg-track focus:ring-2 focus:ring-accent transition"
             >
               <Menu size={20} />
             </button>
             <div className="flex items-center gap-1.5 min-w-0">
-              <strong className="text-sm sm:text-base font-extrabold text-maroon truncate max-w-[130px] sm:max-w-none">
+              <strong className="text-sm font-extrabold text-maroon truncate max-w-[120px] sm:max-w-none">
                 {data?.system?.appName || "CariKostKita"}
               </strong>
-              <span className="shrink-0 rounded bg-maroon/10 px-1.5 py-0.5 text-[10px] font-bold text-maroon">
+              <span className="hidden sm:inline-block shrink-0 rounded bg-maroon/10 px-1.5 py-0.5 text-[10px] font-bold text-maroon">
                 {ROLE_LABELS[admin?.role] || "Admin"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <ContractBadge />
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            <div className="hidden sm:block">
+              <ContractBadge />
+            </div>
 
             <IconButton label="Pencarian Global" onClick={() => setSearchModalOpen(true)} className="!h-9 !w-9">
               <Search size={16} />

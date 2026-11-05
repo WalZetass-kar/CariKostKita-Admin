@@ -639,6 +639,31 @@ const routes = [
             }))
           : [publicAdmin(admin)];
 
+        const ownersList = rawUsers
+          .filter((u) => u.role === "owner" || ["super_admin", "admin"].includes(u.role))
+          .map((o) => ({
+            id: o.id,
+            name: o.nama || o.name || (o.role === "owner" ? "Mitra Pemilik" : "Admin Official"),
+            email: o.email || "",
+            phone: o.no_hp || o.phone || "",
+            verificationStatus: "Verified",
+            accountActive: o.is_active ?? true,
+            archived: false,
+          }));
+
+        const reportsList = reports.data || [];
+        const notificationsList = reportsList
+          .filter((r) => r.status === "BARU" || r.status === "DITINJAU")
+          .map((r) => ({
+            id: `notif-rep-${r.id}`,
+            title: `Laporan #${r.id} Perlu Ditinjau`,
+            message: r.reason || r.description || "Ada laporan masuk dari pengguna.",
+            time: r.created_at ? new Date(r.created_at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "Baru saja",
+            targetView: "fastapi_reports",
+            targetId: r.id,
+            read: false,
+          }));
+
         const result = {
           data: {
             overview: overview.data || overview,
@@ -655,7 +680,9 @@ const routes = [
               name: u.name || u.nama,
               status: u.is_active ? "Aktif" : "Nonaktif",
             })),
-            reports: reports.data || [],
+            owners: ownersList,
+            notifications: notificationsList,
+            reports: reportsList,
             ads: ads.data || [],
             stats: {
               totalKosts: overview.data?.kosts?.total ?? 0,
@@ -699,9 +726,35 @@ const routes = [
   }, ["super_admin", "admin", "moderator"]],
   ["GET", "search", async ({ admin }, { url }) => svc.globalSearch(getDb(), admin, url.searchParams.get("q"))],
 
-  ["POST", "kosts", async (auth, { body }) => write(auth, (db) => ({ kost: svc.createKost(db, auth.admin, body) })), ["super_admin", "admin"]],
+  ["POST", "kosts", async (auth, { body }) => {
+    const kostPayload = {
+      name: body.name || body.nama || "Kost Baru",
+      owner_id: Number(body.ownerId || body.owner_id || 1),
+      address: body.address || body.alamat || "",
+      description: body.description || body.deskripsi || "",
+      no_whatsapp: body.phone || body.no_whatsapp || "",
+      gender_type: body.gender || body.type || body.gender_type || "CAMPUR",
+      price_min: Number(body.price || body.price_min || 0),
+      price_max: Number(body.price || body.price_max || 0),
+      total_kamar: Number(body.rooms || body.total_kamar || 1),
+      kamar_tersedia: Number(body.availableRooms || body.kamar_tersedia || 1),
+      facilities: Array.isArray(body.facilities) ? body.facilities : [],
+      image_urls: Array.isArray(body.images) ? body.images : (body.image ? [body.image] : []),
+      thumbnail_url: body.image || (Array.isArray(body.images) ? body.images[0] : null),
+    };
+    return write(auth, (db) => ({ kost: svc.createKost(db, auth.admin, body) }), {
+      method: "POST",
+      path: "/api/v1/admin/kosts",
+      body: kostPayload,
+      isFastApi: true,
+    });
+  }, ["super_admin", "admin"]],
   ["PATCH", "kosts/:id", async (auth, { body, params }) => write(auth, (db) => ({ kost: svc.updateKost(db, auth.admin, params.id, body) })), ["super_admin", "admin", "moderator"]],
-  ["DELETE", "kosts/:id", async (auth, { params }) => write(auth, (db) => svc.deleteKost(db, auth.admin, params.id)), ["super_admin", "admin"]],
+  ["DELETE", "kosts/:id", async (auth, { params }) => write(auth, (db) => svc.deleteKost(db, auth.admin, params.id), {
+    method: "DELETE",
+    path: `/api/v1/admin/kosts/${params.id}`,
+    isFastApi: true,
+  }), ["super_admin", "admin"]],
   ["POST", "kosts/:id/status", async (auth, { body, params }) => write(auth, (db) => ({ kost: svc.setKostStatus(db, auth.admin, params.id, body.status, body.reason) }), { method: 'PATCH', path: `/api/v1/admin/kosts/${params.id}/status`, body: { status: body.status }, isFastApi: true }), ["super_admin", "admin", "moderator"]],
   ["POST", "kosts/:id/archive", async (auth, { params }) => write(auth, (db) => ({ kost: svc.archiveKost(db, auth.admin, params.id) })), ["super_admin", "admin"]],
   ["POST", "kosts/:id/restore", async (auth, { params }) => write(auth, (db) => ({ kost: svc.restoreKost(db, auth.admin, params.id) })), ["super_admin", "admin"]],
@@ -729,10 +782,55 @@ const routes = [
 
   ["PATCH", "reports/:id", async (auth, { body, params }) => write(auth, (db) => ({ report: svc.updateReport(db, auth.admin, params.id, body) }), { method: 'PATCH', path: `/api/v1/admin/reports/${params.id}`, body: { status: body.status === "Selesai" ? "SELESAI" : body.status === "Ditolak" ? "DITOLAK" : "DITINJAU", admin_action: body.adminAction || body.note }, isFastApi: true }), ["super_admin", "admin", "moderator"]],
 
-  ["POST", "ads", async (auth, { body }) => write(auth, (db) => ({ ad: svc.createAd(db, auth.admin, body) }), { method: 'POST', path: '/admin/ads', body }), ["super_admin", "marketing"]],
-  ["PATCH", "ads/:id", async (auth, { body, params }) => write(auth, (db) => ({ ad: svc.updateAd(db, auth.admin, params.id, body) })), ["super_admin", "marketing"]],
-  ["DELETE", "ads/:id", async (auth, { params }) => write(auth, (db) => svc.deleteAd(db, auth.admin, params.id)), ["super_admin", "marketing"]],
-  ["POST", "ads/:id/toggle", async (auth, { params }) => write(auth, (db) => ({ ad: svc.toggleAd(db, auth.admin, params.id) }), { method: 'PATCH', path: `/admin/ads/${params.id}/status` }), ["super_admin", "marketing"]],
+  ["POST", "ads", async (auth, { body }) => {
+    const adPayload = {
+      title: body.title || "Iklan Baru",
+      image_url: body.image || body.image_url || "",
+      target_url: body.targetUrl || body.target_url || "https://carikostkita.my.id",
+      platform: body.platform || "Website",
+      ad_type: body.type || body.ad_type || "Banner",
+      position: body.position || "Top",
+      start_date: body.startDate || body.start_date || undefined,
+      end_date: body.endDate || body.end_date || undefined,
+      is_active: body.active ?? body.is_active ?? true,
+    };
+    return write(auth, (db) => ({ ad: svc.createAd(db, auth.admin, body) }), {
+      method: "POST",
+      path: "/api/v1/admin/ads",
+      body: adPayload,
+      isFastApi: true,
+    });
+  }, ["super_admin", "marketing"]],
+  ["PATCH", "ads/:id", async (auth, { body, params }) => {
+    const adPayload = {
+      title: body.title,
+      image_url: body.image || body.image_url,
+      target_url: body.targetUrl || body.target_url,
+      platform: body.platform,
+      ad_type: body.type || body.ad_type,
+      position: body.position,
+      start_date: body.startDate || body.start_date,
+      end_date: body.endDate || body.end_date,
+      is_active: body.active ?? body.is_active,
+    };
+    return write(auth, (db) => ({ ad: svc.updateAd(db, auth.admin, params.id, body) }), {
+      method: "PATCH",
+      path: `/api/v1/admin/ads/${params.id}`,
+      body: adPayload,
+      isFastApi: true,
+    });
+  }, ["super_admin", "marketing"]],
+  ["DELETE", "ads/:id", async (auth, { params }) => write(auth, (db) => svc.deleteAd(db, auth.admin, params.id), {
+    method: "DELETE",
+    path: `/api/v1/admin/ads/${params.id}`,
+    isFastApi: true,
+  }), ["super_admin", "marketing"]],
+  ["POST", "ads/:id/toggle", async (auth, { body, params }) => write(auth, (db) => ({ ad: svc.toggleAd(db, auth.admin, params.id) }), {
+    method: "PATCH",
+    path: `/api/v1/admin/ads/${params.id}`,
+    body: { is_active: body?.active ?? true },
+    isFastApi: true,
+  }), ["super_admin", "marketing"]],
   ["POST", "ads/:id/archive", async (auth, { params }) => write(auth, (db) => ({ ad: svc.archiveAd(db, auth.admin, params.id) })), ["super_admin", "marketing"]],
   ["POST", "ads/:id/restore", async (auth, { params }) => write(auth, (db) => ({ ad: svc.restoreAd(db, auth.admin, params.id) })), ["super_admin", "marketing"]],
   ["DELETE", "ads/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteAd(db, auth.admin, params.id)), ["super_admin"]],
@@ -818,9 +916,19 @@ async function write(auth, fn, proxyTarget = null) {
      }
      const payload = res ? await res.json().catch(() => ({})) : null;
      if (res && res.ok) result = payload;
-     else if (res && (isMissingLegacyRoute(res, payload) || isMissingFastApiRoute(res, payload))) result = mutate((db) => fn(db)) || {};
-     else if (res) throw new HttpError(res.status, apiErrorMessage(payload, "Backend menolak perubahan; data lokal tidak diubah."));
-     else result = mutate((db) => fn(db)) || {};
+     else if (res && (isMissingLegacyRoute(res, payload) || isMissingFastApiRoute(res, payload))) {
+       if (process.env.NODE_ENV === "production" && isFastApi) {
+         throw new HttpError(res.status, apiErrorMessage(payload, "Endpoint backend FastAPI tidak ditemukan."));
+       }
+       result = mutate((db) => fn(db)) || {};
+     }
+     else if (res) throw new HttpError(res.status, apiErrorMessage(payload, "Backend menolak perubahan; data tidak disimpan."));
+     else {
+       if (process.env.NODE_ENV === "production" && isFastApi) {
+         throw new HttpError(502, "Backend FastAPI tidak dapat dijangkau. Mutasi dibatalkan.");
+       }
+       result = mutate((db) => fn(db)) || {};
+     }
   } else {
      result = mutate((db) => fn(db)) || {};
   }
