@@ -369,8 +369,12 @@ const routes = [
     };
   }],
   ["GET", "fastapi-owners", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
-    const query = new URLSearchParams({ role: "owner" });
+    const apiUrl = fastApiBase();
+    const verifStatus = url.searchParams.get("verification_status") || "";
+    const query = new URLSearchParams();
+    if (!verifStatus || verifStatus === "APPROVED") {
+      query.set("role", "owner");
+    }
     for (const key of ["q", "verification_status", "is_active", "page", "page_size"]) {
       const value = url.searchParams.get(key);
       if (value !== null && value !== "") query.set(key, value);
@@ -564,7 +568,7 @@ const routes = [
     return { passwordChanged: true };
   }, ["super_admin", "admin", "moderator"]],
   ["GET", "owner-verifications", async ({ session }, { url }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    const apiUrl = fastApiBase();
     const query = new URLSearchParams(url.searchParams);
     const res = await fetch(`${apiUrl}/api/v1/admin/owner-verifications?${query}`, {
       headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
@@ -575,7 +579,8 @@ const routes = [
     return payload;
   }, ["super_admin", "admin", "moderator"]],
   ["PATCH", "owner-verifications/:id", async ({ session }, { body, params }) => {
-    const apiUrl = (process.env.CARIKOSTKITA_API_URL || "https://carikostkitafastapi.vercel.app").replace(/\/$/, "");
+    invalidateAdminCache();
+    const apiUrl = fastApiBase();
     const res = await fetch(`${apiUrl}/api/v1/admin/owner-verifications/${encodeURIComponent(params.id)}`, {
       method: "PATCH",
       headers: { Authorization: `Bearer ${session.token}`, "Content-Type": "application/json", Accept: "application/json" },

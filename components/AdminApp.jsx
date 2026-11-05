@@ -369,11 +369,17 @@ function Shell({ initialAdmin }) {
           <nav className={`grid gap-1.5 ${collapsed ? "lg:overflow-visible" : "overflow-y-auto"}`} aria-label="Menu">
             {filteredNavItems.map(([key, label, Icon]) => {
               const badgeCount =
-                key === "owners" && data
+                key === "verification" && data?.overview?.users
+                  ? data.overview.users.owner_verification_pending || 0
+                  : key === "owners" && data?.owners
                   ? data.owners.filter((o) => o.verificationStatus === "Pending" && !o.archived).length
-                  : key === "reports" && data
+                  : key === "fastapi_reports" && data?.overview?.reports
+                  ? data.overview.reports.new || 0
+                  : key === "reports" && data?.reports
                   ? data.reports.filter((r) => r.status === "Baru").length
-                  : key === "kost" && data
+                  : key === "fastapi_kosts" && data?.overview?.kosts
+                  ? data.overview.kosts.pending || 0
+                  : key === "kost" && data?.kosts
                   ? data.kosts.filter((k) => k.status === "Menunggu Verifikasi" && !k.archived).length
                   : 0;
 
