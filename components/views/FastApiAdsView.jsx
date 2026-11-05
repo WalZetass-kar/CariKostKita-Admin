@@ -73,7 +73,7 @@ export function FastApiAdsView() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <PrimaryButton onClick={() => openAdForm?.({})} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+            <PrimaryButton onClick={() => openAdForm?.({ onSaved: load })} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
               <Plus size={16} />
               <span>Tambah Iklan</span>
             </PrimaryButton>
@@ -137,7 +137,7 @@ export function FastApiAdsView() {
                 Halaman {page} · {PAGE_SIZE} item per permintaan
               </p>
             </div>
-            <PrimaryButton onClick={() => openAdForm?.({})} className="!h-8 text-xs">
+            <PrimaryButton onClick={() => openAdForm?.({ onSaved: load })} className="!h-8 text-xs">
               <Plus size={14} /> Tambah Iklan
             </PrimaryButton>
           </div>
@@ -209,6 +209,7 @@ export function FastApiAdsView() {
                           image: ad.image_url,
                           link: ad.target_url,
                           status: ad.is_active ? "Aktif" : "Nonaktif",
+                          onSaved: load,
                         })
                       }
                       className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line px-2.5 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"

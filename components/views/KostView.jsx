@@ -31,7 +31,7 @@ const emptyForm = {
 };
 
 /** Form tambah/edit kost. Hanya ada satu tombol Tambah Kost di halaman. */
-export function KostFormModal({ kost, onClose }) {
+export function KostFormModal({ kost, onClose, onSaved }) {
   const { data, act } = useApp();
   const toast = useToast();
   const form = useForm(emptyForm);
@@ -67,8 +67,9 @@ export function KostFormModal({ kost, onClose }) {
     setErrors({});
     try {
       await act(isEdit ? `kosts/${kost.id}` : "kosts", { method: isEdit ? "PATCH" : "POST", body: form.values });
-      toast(isEdit ? "Data kost berhasil diperbarui." : "Kost berhasil ditambahkan dan menunggu verifikasi.");
+      toast(isEdit ? "Data kost berhasil diperbarui." : "Kost berhasil ditambahkan.");
       onClose();
+      onSaved?.();
     } catch (err) {
       setErrors(err.fields || {});
       toast(err.message, "error");

@@ -274,7 +274,7 @@ export function FastApiKostsView() {
                 <span>Setujui Semua ({pendingCount} Pending)</span>
               </PrimaryButton>
             )}
-            <PrimaryButton onClick={() => openKostForm?.({})} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
+            <PrimaryButton onClick={() => openKostForm?.({ onSaved: load })} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
               <Plus size={16} />
               <span>Tambah Kost</span>
             </PrimaryButton>

@@ -647,8 +647,22 @@ function Shell({ initialAdmin }) {
           ) : <View key={activeView} />}
         </main>
 
-        <KostFormModal kost={kostForm} onClose={() => setKostForm(null)} />
-        <AdFormModal ad={adForm} onClose={() => setAdForm(null)} onSaved={load} />
+        <KostFormModal
+          kost={kostForm}
+          onClose={() => setKostForm(null)}
+          onSaved={() => {
+            kostForm?.onSaved?.();
+            load();
+          }}
+        />
+        <AdFormModal
+          ad={adForm}
+          onClose={() => setAdForm(null)}
+          onSaved={() => {
+            adForm?.onSaved?.();
+            load();
+          }}
+        />
         <UserFormModal user={userForm} onClose={() => setUserForm(null)} onSaved={load} />
         <GlobalSearchModal
           open={searchModalOpen}

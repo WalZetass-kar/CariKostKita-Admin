@@ -749,7 +749,29 @@ const routes = [
       isFastApi: true,
     });
   }, ["super_admin", "admin"]],
-  ["PATCH", "kosts/:id", async (auth, { body, params }) => write(auth, (db) => ({ kost: svc.updateKost(db, auth.admin, params.id, body) })), ["super_admin", "admin", "moderator"]],
+  ["PATCH", "kosts/:id", async (auth, { body, params }) => {
+    const kostPayload = {};
+    if (body.name || body.nama) kostPayload.name = body.name || body.nama;
+    if (body.address || body.alamat) kostPayload.address = body.address || body.alamat;
+    if (body.description || body.deskripsi) kostPayload.description = body.description || body.deskripsi;
+    if (body.phone || body.no_whatsapp) kostPayload.no_whatsapp = body.phone || body.no_whatsapp;
+    if (body.gender || body.type || body.gender_type) kostPayload.gender_type = body.gender || body.type || body.gender_type;
+    if (body.price || body.price_min) kostPayload.price_min = Number(body.price || body.price_min);
+    if (body.price || body.price_max) kostPayload.price_max = Number(body.price || body.price_max);
+    if (body.rooms || body.total_kamar) kostPayload.total_kamar = Number(body.rooms || body.total_kamar);
+    if (body.availableRooms || body.kamar_tersedia) kostPayload.kamar_tersedia = Number(body.availableRooms || body.kamar_tersedia);
+    if (body.facilities) kostPayload.facilities = Array.isArray(body.facilities) ? body.facilities : [];
+    if (body.image || body.images) {
+      kostPayload.image_urls = Array.isArray(body.images) ? body.images : (body.image ? [body.image] : []);
+      kostPayload.thumbnail_url = body.image || (Array.isArray(body.images) ? body.images[0] : null);
+    }
+    return write(auth, (db) => ({ kost: svc.updateKost(db, auth.admin, params.id, body) }), {
+      method: "PATCH",
+      path: `/api/v1/admin/kosts/${params.id}`,
+      body: kostPayload,
+      isFastApi: true,
+    });
+  }, ["super_admin", "admin", "moderator"]],
   ["DELETE", "kosts/:id", async (auth, { params }) => write(auth, (db) => svc.deleteKost(db, auth.admin, params.id), {
     method: "DELETE",
     path: `/api/v1/admin/kosts/${params.id}`,
