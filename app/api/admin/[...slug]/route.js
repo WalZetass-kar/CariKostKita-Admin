@@ -18,13 +18,17 @@ const apiErrorMessage = (payload, fallback) => {
 // default localhost membuat seluruh panggilan API gagal diam-diam di Vercel
 // ketika env CARIKOSTKITA_API_URL belum diisi. Pengembangan lokal menimpanya
 // lewat .env (CARIKOSTKITA_API_URL=http://127.0.0.1:8000).
-const fastApiBase = () =>
-  (process.env.CARIKOSTKITA_API_URL || process.env.NEXT_PUBLIC_CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id").replace(/\/$/, "");
+const fastApiBase = () => {
+  const raw = process.env.CARIKOSTKITA_API_URL || process.env.NEXT_PUBLIC_CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id";
+  return (raw.includes("carikostkitafastapi.vercel.app") ? "https://api.carikostkita.my.id" : raw).replace(/\/$/, "");
+};
 
 // Base URL gateway lama (Laravel). Route legacy memakai prefix /api/v1.
 // Default production juga, demi alasan yang sama seperti di atas.
-const legacyApiBase = () =>
-  (process.env.NEXT_PUBLIC_API_URL || process.env.CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id/api/v1").replace(/\/$/, "");
+const legacyApiBase = () => {
+  const raw = process.env.NEXT_PUBLIC_API_URL || process.env.CARIKOSTKITA_API_URL || "https://api.carikostkita.my.id/api/v1";
+  return (raw.includes("carikostkitafastapi.vercel.app") ? "https://api.carikostkita.my.id/api/v1" : raw).replace(/\/$/, "");
+};
 
 let dataCache = { value: null, expiresAt: 0, token: null };
 let overviewCache = { value: null, expiresAt: 0, token: null };

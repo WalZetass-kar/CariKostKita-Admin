@@ -282,7 +282,7 @@ export function FastApiKostsView() {
               type="button"
               onClick={() => setDeleteDialog({ type: "all" })}
               disabled={loading || rows.length === 0 || deleteLoading}
-              className="!h-9 sm:!h-10 text-xs sm:text-sm px-3 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer"
+              className="!h-9 sm:!h-10 text-xs sm:text-sm px-3 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white font-bold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer flex-1 sm:flex-initial"
               title="Hapus SEMUA listing kost dari database"
             >
               <Trash2 size={16} />

@@ -106,8 +106,12 @@ export function FastApiBulkImportView() {
     setErrorMsg("");
 
     const name = selected.name.toLowerCase();
-    if (!name.endsWith(".csv") && !name.endsWith(".xlsx") && !name.endsWith(".xls")) {
-      setErrorMsg("Format file harus berakhiran .csv atau .xlsx / .xls");
+    if (name.endsWith(".xls")) {
+      setErrorMsg("Format .xls (Excel 97-2003) tidak didukung. Harap simpan / simpan ulang file Anda sebagai Excel Modern (.xlsx) atau .csv UTF-8.");
+      return;
+    }
+    if (!name.endsWith(".csv") && !name.endsWith(".xlsx")) {
+      setErrorMsg("Format file harus berakhiran .xlsx (Excel) atau .csv (UTF-8).");
       return;
     }
     if (selected.size > 10 * 1024 * 1024) {
@@ -219,11 +223,11 @@ export function FastApiBulkImportView() {
               normalisasi wilayah Pekanbaru, dan audit log.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
             <GhostButton
               onClick={() => handleDownloadTemplate("xlsx")}
               disabled={downloadingTemplate}
-              className="text-xs sm:text-sm font-semibold text-good-fg hover:text-good-fg"
+              className="text-xs sm:text-sm font-semibold text-good-fg hover:text-good-fg flex-1 sm:flex-initial justify-center"
             >
               <Download size={15} />
               <span>Template Excel (.xlsx)</span>
@@ -231,7 +235,7 @@ export function FastApiBulkImportView() {
             <GhostButton
               onClick={() => handleDownloadTemplate("csv")}
               disabled={downloadingTemplate}
-              className="text-xs sm:text-sm"
+              className="text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
             >
               <Download size={15} />
               <span>Template CSV (.csv)</span>
@@ -294,12 +298,12 @@ export function FastApiBulkImportView() {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+              <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto shrink-0">
                 <button
                   type="button"
                   onClick={() => handleDownloadTemplate("xlsx")}
                   disabled={downloadingTemplate}
-                  className="px-4 py-2.5 rounded-xl bg-good-fg hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-sm transition active:scale-95 disabled:opacity-50"
+                  className="px-4 py-2.5 rounded-xl bg-good-fg hover:opacity-95 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 disabled:opacity-50 flex-1 sm:flex-initial"
                 >
                   <Download size={16} />
                   <span>Download Excel (.xlsx) [Rekomendasi]</span>
@@ -308,7 +312,7 @@ export function FastApiBulkImportView() {
                   type="button"
                   onClick={() => handleDownloadTemplate("csv")}
                   disabled={downloadingTemplate}
-                  className="px-3.5 py-2.5 rounded-xl bg-track hover:bg-line text-ink text-xs sm:text-sm font-semibold flex items-center gap-2 border border-line transition active:scale-95 disabled:opacity-50"
+                  className="px-3.5 py-2.5 rounded-xl bg-track hover:bg-line text-ink text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 border border-line transition active:scale-95 disabled:opacity-50 flex-1 sm:flex-initial"
                 >
                   <Download size={15} />
                   <span>Download CSV (.csv) [Per Kolom A s/d T]</span>
@@ -385,7 +389,7 @@ export function FastApiBulkImportView() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".csv, .xlsx, .xls"
+                  accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv"
                   onChange={handleFileChange}
                   className="hidden"
                 />
@@ -394,7 +398,7 @@ export function FastApiBulkImportView() {
                   {fileName ? fileName : "Klik atau seret file spreadsheet ke sini"}
                 </p>
                 <p className="text-xs text-muted mt-1">
-                  Format didukung: <strong>.XLSX (Excel)</strong> atau <strong>.CSV (UTF-8)</strong> &bull; Maks. 10 MB &bull; Maks. 1.000 baris per file
+                  Format didukung: <strong>.XLSX (Excel Modern)</strong> atau <strong>.CSV (UTF-8)</strong> &bull; Maks. 10 MB &bull; Maks. 1.000 baris per file
                 </p>
               </div>
 
@@ -405,14 +409,15 @@ export function FastApiBulkImportView() {
                 </div>
               )}
 
-              <div className="mt-5 flex items-center justify-between">
-                <span className="text-xs text-muted font-medium">
+              <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <span className="text-xs text-muted font-medium truncate">
                   {fileName ? `File terpilih: ${fileName}` : "Belum ada file yang dipilih"}
                 </span>
                 <PrimaryButton
                   onClick={handleValidatePreview}
                   disabled={!file || loading}
                   loading={loading}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <span>Validasi & Preview Data</span>
                   <ArrowRight size={16} />
@@ -504,8 +509,8 @@ export function FastApiBulkImportView() {
           )}
 
           {/* Duplicate Action & Policy Banner */}
-          <Panel className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-surface">
-            <div className="flex items-center gap-3">
+          <Panel className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-surface">
+            <div className="flex flex-wrap items-center gap-3">
               <span className="text-xs font-bold text-ink">Aksi untuk Data Duplikat:</span>
               <label className="flex items-center gap-1.5 text-xs text-muted cursor-pointer">
                 <input
@@ -531,8 +536,8 @@ export function FastApiBulkImportView() {
               </label>
             </div>
 
-            <div className="flex items-center gap-2">
-              <GhostButton onClick={handleReset} className="text-xs">
+            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+              <GhostButton onClick={handleReset} className="text-xs flex-1 md:flex-initial justify-center">
                 <RotateCcw size={14} />
                 <span>Unggah File Lain</span>
               </GhostButton>
@@ -540,7 +545,7 @@ export function FastApiBulkImportView() {
                 onClick={handleCommitImport}
                 disabled={committing || !previewData.summary?.can_commit}
                 loading={committing}
-                className="text-xs"
+                className="text-xs flex-1 md:flex-initial justify-center"
               >
                 <CheckCircle2 size={16} />
                 <span>Konfirmasi & Simpan ke Database</span>
