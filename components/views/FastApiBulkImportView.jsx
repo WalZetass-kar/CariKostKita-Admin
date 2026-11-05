@@ -754,11 +754,9 @@ export function FastApiBulkImportView() {
               <div className="p-4 rounded-xl bg-warn-bg text-warn-fg text-xs max-w-xl mx-auto mb-6 text-left flex items-start gap-3">
                 <ImageIcon size={18} className="shrink-0 mt-0.5" />
                 <div>
-                  <strong>Langkah Selanjutnya: Unggah Foto Kos</strong>
+                  <strong>Data Kos Berhasil Disimpan & Tayang!</strong>
                   <p className="mt-0.5 text-warn-fg/90">
-                    Data kos baru disimpan dengan status verifikasi <code>PENDING</code> dan
-                    belum memiliki foto. Silakan buka halaman <strong>Manajemen Kost</strong> untuk
-                    melengkapi galeri foto sebelum mempublikasikannya.
+                    Data kos baru otomatis disetujui (<strong>APPROVED</strong>) dan langsung tayang di Landing Page & Aplikasi Mobile. Silakan buka halaman <strong>Manajemen Kost</strong> jika ingin melengkapi galeri foto properti.
                   </p>
                 </div>
               </div>
