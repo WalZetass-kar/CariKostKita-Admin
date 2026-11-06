@@ -17,6 +17,53 @@ const dateTime = (value) => value
   ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
   : "—";
 
+function isUrl(str) {
+  if (!str || typeof str !== "string") return false;
+  const s = str.trim().toLowerCase();
+  return s.startsWith("http://") || s.startsWith("https://") || s.startsWith("data:image/") || s.startsWith("/");
+}
+
+function PhotoCard({ title, src }) {
+  if (!src) return null;
+  const valid = isUrl(src);
+  return (
+    <div className="rounded-xl border border-line bg-paper p-3 shadow-xs">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-bold text-muted">{title}</p>
+        {valid && (
+          <a
+            href={src}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[11px] font-semibold text-accent hover:underline inline-flex items-center gap-1"
+          >
+            Buka Penuh ↗
+          </a>
+        )}
+      </div>
+      {valid ? (
+        <a href={src} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-lg border border-line group">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={src}
+            alt={title}
+            className="h-32 w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </a>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-line bg-track/50 p-3 text-center min-h-[7.5rem]">
+          <span className="inline-block rounded bg-amber-500/10 px-2 py-0.5 text-xs font-bold text-amber-700">
+            {src}
+          </span>
+          <p className="mt-2 text-[11px] text-muted leading-tight">
+            Foto diunggah sebelum integrasi penyimpanan cloud (versi lama). Hubungi pemilik via WhatsApp untuk konfirmasi foto fisik.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function parseSubmissionNote(rawNote) {
   const raw = String(rawNote || "").trim();
   const isPropertyFlow = raw.startsWith("[verifikasi-properti]");
@@ -321,28 +368,13 @@ export function OwnerVerificationQueueView() {
             </div>
 
             {(selectedParsed.facadePhoto || selectedParsed.codePhoto || selectedParsed.roomPhoto) && (
-              <div className="grid gap-3 sm:grid-cols-3">
-                {selectedParsed.facadePhoto && (
-                  <a href={selectedParsed.facadePhoto} target="_blank" rel="noreferrer" className="block rounded-lg border border-line p-2 hover:border-accent">
-                    <p className="mb-1 text-xs font-bold text-muted">Foto Tampak Depan</p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={selectedParsed.facadePhoto} alt="Foto Properti" className="h-28 w-full rounded object-cover" />
-                  </a>
-                )}
-                {selectedParsed.codePhoto && (
-                  <a href={selectedParsed.codePhoto} target="_blank" rel="noreferrer" className="block rounded-lg border border-line p-2 hover:border-accent">
-                    <p className="mb-1 text-xs font-bold text-muted">Foto Kode Verifikasi</p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={selectedParsed.codePhoto} alt="Foto Kode" className="h-28 w-full rounded object-cover" />
-                  </a>
-                )}
-                {selectedParsed.roomPhoto && (
-                  <a href={selectedParsed.roomPhoto} target="_blank" rel="noreferrer" className="block rounded-lg border border-line p-2 hover:border-accent">
-                    <p className="mb-1 text-xs font-bold text-muted">Foto Kamar</p>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={selectedParsed.roomPhoto} alt="Foto Kamar" className="h-28 w-full rounded object-cover" />
-                  </a>
-                )}
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-muted uppercase tracking-wider">Lampiran Bukti Foto Properti</p>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  <PhotoCard title="Foto Tampak Depan" src={selectedParsed.facadePhoto} />
+                  <PhotoCard title="Foto Kode Verifikasi" src={selectedParsed.codePhoto} />
+                  <PhotoCard title="Foto Kamar / Fasilitas" src={selectedParsed.roomPhoto} />
+                </div>
               </div>
             )}
 
