@@ -533,11 +533,11 @@ function Shell({ initialAdmin }) {
         </div>
 
         {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 p-4 lg:p-6">
-          <header className="mb-6 flex items-center justify-between gap-4">
+        <main className="min-w-0 p-3 sm:p-5 lg:p-6">
+          <header className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
             <div>
               <p className="mb-0.5 text-xs font-extrabold uppercase text-accent">{eyebrow}</p>
-              <h1 className="text-2xl font-extrabold leading-tight lg:text-3xl">{title}</h1>
+              <h1 className="text-xl sm:text-2xl font-extrabold leading-tight lg:text-3xl">{title}</h1>
             </div>
 
             {/* DESKTOP TOP ACTIONS (Hidden on mobile karena sudah ada di mobile topbar) */}

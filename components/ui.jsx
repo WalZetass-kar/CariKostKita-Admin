@@ -104,10 +104,10 @@ export function PanelTitle({ eyebrow, title }) {
   );
 }
 
-export function DataTable({ headers, children, minWidth, className = "" }) {
+export function DataTable({ headers, children, minWidth = "680px", className = "" }) {
   return (
     <div className={`w-full overflow-x-auto touch-pan-x [-webkit-overflow-scrolling:touch] ${className}`}>
-      <table className="w-full border-collapse" style={minWidth ? { minWidth } : undefined}>
+      <table className="w-full border-collapse" style={{ minWidth }}>
         <thead>
           <tr className="bg-field/40">
             {headers.map((h, idx) => {

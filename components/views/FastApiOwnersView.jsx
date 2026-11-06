@@ -215,96 +215,195 @@ export function FastApiOwnersView() {
               <p className="mt-1 text-xs text-muted">Halaman {page} · {PAGE_SIZE} akun per permintaan</p>
             </div>
           </div>
-          <DataTable headers={["Pemilik & Kontak", "Verifikasi", "Status akun", "Terdaftar", { title: "Aksi", align: "text-center", className: "w-36" }]}>
-            {owners.map((owner) => (
-              <tr key={owner.id} className="hover:bg-track/60 transition-colors">
-                <Td>
-                  <div className="flex items-center gap-3">
-                    <Avatar name={owner.name || owner.email} src={owner.avatar_url} size={36} />
-                    <div className="min-w-0">
-                      <p className="truncate font-bold text-ink">{owner.name || "Tanpa nama"}</p>
-                      <p className="truncate text-xs text-muted">
-                        {owner.email || "—"}{owner.no_hp ? ` · ${owner.no_hp}` : ""}
+          {/* Desktop Table View */}
+          <div className="hidden lg:block">
+            <DataTable headers={["Pemilik & Kontak", "Verifikasi", "Status akun", "Terdaftar", { title: "Aksi", align: "text-center", className: "w-36" }]}>
+              {owners.map((owner) => (
+                <tr key={owner.id} className="hover:bg-track/60 transition-colors">
+                  <Td>
+                    <div className="flex items-center gap-3">
+                      <Avatar name={owner.name || owner.email} src={owner.avatar_url} size={36} />
+                      <div className="min-w-0">
+                        <p className="truncate font-bold text-ink">{owner.name || "Tanpa nama"}</p>
+                        <p className="truncate text-xs text-muted">
+                          {owner.email || "—"}{owner.no_hp ? ` · ${owner.no_hp}` : ""}
+                        </p>
+                        <p className="truncate text-[11px] text-muted font-mono">ID #{owner.id}</p>
+                      </div>
+                    </div>
+                  </Td>
+                  <Td>
+                    <Badge
+                      status={owner.verification_status || "—"}
+                      tone={
+                        owner.verification_status === "APPROVED"
+                          ? "ok"
+                          : owner.verification_status === "REJECTED"
+                          ? "bad"
+                          : "warn"
+                      }
+                      size="sm"
+                    />
+                    {owner.catatan_revisi && (
+                      <p className="mt-1 max-w-44 truncate text-xs text-muted" title={owner.catatan_revisi}>
+                        {owner.catatan_revisi}
                       </p>
-                      <p className="truncate text-[11px] text-muted font-mono">ID #{owner.id}</p>
+                    )}
+                  </Td>
+                  <Td>
+                    <Badge status={owner.is_active === true ? "Aktif" : "Nonaktif"} size="sm" />
+                  </Td>
+                  <Td>
+                    <span className="whitespace-nowrap text-xs text-muted">{dateLabel(owner.created_at)}</span>
+                  </Td>
+                  <Td className="w-36 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      {/* Detail Modal */}
+                      <button
+                        type="button"
+                        title="Lihat Detail Pemilik"
+                        onClick={() => setDetailOwner(owner)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink hover:bg-track active:scale-95 transition"
+                      >
+                        <Eye size={14} />
+                      </button>
+
+                      {/* Quick Toggle Status */}
+                      <button
+                        type="button"
+                        title={owner.is_active ? "Nonaktifkan Akun" : "Aktifkan Akun"}
+                        disabled={togglingId === owner.id}
+                        onClick={() => handleToggleStatus(owner)}
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${
+                          owner.is_active
+                            ? "border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
+                            : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                        }`}
+                      >
+                        <Power size={14} className={togglingId === owner.id ? "animate-spin" : ""} />
+                      </button>
+
+                      {/* Edit Profil */}
+                      <button
+                        type="button"
+                        title="Edit Data Pemilik"
+                        onClick={() => openEditModal(owner)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink hover:bg-track active:scale-95 transition"
+                      >
+                        <Pencil size={14} />
+                      </button>
+
+                      {/* Hapus Pemilik */}
+                      <button
+                        type="button"
+                        title="Hapus Akun Pemilik"
+                        onClick={() => setConfirmDelete(owner)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 text-red-600 hover:bg-red-500/10 active:scale-95 transition"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </Td>
+                </tr>
+              ))}
+            </DataTable>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="block lg:hidden divide-y divide-line/70">
+            {owners.map((owner) => (
+              <div key={owner.id} className="p-4 space-y-3 hover:bg-track/30 transition">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Avatar name={owner.name || owner.email} src={owner.avatar_url} size={42} className="shrink-0" />
+                    <div className="min-w-0">
+                      <p className="font-extrabold text-sm text-ink truncate">{owner.name || "Tanpa nama"}</p>
+                      <p className="text-xs text-muted truncate">ID #{owner.id}</p>
                     </div>
                   </div>
-                </Td>
-                <Td>
-                  <Badge
-                    status={owner.verification_status || "—"}
-                    tone={
-                      owner.verification_status === "APPROVED"
-                        ? "ok"
-                        : owner.verification_status === "REJECTED"
-                        ? "bad"
-                        : "warn"
-                    }
-                    size="sm"
-                  />
-                  {owner.catatan_revisi && (
-                    <p className="mt-1 max-w-44 truncate text-xs text-muted" title={owner.catatan_revisi}>
-                      {owner.catatan_revisi}
-                    </p>
-                  )}
-                </Td>
-                <Td>
-                  <Badge status={owner.is_active === true ? "Aktif" : "Nonaktif"} size="sm" />
-                </Td>
-                <Td>
-                  <span className="whitespace-nowrap text-xs text-muted">{dateLabel(owner.created_at)}</span>
-                </Td>
-                <Td className="w-36 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    {/* Detail Modal */}
-                    <button
-                      type="button"
-                      title="Lihat Detail Pemilik"
-                      onClick={() => setDetailOwner(owner)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink hover:bg-track active:scale-95 transition"
-                    >
-                      <Eye size={14} />
-                    </button>
-
-                    {/* Quick Toggle Status */}
-                    <button
-                      type="button"
-                      title={owner.is_active ? "Nonaktifkan Akun" : "Aktifkan Akun"}
-                      disabled={togglingId === owner.id}
-                      onClick={() => handleToggleStatus(owner)}
-                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border transition ${
-                        owner.is_active
-                          ? "border-amber-500/40 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20"
-                          : "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
-                      }`}
-                    >
-                      <Power size={14} className={togglingId === owner.id ? "animate-spin" : ""} />
-                    </button>
-
-                    {/* Edit Profil */}
-                    <button
-                      type="button"
-                      title="Edit Data Pemilik"
-                      onClick={() => openEditModal(owner)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink hover:bg-track active:scale-95 transition"
-                    >
-                      <Pencil size={14} />
-                    </button>
-
-                    {/* Hapus Pemilik */}
-                    <button
-                      type="button"
-                      title="Hapus Akun Pemilik"
-                      onClick={() => setConfirmDelete(owner)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 text-red-600 hover:bg-red-500/10 active:scale-95 transition"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge
+                      status={owner.verification_status || "—"}
+                      tone={
+                        owner.verification_status === "APPROVED"
+                          ? "ok"
+                          : owner.verification_status === "REJECTED"
+                          ? "bad"
+                          : "warn"
+                      }
+                      size="sm"
+                    />
+                    <Badge status={owner.is_active === true ? "Aktif" : "Nonaktif"} size="sm" />
                   </div>
-                </Td>
-              </tr>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs rounded-lg border border-line/60 bg-track/40 p-2.5">
+                  <div>
+                    <span className="text-muted block text-[11px]">Email:</span>
+                    <span className="font-medium text-ink truncate block">{owner.email || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted block text-[11px]">WhatsApp / No HP:</span>
+                    <span className="font-medium text-ink truncate block">{owner.no_hp || "—"}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted block text-[11px]">Terdaftar:</span>
+                    <span className="font-medium text-ink">{dateLabel(owner.created_at)}</span>
+                  </div>
+                  {owner.catatan_revisi && (
+                    <div>
+                      <span className="text-muted block text-[11px]">Catatan:</span>
+                      <span className="font-medium text-amber-700 truncate block">{owner.catatan_revisi}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-1 border-t border-line/40">
+                  <button
+                    type="button"
+                    onClick={() => setDetailOwner(owner)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                  >
+                    <Eye size={14} />
+                    <span>Detail</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={togglingId === owner.id}
+                    onClick={() => handleToggleStatus(owner)}
+                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition active:scale-95 ${
+                      owner.is_active
+                        ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
+                        : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
+                    }`}
+                  >
+                    <Power size={14} className={togglingId === owner.id ? "animate-spin" : ""} />
+                    <span>{owner.is_active ? "Nonaktifkan" : "Aktifkan"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(owner)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                  >
+                    <Pencil size={14} />
+                    <span>Edit</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(owner)}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition"
+                  >
+                    <Trash2 size={14} />
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
             ))}
-          </DataTable>
+          </div>
           <div className="flex items-center justify-between border-t border-line px-5 py-4">
             <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
               Menampilkan {owners.length} pemilik pada halaman {page}

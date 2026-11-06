@@ -399,152 +399,257 @@ export function FastApiKostsView() {
             </div>
           )}
 
-          <DataTable
-            headers={[
-              {
-                title: (
-                  <input
-                    type="checkbox"
-                    aria-label="Pilih semua listing"
-                    checked={rows.length > 0 && selectedIds.size === rows.length}
-                    onChange={toggleSelectAll}
-                    className="h-4 w-4 rounded border-line text-maroon focus:ring-maroon cursor-pointer"
-                  />
-                ),
-                align: "text-center",
-                className: "w-10",
-              },
-              "Properti Kost & Lokasi",
-              "Harga",
-              "Status & Verifikasi",
-              "Dibuat",
-              { title: "Aksi", align: "text-center", className: "w-24" },
-            ]}
-          >
-            {rows.map((kost) => (
-              <tr key={kost.id} className="hover:bg-track/60 transition-colors">
-                <Td className="w-10 text-center">
-                  <input
-                    type="checkbox"
-                    aria-label={`Pilih ${kost.name || "kost"}`}
-                    checked={selectedIds.has(kost.id)}
-                    onChange={() => toggleSelect(kost.id)}
-                    className="h-4 w-4 rounded border-line text-maroon focus:ring-maroon cursor-pointer"
-                  />
-                </Td>
-                <Td>
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-maroon/10 text-maroon mt-0.5">
-                      <Building2 size={17} aria-hidden="true" />
-                    </span>
-                    <div className="min-w-0">
-                      <p className="font-bold text-sm text-ink">{kost.name || "Tanpa nama"}</p>
-                      <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted mt-0.5">
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} className="shrink-0 text-accent" />
-                          <span>{[kost.district, kost.city].filter(Boolean).join(", ") || kost.address || "Pekanbaru"}</span>
-                        </span>
-                        <span>·</span>
-                        <span>ID #{kost.id}</span>
-                        {kost.gender && (
-                          <>
-                            <span>·</span>
-                            <span className="font-semibold text-ink">Kost {kost.gender}</span>
-                          </>
-                        )}
-                        {kost.owner_id && (
-                          <>
-                            <span>·</span>
-                            <span>Owner #{kost.owner_id}</span>
-                          </>
-                        )}
+          {/* Desktop Table View */}
+          <div className="hidden lg:block">
+            <DataTable
+              headers={[
+                {
+                  title: (
+                    <input
+                      type="checkbox"
+                      aria-label="Pilih semua listing"
+                      checked={rows.length > 0 && selectedIds.size === rows.length}
+                      onChange={toggleSelectAll}
+                      className="h-4 w-4 rounded border-line text-maroon focus:ring-maroon cursor-pointer"
+                    />
+                  ),
+                  align: "text-center",
+                  className: "w-10",
+                },
+                "Properti Kost & Lokasi",
+                "Harga",
+                "Status & Verifikasi",
+                "Dibuat",
+                { title: "Aksi", align: "text-center", className: "w-24" },
+              ]}
+            >
+              {rows.map((kost) => (
+                <tr key={kost.id} className="hover:bg-track/60 transition-colors">
+                  <Td className="w-10 text-center">
+                    <input
+                      type="checkbox"
+                      aria-label={`Pilih ${kost.name || "kost"}`}
+                      checked={selectedIds.has(kost.id)}
+                      onChange={() => toggleSelect(kost.id)}
+                      className="h-4 w-4 rounded border-line text-maroon focus:ring-maroon cursor-pointer"
+                    />
+                  </Td>
+                  <Td>
+                    <div className="flex items-start gap-3">
+                      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-maroon/10 text-maroon mt-0.5">
+                        <Building2 size={17} aria-hidden="true" />
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-ink">{kost.name || "Tanpa nama"}</p>
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted mt-0.5">
+                          <span className="flex items-center gap-1">
+                            <MapPin size={12} className="shrink-0 text-accent" />
+                            <span>{[kost.district, kost.city].filter(Boolean).join(", ") || kost.address || "Pekanbaru"}</span>
+                          </span>
+                          <span>·</span>
+                          <span>ID #{kost.id}</span>
+                          {kost.gender && (
+                            <>
+                              <span>·</span>
+                              <span className="font-semibold text-ink">Kost {kost.gender}</span>
+                            </>
+                          )}
+                          {kost.owner_id && (
+                            <>
+                              <span>·</span>
+                              <span>Owner #{kost.owner_id}</span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Td>
-                <Td>
-                  <span className="font-bold text-xs sm:text-sm text-ink whitespace-nowrap">
-                    {kost.price_min && Number(kost.price_min) > 0 ? (
-                      `${formatCurrency(kost.price_min)}${kost.price_max && Number(kost.price_max) > Number(kost.price_min) ? ` - ${formatCurrency(kost.price_max)}` : " / bln"}`
-                    ) : kost.price || kost.harga ? (
-                      `${formatCurrency(kost.price || kost.harga)} / bln`
-                    ) : (
-                      <span className="text-muted text-xs italic">Belum diatur</span>
-                    )}
-                  </span>
-                </Td>
-                <Td>
-                  <div className="flex flex-col gap-1.5 items-start">
-                    <div className="flex items-center gap-1.5">
-                      <Badge
-                        status={kost.verification_status || "—"}
-                        tone={kost.verification_status === "APPROVED" ? "ok" : kost.verification_status === "REJECTED" ? "bad" : "warn"}
-                        size="sm"
-                      />
-                      {updatingId === kost.id ? (
-                        <RefreshCw size={12} className="animate-spin text-muted" />
-                      ) : kost.verification_status !== "APPROVED" ? (
-                        <button
-                          type="button"
-                          disabled={updatingId === kost.id}
-                          onClick={() => updateVerificationStatus(kost, "APPROVED")}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-good-bg text-good-fg hover:opacity-90 transition disabled:opacity-50"
-                          title="Setujui verifikasi listing ini"
-                        >
-                          <CheckCircle2 size={11} />
-                          <span>Setujui</span>
-                        </button>
+                  </Td>
+                  <Td>
+                    <span className="font-bold text-xs sm:text-sm text-ink whitespace-nowrap">
+                      {kost.price_min && Number(kost.price_min) > 0 ? (
+                        `${formatCurrency(kost.price_min)}${kost.price_max && Number(kost.price_max) > Number(kost.price_min) ? ` - ${formatCurrency(kost.price_max)}` : " / bln"}`
+                      ) : kost.price || kost.harga ? (
+                        `${formatCurrency(kost.price || kost.harga)} / bln`
                       ) : (
-                        <button
-                          type="button"
-                          disabled={updatingId === kost.id}
-                          onClick={() => updateVerificationStatus(kost, "PENDING")}
-                          className="text-[10px] text-muted hover:text-ink underline text-left"
-                          title="Kembalikan status verifikasi ke PENDING"
-                        >
-                          Batal
-                        </button>
+                        <span className="text-muted text-xs italic">Belum diatur</span>
                       )}
+                    </span>
+                  </Td>
+                  <Td>
+                    <div className="flex flex-col gap-1.5 items-start">
+                      <div className="flex items-center gap-1.5">
+                        <Badge
+                          status={kost.verification_status || "—"}
+                          tone={kost.verification_status === "APPROVED" ? "ok" : kost.verification_status === "REJECTED" ? "bad" : "warn"}
+                          size="sm"
+                        />
+                        {updatingId === kost.id ? (
+                          <RefreshCw size={12} className="animate-spin text-muted" />
+                        ) : kost.verification_status !== "APPROVED" ? (
+                          <button
+                            type="button"
+                            disabled={updatingId === kost.id}
+                            onClick={() => updateVerificationStatus(kost, "APPROVED")}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-good-bg text-good-fg hover:opacity-90 transition disabled:opacity-50"
+                            title="Setujui verifikasi listing ini"
+                          >
+                            <CheckCircle2 size={11} />
+                            <span>Setujui</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={updatingId === kost.id}
+                            onClick={() => updateVerificationStatus(kost, "PENDING")}
+                            className="text-[10px] text-muted hover:text-ink underline text-left"
+                            title="Kembalikan status verifikasi ke PENDING"
+                          >
+                            Batal
+                          </button>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleAvailability(kost)}
+                        disabled={updatingId === kost.id}
+                        title="Klik untuk ubah ketersediaan"
+                        className="inline-flex items-center gap-1.5 cursor-pointer rounded-md px-1.5 py-0.5 text-[11px] font-semibold border border-line hover:border-ink transition-colors disabled:opacity-50"
+                      >
+                        <Badge status={kost.status || "—"} tone={kost.status === "TERSEDIA" ? "ok" : "warn"} size="sm" />
+                        <span className="text-[10px] text-muted underline">Ubah</span>
+                      </button>
                     </div>
+                  </Td>
+                  <Td>
+                    <span className="whitespace-nowrap text-xs text-muted">{dateLabel(kost.created_at)}</span>
+                  </Td>
+                  <Td className="w-24 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <IconButton
+                        label="Lihat Detail"
+                        tone="info"
+                        className="!h-8 !w-8"
+                        onClick={() => setDetailKost(kost)}
+                      >
+                        <Eye size={15} />
+                      </IconButton>
+                      <IconButton
+                        label={`Hapus ${kost.name || "kost"}`}
+                        tone="danger"
+                        className="!h-8 !w-8"
+                        disabled={deleteLoading}
+                        onClick={() => setDeleteDialog({ type: "single", kost })}
+                      >
+                        <Trash2 size={15} />
+                      </IconButton>
+                    </div>
+                  </Td>
+                </tr>
+              ))}
+            </DataTable>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="block lg:hidden divide-y divide-line/70">
+            {rows.map((kost) => (
+              <div key={kost.id} className="p-4 space-y-3 hover:bg-track/30 transition">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-maroon/10 text-maroon mt-0.5">
+                      <Building2 size={18} aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <h4 className="font-extrabold text-sm text-ink truncate">{kost.name || "Tanpa nama"}</h4>
+                      <div className="flex items-center gap-1 text-xs text-muted mt-0.5 truncate">
+                        <MapPin size={11} className="shrink-0 text-accent" />
+                        <span className="truncate">{[kost.district, kost.city].filter(Boolean).join(", ") || "Pekanbaru"}</span>
+                      </div>
+                      <p className="text-[11px] text-muted font-mono mt-0.5">ID #{kost.id}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <Badge
+                      status={kost.verification_status || "—"}
+                      tone={kost.verification_status === "APPROVED" ? "ok" : kost.verification_status === "REJECTED" ? "bad" : "warn"}
+                      size="sm"
+                    />
+                    <Badge status={kost.status || "—"} tone={kost.status === "TERSEDIA" ? "ok" : "warn"} size="sm" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between rounded-lg border border-line/60 bg-track/40 px-3 py-2 text-xs">
+                  <div>
+                    <span className="text-muted text-[11px] block">Harga Sewa:</span>
+                    <strong className="text-ink font-bold">
+                      {kost.price_min && Number(kost.price_min) > 0 ? (
+                        `${formatCurrency(kost.price_min)}${kost.price_max && Number(kost.price_max) > Number(kost.price_min) ? ` - ${formatCurrency(kost.price_max)}` : " / bln"}`
+                      ) : kost.price || kost.harga ? (
+                        `${formatCurrency(kost.price || kost.harga)} / bln`
+                      ) : (
+                        "Belum diatur"
+                      )}
+                    </strong>
+                  </div>
+                  <div>
+                    <span className="text-muted text-[11px] block">Tipe Kost:</span>
+                    <span className="font-semibold text-ink">Kost {kost.gender || "Campur"}</span>
+                  </div>
+                </div>
+
+                {/* Mobile Action Buttons */}
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-line/40">
+                  {kost.verification_status !== "APPROVED" ? (
                     <button
                       type="button"
-                      onClick={() => toggleAvailability(kost)}
                       disabled={updatingId === kost.id}
-                      title="Klik untuk ubah ketersediaan"
-                      className="inline-flex items-center gap-1.5 cursor-pointer rounded-md px-1.5 py-0.5 text-[11px] font-semibold border border-line hover:border-ink transition-colors disabled:opacity-50"
+                      onClick={() => updateVerificationStatus(kost, "APPROVED")}
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition"
                     >
-                      <Badge status={kost.status || "—"} tone={kost.status === "TERSEDIA" ? "ok" : "warn"} size="sm" />
-                      <span className="text-[10px] text-muted underline">Ubah</span>
+                      <CheckCircle2 size={13} />
+                      <span>Setujui</span>
                     </button>
-                  </div>
-                </Td>
-                <Td>
-                  <span className="whitespace-nowrap text-xs text-muted">{dateLabel(kost.created_at)}</span>
-                </Td>
-                <Td className="w-24 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
-                    <IconButton
-                      label="Lihat Detail"
-                      tone="info"
-                      className="!h-8 !w-8"
-                      onClick={() => setDetailKost(kost)}
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={updatingId === kost.id}
+                      onClick={() => updateVerificationStatus(kost, "PENDING")}
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition"
                     >
-                      <Eye size={15} />
-                    </IconButton>
-                    <IconButton
-                      label={`Hapus ${kost.name || "kost"}`}
-                      tone="danger"
-                      className="!h-8 !w-8"
-                      disabled={deleteLoading}
-                      onClick={() => setDeleteDialog({ type: "single", kost })}
-                    >
-                      <Trash2 size={15} />
-                    </IconButton>
-                  </div>
-                </Td>
-              </tr>
+                      <span>Batal Setuju</span>
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => toggleAvailability(kost)}
+                    disabled={updatingId === kost.id}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                  >
+                    <span>Ubah Ketersediaan</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDetailKost(kost)}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                  >
+                    <Eye size={14} />
+                    <span>Detail</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={deleteLoading}
+                    onClick={() => setDeleteDialog({ type: "single", kost })}
+                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition"
+                  >
+                    <Trash2 size={14} />
+                    <span>Hapus</span>
+                  </button>
+                </div>
+              </div>
             ))}
-          </DataTable>
+          </div>
           <div className="flex items-center justify-between border-t border-line px-5 py-4">
             <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
               Menampilkan {rows.length} listing pada halaman {page}
