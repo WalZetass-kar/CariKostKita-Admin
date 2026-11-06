@@ -8,6 +8,7 @@ import {
   Eye,
   MapPin,
   Plus,
+  Power,
   RefreshCw,
   RotateCcw,
   Search,
