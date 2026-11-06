@@ -47,8 +47,8 @@ export function FastApiAnalyticsView() {
           </div>
           <div className="flex flex-col sm:flex-row sm:items-end gap-2.5 w-full sm:w-auto">
             <SelectField label="Rentang waktu" value={days} onChange={(event) => setDays(Number(event.target.value))} options={PERIODS} className="w-full sm:w-auto" />
-            <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
-              <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
+            <PrimaryButton onClick={load} disabled={loading} className="w-auto shrink-0 self-end">
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> <span>Perbarui</span>
             </PrimaryButton>
           </div>
         </div>

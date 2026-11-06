@@ -239,7 +239,9 @@ export function FastApiUsersView() {
           </label>
           <SelectField label="Role" className="sm:gap-1" value={role} onChange={(event) => { setRole(event.target.value); setPage(1); }} options={[["", "Semua role"], ["user", "Pencari"], ["owner", "Pemilik"], ["moderator", "Moderator"], ["admin", "Admin"], ["developer", "Super Admin"]]} />
           <SelectField label="Status akun" className="sm:gap-1" value={active} onChange={(event) => { setActive(event.target.value); setPage(1); }} options={[["", "Semua status"], ["true", "Aktif"], ["false", "Nonaktif"]]} />
-          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center"><Search size={16} /> <span>Cari</span></PrimaryButton>
+          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end shrink-0">
+            <Search size={15} /> <span>Cari</span>
+          </PrimaryButton>
         </form>
       </Panel>
 
@@ -406,32 +408,36 @@ export function FastApiUsersView() {
                   </div>
 
                   {manageable && (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 pt-1">
+                    <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line/40">
                       <button
                         type="button"
                         onClick={() => setDetailUser(user)}
-                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line text-xs font-bold text-ink hover:bg-track"
+                        className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
                       >
                         <Eye size={13} /> <span>Detail</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => openEditModal(user)}
-                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line text-xs font-bold text-ink hover:bg-track"
+                        className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
                       >
                         <Pencil size={13} /> <span>Edit</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => openAction(user, "status")}
-                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-line text-xs font-bold text-ink hover:bg-track"
+                        className={`inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border px-2.5 sm:px-3 text-xs font-bold transition active:scale-95 shrink-0 ${
+                          user.is_active
+                            ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
+                            : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
+                        }`}
                       >
                         <Power size={13} /> <span>{user.is_active ? "Nonaktifkan" : "Aktifkan"}</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setConfirmDelete(user)}
-                        className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-red-500/30 text-xs font-bold text-red-600 hover:bg-red-500/10"
+                        className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-2.5 sm:px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 transition active:scale-95 shrink-0"
                       >
                         <Trash2 size={13} /> <span>Hapus</span>
                       </button>
@@ -447,22 +453,22 @@ export function FastApiUsersView() {
             <span className="text-xs text-muted text-center sm:text-left" aria-live="polite" aria-atomic="true">
               Menampilkan {users.length} pengguna pada halaman {page}
             </span>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((value) => value - 1)}
-                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-40 flex-1 sm:flex-initial"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Sebelumnya
+                <span>Sebelumnya</span>
               </button>
               <button
                 type="button"
                 disabled={!hasMore || loading}
                 onClick={() => setPage((value) => value + 1)}
-                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold disabled:opacity-40 flex-1 sm:flex-initial"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Berikutnya
+                <span>Berikutnya</span>
               </button>
             </div>
           </div>

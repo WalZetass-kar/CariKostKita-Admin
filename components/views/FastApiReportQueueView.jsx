@@ -80,8 +80,8 @@ export function FastApiReportQueueView() {
             <PanelTitle eyebrow="Moderasi" title="Laporan Pelanggaran Kost" />
             <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan tindak lanjuti laporan keluhan atau indikasi pelanggaran listing kost.</p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
+          <PrimaryButton onClick={load} disabled={loading} className="w-auto self-start sm:self-auto shrink-0">
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> <span>Perbarui</span>
           </PrimaryButton>
         </div>
         <div className="mt-4 flex overflow-x-auto gap-2 pb-1 scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch]" role="tablist" aria-label="Status laporan">
@@ -126,17 +126,29 @@ export function FastApiReportQueueView() {
                 </div>
 
                 {!(["SELESAI", "DITOLAK"].includes(report.status)) && (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:flex lg:flex-wrap gap-2 w-full lg:w-auto pt-2 border-t border-line/60 lg:border-t-0 lg:pt-0">
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line/60">
                     {report.status === "BARU" && (
-                      <button onClick={() => { setAction({ report, status: "DITINJAU" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold text-ink hover:bg-track w-full sm:w-auto transition">
-                        <Flag size={15} /> Tandai Ditinjau
+                      <button
+                        type="button"
+                        onClick={() => { setAction({ report, status: "DITINJAU" }); setNote(""); }}
+                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
+                      >
+                        <Flag size={14} /> <span>Tandai Ditinjau</span>
                       </button>
                     )}
-                    <PrimaryButton onClick={() => { setAction({ report, status: "SELESAI" }); setNote(""); }} className="w-full sm:w-auto justify-center text-xs sm:text-sm">
-                      <CheckCircle2 size={16} /> Selesaikan
-                    </PrimaryButton>
-                    <button onClick={() => { setAction({ report, status: "DITOLAK" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold text-bad-fg hover:bg-track w-full sm:w-auto transition">
-                      <XCircle size={16} /> Tolak
+                    <button
+                      type="button"
+                      onClick={() => { setAction({ report, status: "SELESAI" }); setNote(""); }}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition shrink-0"
+                    >
+                      <CheckCircle2 size={14} /> <span>Selesaikan</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setAction({ report, status: "DITOLAK" }); setNote(""); }}
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
+                    >
+                      <XCircle size={14} /> <span>Tolak</span>
                     </button>
                   </div>
                 )}
@@ -145,14 +157,22 @@ export function FastApiReportQueueView() {
           ))}
           <nav className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line pt-3" aria-label="Halaman antrean laporan">
             <span className="text-xs text-muted text-center sm:text-left" aria-live="polite">Halaman {page} · {reports.length} laporan ditampilkan</span>
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button type="button" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={loading || page === 1}
-                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-40 flex-1 sm:flex-initial">
-                Sebelumnya
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                disabled={loading || page === 1}
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+              >
+                <span>Sebelumnya</span>
               </button>
-              <button type="button" onClick={() => setPage((current) => current + 1)} disabled={loading || !hasMore}
-                className="min-h-10 rounded-lg border border-line px-4 text-sm font-bold text-ink disabled:cursor-not-allowed disabled:opacity-40 flex-1 sm:flex-initial">
-                Berikutnya
+              <button
+                type="button"
+                onClick={() => setPage((current) => current + 1)}
+                disabled={loading || !hasMore}
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+              >
+                <span>Berikutnya</span>
               </button>
             </div>
           </nav>

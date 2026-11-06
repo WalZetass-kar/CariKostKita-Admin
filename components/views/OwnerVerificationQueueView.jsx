@@ -172,8 +172,8 @@ export function OwnerVerificationQueueView() {
             <p className="mt-2 max-w-2xl text-sm text-muted">Tinjau dan proses permohonan verifikasi properti pemilik kost secara real-time.</p>
             <p className="mt-1 max-w-2xl text-xs text-muted">Bukti yang diperiksa: foto tampak depan properti, kode lokasi, dan foto kamar. Tidak ada KTP.</p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading} className="w-full sm:w-auto justify-center">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} /> Perbarui
+          <PrimaryButton onClick={load} disabled={loading} className="w-auto self-start sm:self-auto shrink-0">
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> <span>Perbarui</span>
           </PrimaryButton>
         </div>
         <div className="mt-5 flex overflow-x-auto gap-2 pb-1 scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch]" role="tablist" aria-label="Filter status pengajuan">
@@ -261,24 +261,36 @@ export function OwnerVerificationQueueView() {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2 w-full lg:w-auto pt-2 border-t border-line/60 lg:border-t-0 lg:pt-0">
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-line/60">
                     <button
                       type="button"
                       onClick={() => setSelectedApp(application)}
-                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line bg-paper px-3 py-2 text-xs sm:text-sm font-bold text-ink hover:bg-track w-full sm:w-auto transition"
+                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
                     >
-                      <Eye size={16} /> Detail Pengajuan
+                      <Eye size={14} /> <span>Detail Pengajuan</span>
                     </button>
                     {application.status === "PENDING" && (
                       <>
-                        <PrimaryButton onClick={() => { setDecision({ id: application.id, status: "APPROVED" }); setNote(""); }} className="w-full sm:w-auto justify-center text-xs sm:text-sm">
-                          <BadgeCheck size={16} /> Setujui
-                        </PrimaryButton>
-                        <button type="button" onClick={() => { setDecision({ id: application.id, status: "REVISION_REQUIRED" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 text-xs sm:text-sm font-bold text-ink hover:bg-track w-full sm:w-auto transition">
-                          <FileCheck2 size={16} /> Minta revisi
+                        <button
+                          type="button"
+                          onClick={() => { setDecision({ id: application.id, status: "APPROVED" }); setNote(""); }}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition shrink-0"
+                        >
+                          <BadgeCheck size={14} /> <span>Setujui</span>
                         </button>
-                        <button type="button" onClick={() => { setDecision({ id: application.id, status: "REJECTED" }); setNote(""); }} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-line px-3 py-2 text-xs sm:text-sm font-bold text-bad-fg hover:bg-track w-full sm:w-auto transition">
-                          <XCircle size={16} /> Tolak
+                        <button
+                          type="button"
+                          onClick={() => { setDecision({ id: application.id, status: "REVISION_REQUIRED" }); setNote(""); }}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition shrink-0"
+                        >
+                          <FileCheck2 size={14} /> <span>Minta Revisi</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setDecision({ id: application.id, status: "REJECTED" }); setNote(""); }}
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
+                        >
+                          <XCircle size={14} /> <span>Tolak</span>
                         </button>
                       </>
                     )}

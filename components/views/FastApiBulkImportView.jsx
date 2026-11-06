@@ -223,11 +223,11 @@ export function FastApiBulkImportView() {
               normalisasi wilayah Pekanbaru, dan audit log.
             </p>
           </div>
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2">
             <GhostButton
               onClick={() => handleDownloadTemplate("xlsx")}
               disabled={downloadingTemplate}
-              className="text-xs sm:text-sm font-semibold text-good-fg hover:text-good-fg flex-1 sm:flex-initial justify-center"
+              className="text-xs sm:text-sm font-semibold text-good-fg hover:text-good-fg w-auto shrink-0"
             >
               <Download size={15} />
               <span>Template Excel (.xlsx)</span>
@@ -235,7 +235,7 @@ export function FastApiBulkImportView() {
             <GhostButton
               onClick={() => handleDownloadTemplate("csv")}
               disabled={downloadingTemplate}
-              className="text-xs sm:text-sm flex-1 sm:flex-initial justify-center"
+              className="text-xs sm:text-sm w-auto shrink-0"
             >
               <Download size={15} />
               <span>Template CSV (.csv)</span>
@@ -536,8 +536,8 @@ export function FastApiBulkImportView() {
               </label>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-              <GhostButton onClick={handleReset} className="text-xs flex-1 md:flex-initial justify-center">
+            <div className="flex flex-wrap items-center gap-2">
+              <GhostButton onClick={handleReset} className="text-xs w-auto shrink-0">
                 <RotateCcw size={14} />
                 <span>Unggah File Lain</span>
               </GhostButton>
@@ -545,10 +545,10 @@ export function FastApiBulkImportView() {
                 onClick={handleCommitImport}
                 disabled={committing || !previewData.summary?.can_commit}
                 loading={committing}
-                className="text-xs flex-1 md:flex-initial justify-center"
+                className="text-xs w-auto shrink-0"
               >
-                <CheckCircle2 size={16} />
-                <span>Konfirmasi & Simpan ke Database</span>
+                <CheckCircle2 size={15} />
+                <span>Konfirmasi & Simpan</span>
               </PrimaryButton>
             </div>
           </Panel>

@@ -797,9 +797,9 @@ function SystemTab() {
 
         {!locked && (
           <div className="pt-3 border-t border-line flex justify-end">
-            <PrimaryButton type="submit" loading={saving} className="w-full sm:w-auto justify-center">
-              <Save size={18} />
-              <span>Simpan Perubahan & Sinkronkan ke Landing Page</span>
+            <PrimaryButton type="submit" loading={saving} className="w-auto px-5 shrink-0">
+              <Save size={16} />
+              <span>Simpan Pengaturan</span>
             </PrimaryButton>
           </div>
         )}
@@ -934,9 +934,9 @@ function AdminsTab() {
               Atur daftar staf pengelola, penetapan role, dan batas kewenangan sistem.
             </p>
           </div>
-          <PrimaryButton onClick={openCreate} className="w-full sm:w-auto justify-center">
-            <Plus size={18} />
-            <span>Tambah Admin Baru</span>
+          <PrimaryButton onClick={openCreate} className="w-auto shrink-0 self-start sm:self-auto">
+            <Plus size={16} />
+            <span>Tambah Admin</span>
           </PrimaryButton>
         </div>
 
@@ -1080,12 +1080,12 @@ function AdminsTab() {
             placeholder={editAdmin ? "Kosongkan jika tidak diganti" : "Minimal 8 karakter"}
             required={!editAdmin}
           />
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2 border-t border-line">
-            <GhostButton onClick={() => setModalOpen(false)} disabled={saving} className="w-full sm:w-auto justify-center">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-line">
+            <GhostButton onClick={() => setModalOpen(false)} disabled={saving} className="w-auto shrink-0">
               Batal
             </GhostButton>
-            <PrimaryButton type="submit" loading={saving} className="w-full sm:w-auto justify-center">
-              <Save size={18} />
+            <PrimaryButton type="submit" loading={saving} className="w-auto shrink-0">
+              <Save size={16} />
               <span>{editAdmin ? "Simpan Perubahan" : "Buat Akun Admin"}</span>
             </PrimaryButton>
           </div>

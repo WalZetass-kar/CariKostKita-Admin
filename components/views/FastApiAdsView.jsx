@@ -105,13 +105,13 @@ export function FastApiAdsView() {
               Kelola dan pantau seluruh inventaris kampanye iklan yang tayang di aplikasi dan website CariKostKita.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <PrimaryButton onClick={() => openAdForm?.({ onSaved: load })} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
-              <Plus size={16} />
+          <div className="flex flex-wrap items-center gap-2">
+            <PrimaryButton onClick={() => openAdForm?.({ onSaved: load })} className="!h-9 sm:!h-10 text-xs sm:text-sm w-auto shrink-0">
+              <Plus size={15} />
               <span>Tambah Iklan</span>
             </PrimaryButton>
-            <GhostButton onClick={load} disabled={loading} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
-              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            <GhostButton onClick={load} disabled={loading} className="!h-9 sm:!h-10 text-xs sm:text-sm w-auto shrink-0">
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               <span>Perbarui</span>
             </GhostButton>
           </div>
@@ -146,8 +146,8 @@ export function FastApiAdsView() {
               ["false", "Nonaktif"],
             ]}
           />
-          <PrimaryButton type="submit" className="h-10 sm:w-auto w-full justify-center">
-            <Search size={16} /> <span>Cari</span>
+          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end shrink-0">
+            <Search size={15} /> <span>Cari</span>
           </PrimaryButton>
         </form>
       </Panel>
@@ -391,22 +391,22 @@ export function FastApiAdsView() {
             <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
               Menampilkan {ads.length} iklan pada halaman {page}
             </span>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((value) => value - 1)}
-                className="min-h-9 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Sebelumnya
+                <span>Sebelumnya</span>
               </button>
               <button
                 type="button"
                 disabled={!hasMore || loading}
                 onClick={() => setPage((value) => value + 1)}
-                className="min-h-9 rounded-lg border border-line px-3 text-xs sm:text-sm font-bold disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Berikutnya
+                <span>Berikutnya</span>
               </button>
             </div>
           </div>

@@ -560,6 +560,17 @@ const routes = [
     if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menghapus pengguna via FastAPI."));
     return payload;
   }, ["super_admin", "admin"]],
+  ["DELETE", "fastapi-owners/:id", async ({ session }, { params }) => {
+    const apiUrl = fastApiBase();
+    const res = await fetch(`${apiUrl}/api/v1/admin/users/${encodeURIComponent(params.id)}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${session.token}`, Accept: "application/json" },
+      cache: "no-store",
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new HttpError(res.status, apiErrorMessage(payload, "Gagal menghapus pemilik via FastAPI."));
+    return payload;
+  }, ["super_admin", "admin"]],
   ["GET", "fastapi-reports", async ({ session }, { url }) => {
     const apiUrl = fastApiBase();
     const query = new URLSearchParams(url.searchParams);
@@ -827,8 +838,8 @@ const routes = [
   ["POST", "owners/:id/action", async (auth, { body, params }) => write(auth, (db) => ({ owner: svc.ownerAction(db, auth.admin, params.id, body) })), ["super_admin", "admin", "moderator"]],
   ["POST", "owners/:id/archive", async (auth, { params }) => write(auth, (db) => ({ owner: svc.archiveOwner(db, auth.admin, params.id) })), ["super_admin", "admin"]],
   ["POST", "owners/:id/restore", async (auth, { params }) => write(auth, (db) => ({ owner: svc.restoreOwner(db, auth.admin, params.id) })), ["super_admin", "admin"]],
-  ["DELETE", "owners/:id/permanent", async (auth, { body, params }) => write(auth, (db) => svc.permanentDeleteOwner(db, auth.admin, params.id, body)), ["super_admin"]],
-  ["POST", "owners/:id/permanent", async (auth, { body, params }) => write(auth, (db) => svc.permanentDeleteOwner(db, auth.admin, params.id, body)), ["super_admin"]],
+  ["DELETE", "owners/:id/permanent", async (auth, { body, params }) => write(auth, (db) => svc.permanentDeleteOwner(db, auth.admin, params.id, body)), ["super_admin", "admin"]],
+  ["POST", "owners/:id/permanent", async (auth, { body, params }) => write(auth, (db) => svc.permanentDeleteOwner(db, auth.admin, params.id, body)), ["super_admin", "admin"]],
   ["POST", "owners/bulk", async (auth, { body }) => write(auth, (db) => svc.bulkOwnerAction(db, auth.admin, body)), ["super_admin", "admin", "moderator"]],
 
   ["PATCH", "users/:id", async (auth, { body, params }) => write(auth, (db) => ({ user: svc.updateUser(db, auth.admin, params.id, body) })), ["super_admin", "admin"]],
@@ -836,8 +847,8 @@ const routes = [
   ["POST", "users/:id/status", async (auth, { body, params }) => write(auth, (db) => ({ user: svc.setUserStatus(db, auth.admin, params.id, body.status) }), { method: 'PATCH', path: `/api/v1/admin/users/${params.id}`, body: { is_active: body.status === "Aktif" || body.status === true }, isFastApi: true }), ["super_admin", "admin"]],
   ["POST", "users/:id/archive", async (auth, { params }) => write(auth, (db) => ({ user: svc.archiveUser(db, auth.admin, params.id) })), ["super_admin", "admin"]],
   ["POST", "users/:id/restore", async (auth, { params }) => write(auth, (db) => ({ user: svc.restoreUser(db, auth.admin, params.id) })), ["super_admin", "admin"]],
-  ["DELETE", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin"]],
-  ["POST", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin"]],
+  ["DELETE", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin", "admin"]],
+  ["POST", "users/:id/permanent", async (auth, { params }) => write(auth, (db) => svc.permanentDeleteUser(db, auth.admin, params.id)), ["super_admin", "admin"]],
   ["POST", "users", async (auth, { body }) => write(auth, (db) => ({ user: svc.createUser(db, auth.admin, body) })), ["super_admin", "admin"]],
   ["POST", "users/bulk", async (auth, { body }) => write(auth, (db) => svc.bulkUserAction(db, auth.admin, body)), ["super_admin", "admin"]],
 

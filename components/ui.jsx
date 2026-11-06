@@ -33,10 +33,10 @@ export function Badge({ status, label, tone, size = "md" }) {
 }
 
 /* ---------- Tombol ---------- */
-const btnBase = "inline-flex items-center justify-center gap-2 rounded-lg font-bold transition hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 disabled:hover:translate-y-0 disabled:hover:shadow-none";
+const btnBase = "inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-lg font-bold whitespace-nowrap select-none transition hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 disabled:hover:translate-y-0 disabled:hover:shadow-none disabled:opacity-50";
 
-export function Spinner({ size = 16 }) {
-  return <Loader2 size={size} className="animate-spin-slow" aria-hidden="true" />;
+export function Spinner({ size = 15 }) {
+  return <Loader2 size={size} className="animate-spin-slow shrink-0" aria-hidden="true" />;
 }
 
 export function IconButton({ children, icon: Icon, label, onClick, disabled, className = "", type = "button", tone = "neutral", size = 16 }) {
@@ -65,7 +65,7 @@ export function IconButton({ children, icon: Icon, label, onClick, disabled, cla
 
 export function PrimaryButton({ children, onClick, type = "button", loading, disabled, className = "" }) {
   return (
-    <button type={type} onClick={onClick} disabled={disabled || loading} className={`${btnBase} min-h-10 border border-maroon bg-maroon px-4 font-extrabold text-[#EEEAD7] ${className}`}>
+    <button type={type} onClick={onClick} disabled={disabled || loading} className={`${btnBase} h-9 sm:h-10 border border-maroon bg-maroon px-3.5 sm:px-4 text-xs sm:text-sm font-extrabold text-[#EEEAD7] ${className}`}>
       {loading && <Spinner />}
       {children}
     </button>
@@ -74,7 +74,7 @@ export function PrimaryButton({ children, onClick, type = "button", loading, dis
 
 export function GhostButton({ children, onClick, type = "button", loading, disabled, className = "", title }) {
   return (
-    <button type={type} onClick={onClick} disabled={disabled || loading} title={title} className={`${btnBase} min-h-10 border border-line bg-paper px-3 text-accent ${className}`}>
+    <button type={type} onClick={onClick} disabled={disabled || loading} title={title} className={`${btnBase} h-9 sm:h-10 border border-line bg-paper px-3 sm:px-3.5 text-xs sm:text-sm text-accent ${className}`}>
       {loading && <Spinner />}
       {children}
     </button>
@@ -83,7 +83,7 @@ export function GhostButton({ children, onClick, type = "button", loading, disab
 
 export function DangerButton({ children, onClick, type = "button", loading, disabled, className = "" }) {
   return (
-    <button type={type} onClick={onClick} disabled={disabled || loading} className={`${btnBase} min-h-10 border border-bad-fg bg-bad-bg px-4 font-extrabold text-bad-fg ${className}`}>
+    <button type={type} onClick={onClick} disabled={disabled || loading} className={`${btnBase} h-9 sm:h-10 border border-bad-fg bg-bad-bg px-3.5 sm:px-4 text-xs sm:text-sm font-extrabold text-bad-fg ${className}`}>
       {loading && <Spinner />}
       {children}
     </button>

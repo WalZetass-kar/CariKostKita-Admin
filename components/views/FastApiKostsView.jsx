@@ -316,8 +316,8 @@ export function FastApiKostsView() {
             }}
             options={STATUSES}
           />
-          <PrimaryButton type="submit" className="h-10 w-full sm:w-auto justify-center">
-            <Search size={16} /> <span>Cari</span>
+          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end shrink-0">
+            <Search size={15} /> <span>Cari</span>
           </PrimaryButton>
         </form>
       </Panel>
@@ -654,22 +654,22 @@ export function FastApiKostsView() {
             <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
               Menampilkan {rows.length} listing pada halaman {page}
             </span>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((value) => value - 1)}
-                className="min-h-10 rounded-lg border border-line px-3 text-sm font-bold disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Sebelumnya
+                <span>Sebelumnya</span>
               </button>
               <button
                 type="button"
                 disabled={!hasMore || loading}
                 onClick={() => setPage((value) => value + 1)}
-                className="min-h-10 rounded-lg border border-line px-3 text-sm font-bold disabled:opacity-40"
+                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
               >
-                Berikutnya
+                <span>Berikutnya</span>
               </button>
             </div>
           </div>
