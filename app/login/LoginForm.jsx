@@ -92,13 +92,13 @@ function Inner() {
   };
 
   const input = (err) =>
-    `h-11 w-full rounded-lg border bg-field pl-10 pr-3 text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-brand/30 ${
+    `h-11 w-full rounded-lg border bg-field pl-10 pr-3 text-base sm:text-sm text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-brand/30 ${
       err ? "border-bad-fg" : "border-line"
     }`;
 
   return (
-    <main className="grid min-h-screen place-items-center bg-cream p-4">
-      <div className="grid w-full max-w-4xl overflow-hidden rounded-2xl border border-line bg-paper shadow-panel md:grid-cols-[1fr_1.2fr]">
+    <main className="flex min-h-[100dvh] w-full flex-col justify-center items-center bg-cream px-3 py-6 sm:p-6 md:p-8">
+      <div className="w-full max-w-md md:max-w-4xl overflow-hidden rounded-2xl border border-line bg-paper shadow-panel grid md:grid-cols-[1fr_1.2fr]">
         <aside className="hidden flex-col justify-between bg-sidebar p-8 text-[#EEEAD7] md:flex">
           <div className="flex items-center gap-3">
             <div className="grid h-11 w-11 place-items-center rounded-xl border border-[#EEEAD766] bg-[#EEEAD71F] font-extrabold text-lg">
@@ -128,7 +128,18 @@ function Inner() {
           </div>
         </aside>
 
-        <form onSubmit={submit} noValidate className="grid content-center gap-5 p-6 sm:p-10">
+        <form onSubmit={submit} noValidate className="grid content-center gap-4 sm:gap-5 p-4 sm:p-8 md:p-10">
+          {/* Mobile-only Brand Header */}
+          <div className="flex items-center gap-3 md:hidden pb-2 border-b border-line/60">
+            <div className="grid h-10 w-10 place-items-center rounded-xl bg-maroon text-[#EEEAD7] font-extrabold text-base shadow-sm shrink-0">
+              CK
+            </div>
+            <div className="min-w-0">
+              <strong className="block text-base font-extrabold text-ink leading-tight truncate">CariKostKita</strong>
+              <span className="block text-xs text-muted font-medium">Admin Panel</span>
+            </div>
+          </div>
+
           {/* Honeypot field for bot trapping */}
           <div style={{ display: "none" }} aria-hidden="true">
             <input
@@ -146,7 +157,7 @@ function Inner() {
               <span className="text-xs font-extrabold uppercase tracking-wider text-maroon">Admin Portal</span>
               <span className="text-[11px] font-mono text-muted">v2.0</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-ink mt-1">Masuk ke Akun</h1>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-ink mt-1">Masuk ke Akun</h1>
             <p className="mt-1 text-xs sm:text-sm text-muted">Gunakan kredensial akun staf Admin CariKostKita.</p>
           </div>
 
@@ -200,7 +211,7 @@ function Inner() {
                 type="button"
                 aria-label={show ? "Sembunyikan password" : "Tampilkan password"}
                 onClick={() => setShow(!show)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-ink transition-colors p-1"
               >
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -212,7 +223,7 @@ function Inner() {
           <div className="rounded-xl border border-line bg-track/40 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-extrabold uppercase tracking-wider text-muted">
-                Verifikasi Keamanan (Captcha)
+                Verifikasi Keamanan
               </span>
               <button
                 type="button"
@@ -225,10 +236,10 @@ function Inner() {
               </button>
             </div>
 
-            <div className="flex items-center gap-2.5">
-              <div className="shrink-0 h-11 w-40 rounded-lg border border-line overflow-hidden bg-white grid place-items-center">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+              <div className="h-11 w-full sm:w-40 rounded-lg border border-line overflow-hidden bg-white flex items-center justify-center shrink-0">
                 {captchaImg ? (
-                  <img src={captchaImg} alt="Captcha" className="h-full w-full object-contain" />
+                  <img src={captchaImg} alt="Captcha" className="h-full w-full object-contain p-1" />
                 ) : (
                   <span className="text-xs text-muted animate-pulse">Memuat...</span>
                 )}
@@ -237,12 +248,13 @@ function Inner() {
                 id="captchaAnswer"
                 name="captchaAnswer"
                 type="text"
+                inputMode="numeric"
                 autoComplete="off"
                 maxLength={6}
                 value={captchaAnswer}
                 onChange={(e) => setCaptchaAnswer(e.target.value)}
                 placeholder="Jawaban ="
-                className={`h-11 flex-1 rounded-lg border bg-field px-3 text-sm font-bold text-center text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-brand/30 ${
+                className={`h-11 flex-1 min-w-0 rounded-lg border bg-field px-3 text-base sm:text-sm font-bold text-center text-ink transition-colors focus:outline-none focus:ring-2 focus:ring-brand/30 ${
                   errors.captcha ? "border-bad-fg" : "border-line"
                 }`}
               />
@@ -257,10 +269,10 @@ function Inner() {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-maroon bg-maroon px-4 font-extrabold text-[#EEEAD7] transition-all hover:bg-maroon/90 hover:shadow-lg disabled:opacity-60 active:scale-[0.99]"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-maroon bg-maroon px-4 font-extrabold text-[#EEEAD7] transition-all hover:bg-maroon/90 hover:shadow-lg disabled:opacity-60 active:scale-[0.99] text-sm sm:text-base"
           >
             {loading ? <Spinner /> : <LogIn size={18} />}
-            <span>{loading ? "Memverifikasi Kredensial..." : "Masuk ke Dashboard"}</span>
+            <span>{loading ? "Memverifikasi..." : "Masuk ke Dashboard"}</span>
           </button>
         </form>
       </div>

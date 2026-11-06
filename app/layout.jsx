@@ -11,6 +11,13 @@ export const metadata = {
   description: "Admin panel untuk mengelola platform CariKostKita.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+};
+
 // Terapkan tema tersimpan sebelum render agar tidak berkedip.
 const themeScript = `try{var t=localStorage.getItem("ckk.theme");if(t==="dark"||(t==="system"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.classList.add("dark")}catch(e){}`;
 
