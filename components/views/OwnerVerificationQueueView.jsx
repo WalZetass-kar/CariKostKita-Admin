@@ -176,10 +176,10 @@ export function OwnerVerificationQueueView() {
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> <span>Perbarui</span>
           </PrimaryButton>
         </div>
-        <div className="mt-5 flex overflow-x-auto gap-2 pb-1 scrollbar-none touch-pan-x [-webkit-overflow-scrolling:touch]" role="tablist" aria-label="Filter status pengajuan">
+        <div className="mt-4 sm:mt-5 flex items-center overflow-x-auto gap-2 pb-2 pt-1 touch-pan-x [-webkit-overflow-scrolling:touch]" role="tablist" aria-label="Filter status pengajuan">
           {STATUS_TABS.map(([key, label]) => (
             <button key={key} role="tab" aria-selected={status === key} onClick={() => setStatus(key)}
-              className={`rounded-full border px-3.5 py-1.5 text-xs sm:text-sm font-semibold shrink-0 transition ${status === key ? "border-accent bg-accent text-white" : "border-line bg-paper text-muted hover:text-ink"}`}>
+              className={`rounded-full border px-3.5 py-1.5 text-xs sm:text-sm font-bold shrink-0 transition ${status === key ? "border-accent bg-accent text-white shadow-xs" : "border-line bg-paper text-muted hover:text-ink"}`}>
               {label}
             </button>
           ))}
@@ -195,15 +195,15 @@ export function OwnerVerificationQueueView() {
             const parsed = parseSubmissionNote(application.submission_note);
             const contactPhone = parsed.whatsapp || owner.no_hp || owner.phone || "";
             return (
-              <Panel key={application.id} className="p-4 sm:p-5">
-                <div className="flex flex-col gap-3.5 lg:flex-row lg:items-start lg:justify-between">
+              <Panel key={application.id} className="p-3.5 sm:p-5">
+                <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0 flex-1 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-base font-extrabold text-ink truncate">{owner.name || "Nama tidak tersedia"}</h3>
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <h3 className="text-sm sm:text-base font-extrabold text-ink truncate">{owner.name || "Nama tidak tersedia"}</h3>
                           {parsed.verificationCode && (
-                            <span className="inline-flex items-center gap-1 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[11px] font-bold text-accent">
+                            <span className="inline-flex items-center gap-1 rounded-md border border-accent/30 bg-accent/10 px-2 py-0.5 text-[10px] sm:text-[11px] font-bold text-accent shrink-0">
                               <ShieldCheck size={12} /> {parsed.verificationCode}
                             </span>
                           )}
@@ -213,84 +213,84 @@ export function OwnerVerificationQueueView() {
                           {contactPhone ? ` · ${contactPhone}` : ""}
                         </p>
                       </div>
-                      <Badge label={application.status} status={application.status} tone={application.status === "PENDING" ? "warn" : application.status === "REJECTED" ? "bad" : "ok"} />
+                      <Badge label={application.status} status={application.status} tone={application.status === "PENDING" ? "warn" : application.status === "REJECTED" ? "bad" : "ok"} size="sm" />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted">
-                      <span className="inline-flex items-center gap-1.5"><Clock3 size={13} /> Diajukan {dateTime(application.created_at)}</span>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-muted">
+                      <span className="inline-flex items-center gap-1.5 shrink-0"><Clock3 size={13} /> Diajukan {dateTime(application.created_at)}</span>
                       {parsed.propertyName && (
-                        <span className="inline-flex items-center gap-1.5 font-semibold text-ink"><Building2 size={13} /> {parsed.propertyName}</span>
+                        <span className="inline-flex items-center gap-1.5 font-semibold text-ink truncate max-w-full"><Building2 size={13} className="shrink-0" /> <span className="truncate">{parsed.propertyName}</span></span>
                       )}
                       {parsed.propertyAddress && (
-                        <span className="inline-flex items-center gap-1.5"><MapPin size={13} /> {parsed.propertyAddress}</span>
+                        <span className="inline-flex items-center gap-1.5 text-muted truncate max-w-full"><MapPin size={13} className="shrink-0" /> <span className="truncate">{parsed.propertyAddress}</span></span>
                       )}
                     </div>
 
                     {parsed.propertyName || parsed.propertyAddress || parsed.whatsapp ? (
-                      <div className="grid gap-2 rounded-lg border border-line bg-track/50 p-3 sm:grid-cols-2">
-                        <div>
+                      <div className="grid gap-2 rounded-lg border border-line bg-track/50 p-2.5 sm:p-3 sm:grid-cols-2">
+                        <div className="min-w-0">
                           <p className="text-[11px] font-extrabold uppercase tracking-wide text-muted">Nama Properti Kost</p>
-                          <p className="text-xs sm:text-sm font-semibold text-ink">{parsed.propertyName || "—"}</p>
+                          <p className="text-xs sm:text-sm font-semibold text-ink truncate">{parsed.propertyName || "—"}</p>
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-[11px] font-extrabold uppercase tracking-wide text-muted">Kontak WhatsApp</p>
-                          <p className="text-xs sm:text-sm font-semibold text-ink">{parsed.whatsapp || owner.no_hp || owner.phone || "—"}</p>
+                          <p className="text-xs sm:text-sm font-semibold text-ink truncate">{parsed.whatsapp || owner.no_hp || owner.phone || "—"}</p>
                         </div>
-                        <div className="sm:col-span-2">
+                        <div className="sm:col-span-2 min-w-0">
                           <p className="text-[11px] font-extrabold uppercase tracking-wide text-muted">Alamat Lengkap Properti</p>
-                          <p className="text-xs sm:text-sm text-ink">{parsed.propertyAddress || "—"}</p>
+                          <p className="text-xs sm:text-sm text-ink break-words">{parsed.propertyAddress || "—"}</p>
                         </div>
                         {parsed.note && (
-                          <div className="sm:col-span-2">
+                          <div className="sm:col-span-2 min-w-0">
                             <p className="text-[11px] font-extrabold uppercase tracking-wide text-muted">Catatan Pemohon</p>
-                            <p className="text-xs sm:text-sm text-ink">{parsed.note}</p>
+                            <p className="text-xs sm:text-sm text-ink break-words">{parsed.note}</p>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="rounded-lg border border-line bg-track/50 p-3">
+                      <div className="rounded-lg border border-line bg-track/50 p-2.5 sm:p-3">
                         <p className="mb-1 text-[11px] font-extrabold uppercase tracking-wide text-muted">Catatan pengajuan</p>
-                        <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-ink">{parsed.rawText}</p>
+                        <p className="whitespace-pre-wrap text-xs sm:text-sm leading-relaxed text-ink break-words [overflow-wrap:anywhere]">{parsed.rawText}</p>
                       </div>
                     )}
 
                     {application.review_note && (
-                      <div className="rounded-lg border border-line bg-paper p-2.5 text-xs text-muted">
+                      <div className="rounded-lg border border-line bg-paper p-2.5 text-xs text-muted break-words">
                         <span className="font-bold text-ink">Catatan keputusan admin:</span> {application.review_note}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-line/60">
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-2.5 border-t border-line/60 lg:border-t-0 lg:pt-0 shrink-0">
                     <button
                       type="button"
                       onClick={() => setSelectedApp(application)}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
+                      className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track transition active:scale-95 shrink-0"
                     >
-                      <Eye size={14} /> <span>Detail Pengajuan</span>
+                      <Eye size={13} /> <span>Detail Pengajuan</span>
                     </button>
                     {application.status === "PENDING" && (
                       <>
                         <button
                           type="button"
                           onClick={() => { setDecision({ id: application.id, status: "APPROVED" }); setNote(""); }}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition shrink-0"
+                          className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 sm:px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition shrink-0"
                         >
-                          <BadgeCheck size={14} /> <span>Setujui</span>
+                          <BadgeCheck size={13} /> <span>Setujui</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => { setDecision({ id: application.id, status: "REVISION_REQUIRED" }); setNote(""); }}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition shrink-0"
+                          className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 sm:px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition shrink-0"
                         >
-                          <FileCheck2 size={14} /> <span>Minta Revisi</span>
+                          <FileCheck2 size={13} /> <span>Minta Revisi</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => { setDecision({ id: application.id, status: "REJECTED" }); setNote(""); }}
-                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
+                          className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-2.5 sm:px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
                         >
-                          <XCircle size={14} /> <span>Tolak</span>
+                          <XCircle size={13} /> <span>Tolak</span>
                         </button>
                       </>
                     )}

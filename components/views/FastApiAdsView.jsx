@@ -341,18 +341,18 @@ export function FastApiAdsView() {
                 </div>
 
                 {/* Mobile Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-1 border-t border-line/40">
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line/40">
                   <button
                     type="button"
                     disabled={togglingId === ad.id}
                     onClick={() => handleToggleActive(ad)}
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition active:scale-95 ${
+                    className={`inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border px-2.5 sm:px-3 text-xs font-bold transition active:scale-95 shrink-0 ${
                       ad.is_active
                         ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
                         : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
                     }`}
                   >
-                    <Power size={14} className={togglingId === ad.id ? "animate-spin" : ""} />
+                    <Power size={13} className={togglingId === ad.id ? "animate-spin" : ""} />
                     <span>{ad.is_active ? "Nonaktifkan" : "Aktifkan"}</span>
                   </button>
 
@@ -369,18 +369,18 @@ export function FastApiAdsView() {
                         onSaved: load,
                       })
                     }
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition shrink-0"
                   >
-                    <Pencil size={14} />
+                    <Pencil size={13} />
                     <span>Edit</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setConfirmDelete(ad)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-2.5 sm:px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                     <span>Hapus</span>
                   </button>
                 </div>

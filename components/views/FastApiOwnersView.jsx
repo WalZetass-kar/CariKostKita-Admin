@@ -152,15 +152,15 @@ export function FastApiOwnersView() {
               Kelola data akun mitra pemilik kost, kontak WhatsApp, verifikasi berkas, serta keaktifan akun.
             </p>
           </div>
-          <PrimaryButton onClick={load} disabled={loading} className="w-auto self-start md:self-auto shrink-0">
+          <PrimaryButton onClick={load} disabled={loading} className="w-auto self-start sm:self-auto shrink-0">
             <RefreshCw size={15} className={loading ? "animate-spin" : ""} /> <span>Perbarui</span>
           </PrimaryButton>
         </div>
         <form
           onSubmit={search}
-          className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(210px,1fr)_220px_170px_auto] items-end"
+          className="mt-4 flex flex-col sm:flex-row sm:items-end gap-2.5"
         >
-          <label className="relative block">
+          <label className="relative block flex-1 min-w-0">
             <span className="sr-only">Cari nama pemilik</span>
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input
@@ -171,31 +171,33 @@ export function FastApiOwnersView() {
               className="h-10 w-full rounded-lg border border-line bg-field pl-9 pr-3 text-sm text-ink"
             />
           </label>
-          <SelectField
-            label="Verifikasi"
-            className="sm:gap-1"
-            value={verification}
-            onChange={(event) => {
-              setVerification(event.target.value);
-              setPage(1);
-            }}
-            options={VERIFICATION}
-          />
-          <SelectField
-            label="Status akun"
-            className="sm:gap-1"
-            value={active}
-            onChange={(event) => {
-              setActive(event.target.value);
-              setPage(1);
-            }}
-            options={[
-              ["", "Semua akun"],
-              ["true", "Aktif"],
-              ["false", "Nonaktif"],
-            ]}
-          />
-          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end shrink-0">
+          <div className="w-full sm:w-48 shrink-0">
+            <SelectField
+              label="Verifikasi"
+              value={verification}
+              onChange={(event) => {
+                setVerification(event.target.value);
+                setPage(1);
+              }}
+              options={VERIFICATION}
+            />
+          </div>
+          <div className="w-full sm:w-40 shrink-0">
+            <SelectField
+              label="Status akun"
+              value={active}
+              onChange={(event) => {
+                setActive(event.target.value);
+                setPage(1);
+              }}
+              options={[
+                ["", "Semua akun"],
+                ["true", "Aktif"],
+                ["false", "Nonaktif"],
+              ]}
+            />
+          </div>
+          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end sm:self-auto shrink-0 justify-center">
             <Search size={15} /> <span>Cari</span>
           </PrimaryButton>
         </form>
@@ -359,13 +361,13 @@ export function FastApiOwnersView() {
                 </div>
 
                 {/* Mobile Action Buttons */}
-                <div className="flex items-center justify-end gap-2 pt-1 border-t border-line/40">
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line/40">
                   <button
                     type="button"
                     onClick={() => setDetailOwner(owner)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition shrink-0"
                   >
-                    <Eye size={14} />
+                    <Eye size={13} />
                     <span>Detail</span>
                   </button>
 
@@ -373,39 +375,39 @@ export function FastApiOwnersView() {
                     type="button"
                     disabled={togglingId === owner.id}
                     onClick={() => handleToggleStatus(owner)}
-                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs font-bold transition active:scale-95 ${
+                    className={`inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border px-2.5 sm:px-3 text-xs font-bold transition active:scale-95 shrink-0 ${
                       owner.is_active
                         ? "border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20"
                         : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20"
                     }`}
                   >
-                    <Power size={14} className={togglingId === owner.id ? "animate-spin" : ""} />
+                    <Power size={13} className={togglingId === owner.id ? "animate-spin" : ""} />
                     <span>{owner.is_active ? "Nonaktifkan" : "Aktifkan"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => openEditModal(owner)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition shrink-0"
                   >
-                    <Pencil size={14} />
+                    <Pencil size={13} />
                     <span>Edit</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setConfirmDelete(owner)}
-                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/5 px-2.5 sm:px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                     <span>Hapus</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-between border-t border-line px-5 py-4">
-            <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5 sm:py-4">
+            <span aria-live="polite" aria-atomic="true" className="text-xs text-muted text-center sm:text-left">
               Menampilkan {owners.length} pemilik pada halaman {page}
             </span>
             <div className="flex items-center gap-2">
@@ -413,7 +415,7 @@ export function FastApiOwnersView() {
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((value) => value - 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+                className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition shrink-0"
               >
                 <span>Sebelumnya</span>
               </button>
@@ -421,7 +423,7 @@ export function FastApiOwnersView() {
                 type="button"
                 disabled={!hasMore || loading}
                 onClick={() => setPage((value) => value + 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+                className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition shrink-0"
               >
                 <span>Berikutnya</span>
               </button>

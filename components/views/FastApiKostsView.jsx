@@ -267,35 +267,35 @@ export function FastApiKostsView() {
                 type="button"
                 onClick={() => setBulkAction({ type: "all_pending", status: "APPROVED" })}
                 disabled={bulkLoading}
-                className="!h-9 sm:!h-10 text-xs sm:text-sm !bg-good-fg hover:opacity-95 text-white shadow-xs"
+                className="!h-9 text-xs sm:text-sm !bg-good-fg hover:opacity-95 text-white shadow-xs shrink-0"
                 title="Setujui semua kos yang berstatus PENDING"
               >
-                <CheckCheck size={16} />
+                <CheckCheck size={15} />
                 <span>Setujui Semua ({pendingCount} Pending)</span>
               </PrimaryButton>
             )}
-            <PrimaryButton onClick={() => openKostForm?.({ onSaved: load })} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
-              <Plus size={16} />
+            <PrimaryButton onClick={() => openKostForm?.({ onSaved: load })} className="!h-9 text-xs sm:text-sm shrink-0">
+              <Plus size={15} />
               <span>Tambah Kost</span>
             </PrimaryButton>
             <button
               type="button"
               onClick={() => setDeleteDialog({ type: "all" })}
               disabled={loading || rows.length === 0 || deleteLoading}
-              className="!h-9 sm:!h-10 text-xs sm:text-sm px-3 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white font-bold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer flex-1 sm:flex-initial"
+              className="!h-9 text-xs sm:text-sm px-3 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white font-bold flex items-center justify-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-40 cursor-pointer shrink-0"
               title="Hapus SEMUA listing kost dari database"
             >
-              <Trash2 size={16} />
+              <Trash2 size={15} />
               <span>Hapus Semua</span>
             </button>
-            <GhostButton onClick={load} disabled={loading} className="!h-9 sm:!h-10 text-xs sm:text-sm flex-1 sm:flex-initial justify-center">
-              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            <GhostButton onClick={load} disabled={loading} className="!h-9 text-xs sm:text-sm shrink-0">
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
               <span>Perbarui</span>
             </GhostButton>
           </div>
         </div>
-        <form onSubmit={search} className="mt-4 grid gap-2.5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1fr)_240px_auto] items-end">
-          <label className="relative block">
+        <form onSubmit={search} className="mt-4 flex flex-col sm:flex-row sm:items-end gap-2.5">
+          <label className="relative block flex-1 min-w-0">
             <span className="sr-only">Cari nama kost</span>
             <Search size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" aria-hidden="true" />
             <input
@@ -306,17 +306,18 @@ export function FastApiKostsView() {
               className="h-10 w-full rounded-lg border border-line bg-field pl-9 pr-3 text-sm text-ink"
             />
           </label>
-          <SelectField
-            label="Status verifikasi"
-            className="sm:gap-1"
-            value={status}
-            onChange={(event) => {
-              setStatus(event.target.value);
-              setPage(1);
-            }}
-            options={STATUSES}
-          />
-          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end shrink-0">
+          <div className="w-full sm:w-56 shrink-0">
+            <SelectField
+              label="Status verifikasi"
+              value={status}
+              onChange={(event) => {
+                setStatus(event.target.value);
+                setPage(1);
+              }}
+              options={STATUSES}
+            />
+          </div>
+          <PrimaryButton type="submit" className="h-10 px-4 w-auto self-end sm:self-auto shrink-0 justify-center">
             <Search size={15} /> <span>Cari</span>
           </PrimaryButton>
         </form>
@@ -354,17 +355,17 @@ export function FastApiKostsView() {
           </div>
 
           {selectedIds.size > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-good-bg/30 border-b border-good-border px-5 py-3">
-              <span className="text-xs font-bold text-ink flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-good-bg/30 border-b border-good-border px-4 sm:px-5 py-3">
+              <span className="text-xs font-bold text-ink flex items-center gap-2 shrink-0">
                 <CheckCheck size={16} className="text-good-fg" />
                 <span>{selectedIds.size} kos dipilih</span>
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   disabled={bulkLoading}
                   onClick={() => setBulkAction({ type: "selected", status: "APPROVED" })}
-                  className="px-3 py-1.5 rounded-lg bg-good-fg hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-good-fg hover:opacity-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-50 shrink-0"
                 >
                   <CheckCircle2 size={14} />
                   <span>Setujui Terpilih ({selectedIds.size})</span>
@@ -373,7 +374,7 @@ export function FastApiKostsView() {
                   type="button"
                   disabled={bulkLoading}
                   onClick={() => setBulkAction({ type: "selected", status: "REJECTED" })}
-                  className="px-3 py-1.5 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-bg/80 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+                  className="px-3 py-1.5 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-bg/80 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 disabled:opacity-50 shrink-0"
                 >
                   <XCircle size={14} />
                   <span>Tolak Terpilih</span>
@@ -382,7 +383,7 @@ export function FastApiKostsView() {
                   type="button"
                   disabled={bulkLoading || deleteLoading}
                   onClick={() => setDeleteDialog({ type: "selected", ids: Array.from(selectedIds) })}
-                  className="px-3 py-1.5 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-bad-bg text-bad-fg border border-bad-border hover:bg-bad-fg hover:text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
                   title="Hapus listing kost yang dipilih secara permanen"
                 >
                   <Trash2 size={14} />
@@ -391,7 +392,7 @@ export function FastApiKostsView() {
                 <button
                   type="button"
                   onClick={() => setSelectedIds(new Set())}
-                  className="text-xs text-muted hover:text-ink underline ml-1 cursor-pointer"
+                  className="text-xs text-muted hover:text-ink underline ml-1 cursor-pointer shrink-0"
                 >
                   Batal
                 </button>
@@ -597,13 +598,13 @@ export function FastApiKostsView() {
                 </div>
 
                 {/* Mobile Action Buttons */}
-                <div className="flex flex-wrap items-center justify-end gap-2 pt-1 border-t border-line/40">
+                <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-line/40">
                   {kost.verification_status !== "APPROVED" ? (
                     <button
                       type="button"
                       disabled={updatingId === kost.id}
                       onClick={() => updateVerificationStatus(kost, "APPROVED")}
-                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition"
+                      className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 sm:px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-500/20 active:scale-95 transition shrink-0"
                     >
                       <CheckCircle2 size={13} />
                       <span>Setujui</span>
@@ -613,7 +614,7 @@ export function FastApiKostsView() {
                       type="button"
                       disabled={updatingId === kost.id}
                       onClick={() => updateVerificationStatus(kost, "PENDING")}
-                      className="inline-flex h-9 items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition"
+                      className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-amber-500/40 bg-amber-500/10 px-2.5 sm:px-3 text-xs font-bold text-amber-700 hover:bg-amber-500/20 active:scale-95 transition shrink-0"
                     >
                       <span>Batal Setuju</span>
                     </button>
@@ -623,17 +624,18 @@ export function FastApiKostsView() {
                     type="button"
                     onClick={() => toggleAvailability(kost)}
                     disabled={updatingId === kost.id}
-                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition shrink-0"
                   >
-                    <span>Ubah Ketersediaan</span>
+                    <Power size={13} />
+                    <span>{kost.status === "TERSEDIA" ? "Set Penuh" : "Set Tersedia"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setDetailKost(kost)}
-                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-2.5 sm:px-3 text-xs font-bold text-ink hover:bg-track active:scale-95 transition shrink-0"
                   >
-                    <Eye size={14} />
+                    <Eye size={13} />
                     <span>Detail</span>
                   </button>
 
@@ -641,17 +643,17 @@ export function FastApiKostsView() {
                     type="button"
                     disabled={deleteLoading}
                     onClick={() => setDeleteDialog({ type: "single", kost })}
-                    className="inline-flex h-9 items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/5 px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition"
+                    className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-red-500/30 bg-red-500/5 px-2.5 sm:px-3 text-xs font-bold text-red-600 hover:bg-red-500/15 active:scale-95 transition shrink-0"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={13} />
                     <span>Hapus</span>
                   </button>
                 </div>
               </div>
             ))}
           </div>
-          <div className="flex items-center justify-between border-t border-line px-5 py-4">
-            <span aria-live="polite" aria-atomic="true" className="text-xs text-muted">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-line px-4 py-3 sm:px-5 sm:py-4">
+            <span aria-live="polite" aria-atomic="true" className="text-xs text-muted text-center sm:text-left">
               Menampilkan {rows.length} listing pada halaman {page}
             </span>
             <div className="flex items-center gap-2">
@@ -659,7 +661,7 @@ export function FastApiKostsView() {
                 type="button"
                 disabled={page <= 1 || loading}
                 onClick={() => setPage((value) => value - 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+                className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition shrink-0"
               >
                 <span>Sebelumnya</span>
               </button>
@@ -667,7 +669,7 @@ export function FastApiKostsView() {
                 type="button"
                 disabled={!hasMore || loading}
                 onClick={() => setPage((value) => value + 1)}
-                className="inline-flex h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition"
+                className="inline-flex h-8 sm:h-9 items-center gap-1 rounded-lg border border-line bg-paper px-3 text-xs font-bold text-ink hover:bg-track disabled:opacity-40 transition shrink-0"
               >
                 <span>Berikutnya</span>
               </button>
